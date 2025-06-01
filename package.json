@@ -1,0 +1,97 @@
+{
+  "name": "dimsee",
+  "version": "0.1.0",
+  "description": "Modern, flexible authentication solution for MERN applications with OAuth support",
+  "main": "index.js",
+  "module": "index.mjs",
+  "exports": {
+    ".": {
+      "require": "./index.js",
+      "import": "./index.mjs"
+    },
+    "./backend": {
+      "require": "./backend/index.js",
+      "import": "./backend/index.js"
+    },
+    "./frontend": {
+      "require": "./frontend/src/index.js",
+      "import": "./frontend/src/index.js"
+    }
+  },
+  "type": "commonjs",
+  "sideEffects": false,
+  "files": [
+    "index.js",
+    "index.mjs",
+    "backend/",
+    "frontend/src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "jest",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "babel backend -d dist/backend",
+    "build:frontend": "babel frontend/src -d dist/frontend",
+    "prepare": "husky install && npm run build",
+    "prepublishOnly": "npm test",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/siddharthborderwala/dimsee.git"
+  },
+  "keywords": [
+    "mern",
+    "auth",
+    "authentication",
+    "react",
+    "express",
+    "mongodb",
+    "oauth",
+    "google-auth",
+    "github-auth",
+    "session",
+    "jwt"
+  ],
+  "author": "Siddharth <siddharthborderwala@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/siddharthborderwala/dimsee/issues"
+  },
+  "homepage": "https://github.com/siddharthborderwala/dimsee#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "connect-mongo": "^5.1.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.18.2",
+    "express-session": "^1.18.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.5.0",
+    "passport": "^0.7.0",
+    "passport-github2": "^0.1.12",
+    "passport-google-oauth20": "^2.0.0",
+    "zod": "^3.22.2"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.9",
+    "@babel/core": "^7.23.9",
+    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-react": "^7.23.9",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^8.0.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.5"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
