@@ -1,0 +1,138 @@
+.set-password-prompt {
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.set-password-prompt p {
+  margin-bottom: 12px;
+  color: #4b5563;
+}
+
+.set-password-button {
+  background-color: #3b82f6;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.set-password-button:hover {
+  background-color: #2563eb;
+}
+
+.set-password-form {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.set-password-form h3 {
+  margin-bottom: 16px;
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.set-password-form .input-group {
+  margin-bottom: 16px;
+}
+
+.set-password-form .form-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.set-password-form .form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.set-password-form .form-input.error {
+  border-color: #ef4444;
+}
+
+.set-password-form .error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.set-password-form .button-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.set-password-form .submit-button {
+  flex: 1;
+  background-color: #3b82f6;
+  color: white;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.set-password-form .submit-button:hover {
+  background-color: #2563eb;
+}
+
+.set-password-form .submit-button:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
+
+.set-password-form .cancel-button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background-color: white;
+  color: #4b5563;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.set-password-form .cancel-button:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.set-password-form .cancel-button:disabled {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Only style the buttons container when both buttons are present */
+.auth-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .auth-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+} 
