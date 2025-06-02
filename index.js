@@ -1,28 +1,23 @@
-<<<<<<< HEAD
 // Root index.js - Universal Entry Point
 'use strict';
 
 const backend = require('./backend');
 
-module.exports = {
-  ...backend,
-  // Frontend components are imported dynamically when using the /frontend subpath
-};
-=======
-// Main entry point for the package
-const { createAuthBackend, authMiddleware } = require('./backend');
+// Backend exports
+const { createAuthBackend, authMiddleware } = backend;
 
-// Re-export everything
+// Frontend exports
+const AuthStatus = require('./frontend/src/components/AuthStatus');
+const useAuth = require('./frontend/src/hooks/useAuth');
+const AuthForm = require('./frontend/src/components/AuthForm');
+
 module.exports = {
-  // Backend exports
+  // Backend
   createAuthBackend,
   authMiddleware,
-  
-  // Frontend exports
-  AuthStatus: require('./frontend/src/components/AuthStatus'),
-  useAuth: require('./frontend/src/hooks/useAuth'),
-  
+  // Frontend
+  AuthStatus,
+  useAuth,
   // Optional components
-  AuthForm: require('./frontend/src/components/AuthForm') // Still available but not the main focus
-}; 
->>>>>>> 36e4d2f10472aaa87b7d60a021de779f61fbb3e9
+  AuthForm // Still available but not the main focus
+};
