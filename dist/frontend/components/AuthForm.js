@@ -29,7 +29,8 @@ var AuthForm = function AuthForm(_ref) {
     _ref$oAuthConfig = _ref.oAuthConfig,
     oAuthConfig = _ref$oAuthConfig === void 0 ? null : _ref$oAuthConfig,
     _ref$redirectUrl = _ref.redirectUrl,
-    redirectUrl = _ref$redirectUrl === void 0 ? null : _ref$redirectUrl;
+    redirectUrl = _ref$redirectUrl === void 0 ? null : _ref$redirectUrl,
+    onModeChange = _ref.onModeChange;
   var _useAuth = useAuth(),
     signup = _useAuth.signup,
     signin = _useAuth.signin,
@@ -63,6 +64,14 @@ var AuthForm = function AuthForm(_ref) {
     _useState0 = _slicedToArray(_useState9, 2),
     oAuthConfigured = _useState0[0],
     setOAuthConfigured = _useState0[1];
+  var _useState1 = useState(mode),
+    _useState10 = _slicedToArray(_useState1, 2),
+    localMode = _useState10[0],
+    setLocalMode = _useState10[1];
+  var effectiveMode = typeof onModeChange === 'function' ? mode : localMode;
+  useEffect(function () {
+    if (typeof onModeChange !== 'function') setLocalMode(mode);
+  }, [mode, onModeChange]);
   useEffect(function () {
     // Use apiUrl from context instead of hardcoded URL
     fetch("".concat(apiUrl, "/oauth-status"), {
@@ -125,7 +134,7 @@ var AuthForm = function AuthForm(_ref) {
   };
   var validateForm = function validateForm() {
     var newErrors = {};
-    if (mode === 'signup') {
+    if (effectiveMode === 'signup') {
       if (!formData.username.trim()) {
         newErrors.username = 'Username is required';
       } else if (formData.username.length < 3) {
@@ -142,7 +151,7 @@ var AuthForm = function AuthForm(_ref) {
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    if (mode === 'signup') {
+    if (effectiveMode === 'signup') {
       if (!formData.confirmPassword) {
         newErrors.confirmPassword = 'Please confirm your password';
       } else if (formData.password !== formData.confirmPassword) {
@@ -167,7 +176,7 @@ var AuthForm = function AuthForm(_ref) {
           case 1:
             setIsSubmitting(true);
             _context.p = 2;
-            if (!(mode === 'signup')) {
+            if (!(effectiveMode === 'signup')) {
               _context.n = 4;
               break;
             }
@@ -238,6 +247,20 @@ var AuthForm = function AuthForm(_ref) {
     // Use apiUrl from context
     window.location.href = "".concat(apiUrl, "/").concat(provider);
   };
+  var handleModeSwitch = function handleModeSwitch() {
+    if (typeof onModeChange === 'function') {
+      onModeChange(effectiveMode === 'signup' ? 'signin' : 'signup');
+    } else {
+      setLocalMode(effectiveMode === 'signup' ? 'signin' : 'signup');
+    }
+    setErrors({});
+    setFormData({
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
+  };
   return /*#__PURE__*/React.createElement("div", {
     className: "auth-container ".concat(design, " ").concat(className)
   }, /*#__PURE__*/React.createElement("div", {
@@ -267,9 +290,9 @@ var AuthForm = function AuthForm(_ref) {
     className: "form-header"
   }, /*#__PURE__*/React.createElement("h2", {
     className: "form-title"
-  }, mode === 'signup' ? 'Join Our Community' : 'Welcome Back'), /*#__PURE__*/React.createElement("p", {
+  }, effectiveMode === 'signup' ? 'Join Our Community' : 'Welcome Back'), /*#__PURE__*/React.createElement("p", {
     className: "form-subtitle"
-  }, mode === 'signup' ? 'Create your account and start your journey' : 'Sign in to continue your adventure')), oAuthStatus.enabled && /*#__PURE__*/React.createElement("div", {
+  }, effectiveMode === 'signup' ? 'Create your account and start your journey' : 'Sign in to continue your adventure')), oAuthStatus.enabled && /*#__PURE__*/React.createElement("div", {
     className: "oauth-buttons"
   }, oAuthStatus.providers.google && /*#__PURE__*/React.createElement("button", {
     type: "button",
@@ -307,7 +330,7 @@ var AuthForm = function AuthForm(_ref) {
     className: "separator"
   }, /*#__PURE__*/React.createElement("span", null, "or")), /*#__PURE__*/React.createElement("div", {
     className: "form-body"
-  }, mode === 'signup' && /*#__PURE__*/React.createElement("div", {
+  }, effectiveMode === 'signup' && /*#__PURE__*/React.createElement("div", {
     className: "input-group"
   }, /*#__PURE__*/React.createElement("div", {
     className: "input-wrapper"
@@ -361,7 +384,7 @@ var AuthForm = function AuthForm(_ref) {
     className: "error-message"
   }, /*#__PURE__*/React.createElement("span", {
     className: "error-icon"
-  }, "\u26A0\uFE0F"), errors.password)), mode === 'signup' && /*#__PURE__*/React.createElement("div", {
+  }, "\u26A0\uFE0F"), errors.password)), effectiveMode === 'signup' && /*#__PURE__*/React.createElement("div", {
     className: "input-group"
   }, /*#__PURE__*/React.createElement("div", {
     className: "input-wrapper"
@@ -389,6 +412,47 @@ var AuthForm = function AuthForm(_ref) {
     className: "loading-spinner"
   }), "Please wait...") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
     className: "button-icon"
-  }, mode === 'signup' ? '🚀' : '🌟'), mode === 'signup' ? 'Create Account' : 'Sign In'))))));
+  }, effectiveMode === 'signup' ? '🚀' : '🌟'), effectiveMode === 'signup' ? 'Create Account' : 'Sign In'))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center',
+      marginTop: '18px'
+    }
+  }, effectiveMode === 'signup' ? /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "switch-mode-link",
+    onClick: handleModeSwitch,
+    style: {
+      background: 'none',
+      border: 'none',
+      color: '#667eea',
+      cursor: 'pointer',
+      fontWeight: 500,
+      fontSize: '1rem',
+      textDecoration: 'underline',
+      padding: 0
+    }
+  }, "Already have an account? ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: '#764ba2'
+    }
+  }, "Sign In")) : /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "switch-mode-link",
+    onClick: handleModeSwitch,
+    style: {
+      background: 'none',
+      border: 'none',
+      color: '#667eea',
+      cursor: 'pointer',
+      fontWeight: 500,
+      fontSize: '1rem',
+      textDecoration: 'underline',
+      padding: 0
+    }
+  }, "Don't have an account? ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: '#764ba2'
+    }
+  }, "Sign Up"))))));
 };
 export default AuthForm;

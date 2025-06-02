@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-node_modules/
-=======
 # dependencies
 /node_modules
 /.pnp
@@ -10,8 +7,8 @@ node_modules/
 /coverage
 
 # production
-/build
-/dist
+#/build
+#/dist
 
 # misc
 .DS_Store
@@ -24,4 +21,3 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log* 
->>>>>>> 36e4d2f10472aaa87b7d60a021de779f61fbb3e9
