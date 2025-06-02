@@ -1,5 +1,6 @@
 {
   "name": "dimsee",
+<<<<<<< HEAD
   "version": "0.2.6",
   "description": "Modern, flexible authentication solution for MERN applications with OAuth support",
   "main": "./dist/backend/index.js",
@@ -23,14 +24,48 @@
     "dist/",
     "frontend/index.js",
     "frontend/src/components/*.css",
+=======
+  "version": "0.1.0",
+  "description": "Modern, flexible authentication solution for MERN applications with OAuth support",
+  "main": "index.js",
+  "module": "index.mjs",
+  "exports": {
+    ".": {
+      "require": "./index.js",
+      "import": "./index.mjs"
+    },
+    "./backend": {
+      "require": "./backend/index.js",
+      "import": "./backend/index.js"
+    },
+    "./frontend": {
+      "require": "./frontend/src/index.js",
+      "import": "./frontend/src/index.js"
+    }
+  },
+  "type": "commonjs",
+  "sideEffects": false,
+  "files": [
+    "index.js",
+    "index.mjs",
+    "backend/",
+    "frontend/src/",
+>>>>>>> 36e4d2f10472aaa87b7d60a021de779f61fbb3e9
     "README.md",
     "LICENSE"
   ],
   "scripts": {
+<<<<<<< HEAD
     "test": "jest --passWithNoTests",
     "build": "npm run build:backend && npm run build:frontend",
     "build:backend": "babel backend -d dist/backend --config-file ./babel.config.backend.json --copy-files",
     "build:frontend": "babel frontend/src -d dist/frontend --config-file ./babel.config.frontend.json --copy-files",
+=======
+    "test": "jest",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "babel backend -d dist/backend",
+    "build:frontend": "babel frontend/src -d dist/frontend",
+>>>>>>> 36e4d2f10472aaa87b7d60a021de779f61fbb3e9
     "prepare": "husky install && npm run build",
     "prepublishOnly": "npm test",
     "lint": "eslint .",
@@ -38,7 +73,11 @@
   },
   "repository": {
     "type": "git",
+<<<<<<< HEAD
     "url": "git+https://github.com/sidd190/dimsee.git"
+=======
+    "url": "git+https://github.com/siddharthborderwala/dimsee.git"
+>>>>>>> 36e4d2f10472aaa87b7d60a021de779f61fbb3e9
   },
   "keywords": [
     "mern",
@@ -53,12 +92,21 @@
     "session",
     "jwt"
   ],
+<<<<<<< HEAD
   "author": "Siddharth <sidd190@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/sidd190/dimsee/issues"
   },
   "homepage": "https://github.com/sidd190/dimsee#readme",
+=======
+  "author": "Siddharth <siddharthborderwala@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/siddharthborderwala/dimsee/issues"
+  },
+  "homepage": "https://github.com/siddharthborderwala/dimsee#readme",
+>>>>>>> 36e4d2f10472aaa87b7d60a021de779f61fbb3e9
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "connect-mongo": "^5.1.0",
@@ -76,8 +124,12 @@
   },
   "peerDependencies": {
     "react": ">=16.8.0",
+<<<<<<< HEAD
     "react-dom": ">=16.8.0",
     "axios": "^1.0.0"
+=======
+    "react-dom": ">=16.8.0"
+>>>>>>> 36e4d2f10472aaa87b7d60a021de779f61fbb3e9
   },
   "devDependencies": {
     "@babel/cli": "^7.23.9",
@@ -92,6 +144,10 @@
   },
   "engines": {
     "node": ">=14.0.0"
+<<<<<<< HEAD
   },
   "browser": "./dist/index.mjs"
+=======
+  }
+>>>>>>> 36e4d2f10472aaa87b7d60a021de779f61fbb3e9
 }

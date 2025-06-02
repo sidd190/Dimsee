@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const passport = require('passport');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+<<<<<<< HEAD
 const path = require('path');
 
 // Use path.join for proper path resolution
@@ -13,6 +14,11 @@ const authRoutes = require(path.join(__dirname, 'routes', 'auth'));
 const authMiddleware = require(path.join(__dirname, 'middleware', 'auth'));
 const { passport: passportInstance, configureOAuthStrategies } = require(path.join(__dirname, 'config', 'passport'));
 
+=======
+const authRoutes = require('./routes/auth');
+const authMiddleware = require('./middleware/auth');
+const { passport: passportInstance, configureOAuthStrategies } = require('./config/passport');
+>>>>>>> 36e4d2f10472aaa87b7d60a021de779f61fbb3e9
 require('dotenv').config();
 
 const createAuthBackend = (config = {}) => {

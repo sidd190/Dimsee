@@ -9,7 +9,8 @@ const AuthForm = ({
   onError,
   className = '',
   oAuthConfig = null,
-  redirectUrl = null
+  redirectUrl = null,
+  onModeChange
 }) => {
   const { signup, signin, loading, apiUrl } = useAuth();
   const [formData, setFormData] = useState({
@@ -25,6 +26,12 @@ const AuthForm = ({
     providers: {}
   });
   const [oAuthConfigured, setOAuthConfigured] = useState(false);
+  const [localMode, setLocalMode] = useState(mode);
+  const effectiveMode = typeof onModeChange === 'function' ? mode : localMode;
+
+  useEffect(() => {
+    if (typeof onModeChange !== 'function') setLocalMode(mode);
+  }, [mode, onModeChange]);
 
   useEffect(() => {
     // Use apiUrl from context instead of hardcoded URL
@@ -86,7 +93,7 @@ const AuthForm = ({
   const validateForm = () => {
     const newErrors = {};
 
-    if (mode === 'signup') {
+    if (effectiveMode === 'signup') {
       if (!formData.username.trim()) {
         newErrors.username = 'Username is required';
       } else if (formData.username.length < 3) {
@@ -106,7 +113,7 @@ const AuthForm = ({
       newErrors.password = 'Password must be at least 6 characters';
     }
 
-    if (mode === 'signup') {
+    if (effectiveMode === 'signup') {
       if (!formData.confirmPassword) {
         newErrors.confirmPassword = 'Please confirm your password';
       } else if (formData.password !== formData.confirmPassword) {
@@ -126,7 +133,7 @@ const AuthForm = ({
     setIsSubmitting(true);
     
     try {
-      const result = mode === 'signup' 
+      const result = effectiveMode === 'signup' 
         ? await signup(formData)
         : await signin({ email: formData.email, password: formData.password });
 
@@ -167,6 +174,16 @@ const AuthForm = ({
     window.location.href = `${apiUrl}/${provider}`;
   };
 
+  const handleModeSwitch = () => {
+    if (typeof onModeChange === 'function') {
+      onModeChange(effectiveMode === 'signup' ? 'signin' : 'signup');
+    } else {
+      setLocalMode(effectiveMode === 'signup' ? 'signin' : 'signup');
+    }
+    setErrors({});
+    setFormData({ username: '', email: '', password: '', confirmPassword: '' });
+  };
+
   return (
     <div className={`auth-container ${design} ${className}`}>
       <div className="auth-background">
@@ -187,10 +204,10 @@ const AuthForm = ({
       <form onSubmit={handleSubmit} className="auth-form">
         <div className="form-header">
           <h2 className="form-title">
-            {mode === 'signup' ? 'Join Our Community' : 'Welcome Back'}
+            {effectiveMode === 'signup' ? 'Join Our Community' : 'Welcome Back'}
           </h2>
           <p className="form-subtitle">
-            {mode === 'signup' 
+            {effectiveMode === 'signup' 
               ? 'Create your account and start your journey' 
               : 'Sign in to continue your adventure'
             }
@@ -240,7 +257,7 @@ const AuthForm = ({
         )}
 
         <div className="form-body">
-          {mode === 'signup' && (
+          {effectiveMode === 'signup' && (
             <div className="input-group">
               <div className="input-wrapper">
                 <input
@@ -305,7 +322,7 @@ const AuthForm = ({
             )}
           </div>
 
-          {mode === 'signup' && (
+          {effectiveMode === 'signup' && (
             <div className="input-group">
               <div className="input-wrapper">
                 <input
@@ -342,13 +359,34 @@ const AuthForm = ({
               ) : (
                 <>
                   <span className="button-icon">
-                    {mode === 'signup' ? '🚀' : '🌟'}
+                    {effectiveMode === 'signup' ? '🚀' : '🌟'}
                   </span>
-                  {mode === 'signup' ? 'Create Account' : 'Sign In'}
+                  {effectiveMode === 'signup' ? 'Create Account' : 'Sign In'}
                 </>
               )}
             </span>
           </button>
+          <div style={{ textAlign: 'center', marginTop: '18px' }}>
+            {effectiveMode === 'signup' ? (
+              <button
+                type="button"
+                className="switch-mode-link"
+                onClick={handleModeSwitch}
+                style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', fontWeight: 500, fontSize: '1rem', textDecoration: 'underline', padding: 0 }}
+              >
+                Already have an account? <span style={{ color: '#764ba2' }}>Sign In</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="switch-mode-link"
+                onClick={handleModeSwitch}
+                style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', fontWeight: 500, fontSize: '1rem', textDecoration: 'underline', padding: 0 }}
+              >
+                Don&apos;t have an account? <span style={{ color: '#764ba2' }}>Sign Up</span>
+              </button>
+            )}
+          </div>
         </div>
       </form>
     </div>
