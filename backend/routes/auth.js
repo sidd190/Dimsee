@@ -84,22 +84,29 @@ router.post('/set-password', isAuthenticated, async (req, res) => {
 
 // OAuth status route
 router.get('/oauth-status', (req, res) => {
-  const googleEnabled = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
-  const githubEnabled = !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
+  const { enableOAuth } = req.app.locals.authConfig;
+  const googleEnabled = enableOAuth && !!process.env.GOOGLE_CLIENT_ID;
+  const githubEnabled = enableOAuth && !!process.env.GITHUB_CLIENT_ID;
 
   res.json({
     enabled: googleEnabled || githubEnabled,
     providers: {
       google: googleEnabled,
-      github: githubEnabled
-    }
+      github: githubEnabled,
+    },
   });
 });
 
 // Google OAuth routes
-router.get('/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+router.get('/google', (req, res, next) => {
+  if (!req.app.locals.authConfig.enableOAuth) {
+    return res.status(403).json({
+      success: false,
+      message: 'Google OAuth is not enabled'
+    });
+  }
+  passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+});
 
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),

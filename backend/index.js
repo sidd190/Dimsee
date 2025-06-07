@@ -89,17 +89,6 @@ const createAuthBackend = (config = {}) => {
   // Auth routes
   app.use('/api/auth', authRoutes);
 
-  // OAuth status endpoint
-  app.get('/api/auth/oauth-status', (req, res) => {
-    res.json({
-      enabled: app.locals.authConfig.enableOAuth,
-      providers: app.locals.authConfig.enableOAuth ? {
-        google: !!oauth.google?.clientId || !!process.env.GOOGLE_CLIENT_ID,
-        github: !!oauth.github?.clientId || !!process.env.GITHUB_CLIENT_ID
-      } : {}
-    });
-  });
-
   // Protected route example
   app.get('/api/protected', authMiddleware, (req, res) => {
     res.json({

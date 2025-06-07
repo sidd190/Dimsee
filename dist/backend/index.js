@@ -98,18 +98,6 @@ var createAuthBackend = function createAuthBackend() {
   // Auth routes
   app.use('/api/auth', authRoutes);
 
-  // OAuth status endpoint
-  app.get('/api/auth/oauth-status', function (req, res) {
-    var _oauth$google4, _oauth$github4;
-    res.json({
-      enabled: app.locals.authConfig.enableOAuth,
-      providers: app.locals.authConfig.enableOAuth ? {
-        google: !!((_oauth$google4 = oauth.google) !== null && _oauth$google4 !== void 0 && _oauth$google4.clientId) || !!process.env.GOOGLE_CLIENT_ID,
-        github: !!((_oauth$github4 = oauth.github) !== null && _oauth$github4 !== void 0 && _oauth$github4.clientId) || !!process.env.GITHUB_CLIENT_ID
-      } : {}
-    });
-  });
-
   // Protected route example
   app.get('/api/protected', authMiddleware, function (req, res) {
     res.json({

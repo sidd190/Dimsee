@@ -143,6 +143,17 @@
   background: transparent; /* Keep consistent */
 }
 
+.auth-container.modern .oauth-button.google {
+    background: transparent;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+.auth-container.modern .oauth-button.google:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #6366f1;
+}
+
 
 /* ==========================================
    MINIMAL THEME (Polished Redesign with Subtle Neomorphism)
@@ -239,6 +250,16 @@
   border-color: transparent;
 }
 
+.auth-container.minimal .oauth-button.google {
+    background: #eef0f4;
+    color: #374151;
+}
+
+.auth-container.minimal .oauth-button.github {
+    background: #eef0f4;
+    color: #374151;
+}
+
 
 /* ==========================================
    COLORFUL THEME (Gumroad Inspired)
@@ -324,6 +345,21 @@
 
 .auth-container.colorful .oauth-button:hover {
   border-color: #FFD600;
+}
+
+.auth-container.colorful .oauth-button.google {
+    background-color: #fff;
+    color: #000;
+}
+
+.auth-container.colorful .oauth-button.github {
+    background-color: #24292e;
+    color: #fff;
+}
+
+.auth-container.colorful .oauth-button.github:hover {
+    background-color: #333;
+    border-color: #000;
 }
 
 
