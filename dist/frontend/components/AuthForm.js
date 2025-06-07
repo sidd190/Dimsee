@@ -263,27 +263,7 @@ var AuthForm = function AuthForm(_ref) {
   };
   return /*#__PURE__*/React.createElement("div", {
     className: "auth-container ".concat(design, " ").concat(className)
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "auth-background"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "floating-shapes"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "shape shape-1"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "shape shape-2"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "shape shape-3"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "shape shape-4"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "animal-silhouettes"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "animal bird-1"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "animal butterfly-1"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "animal fish-1"
-  }))), /*#__PURE__*/React.createElement("form", {
+  }, /*#__PURE__*/React.createElement("form", {
     onSubmit: handleSubmit,
     className: "auth-form"
   }, /*#__PURE__*/React.createElement("div", {
@@ -342,9 +322,7 @@ var AuthForm = function AuthForm(_ref) {
     onChange: handleChange,
     className: "form-input ".concat(errors.username ? 'error' : ''),
     disabled: isSubmitting
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "input-icon"
-  }, "\uD83D\uDC64")), errors.username && /*#__PURE__*/React.createElement("p", {
+  })), errors.username && /*#__PURE__*/React.createElement("p", {
     className: "error-message"
   }, /*#__PURE__*/React.createElement("span", {
     className: "error-icon"
@@ -360,9 +338,7 @@ var AuthForm = function AuthForm(_ref) {
     onChange: handleChange,
     className: "form-input ".concat(errors.email ? 'error' : ''),
     disabled: isSubmitting
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "input-icon"
-  }, "\uD83D\uDCE7")), errors.email && /*#__PURE__*/React.createElement("p", {
+  })), errors.email && /*#__PURE__*/React.createElement("p", {
     className: "error-message"
   }, /*#__PURE__*/React.createElement("span", {
     className: "error-icon"
@@ -378,9 +354,7 @@ var AuthForm = function AuthForm(_ref) {
     onChange: handleChange,
     className: "form-input ".concat(errors.password ? 'error' : ''),
     disabled: isSubmitting
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "input-icon"
-  }, "\uD83D\uDD12")), errors.password && /*#__PURE__*/React.createElement("p", {
+  })), errors.password && /*#__PURE__*/React.createElement("p", {
     className: "error-message"
   }, /*#__PURE__*/React.createElement("span", {
     className: "error-icon"
@@ -396,9 +370,7 @@ var AuthForm = function AuthForm(_ref) {
     onChange: handleChange,
     className: "form-input ".concat(errors.confirmPassword ? 'error' : ''),
     disabled: isSubmitting
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "input-icon"
-  }, "\uD83D\uDD10")), errors.confirmPassword && /*#__PURE__*/React.createElement("p", {
+  })), errors.confirmPassword && /*#__PURE__*/React.createElement("p", {
     className: "error-message"
   }, /*#__PURE__*/React.createElement("span", {
     className: "error-icon"
@@ -412,7 +384,7 @@ var AuthForm = function AuthForm(_ref) {
     className: "loading-spinner"
   }), "Please wait...") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
     className: "button-icon"
-  }, effectiveMode === 'signup' ? '🚀' : '🌟'), effectiveMode === 'signup' ? 'Create Account' : 'Sign In'))), /*#__PURE__*/React.createElement("div", {
+  }, effectiveMode === 'signup' ? '🚀' : '🚀'), effectiveMode === 'signup' ? 'Create Account' : 'Sign In'))), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
       marginTop: '18px'

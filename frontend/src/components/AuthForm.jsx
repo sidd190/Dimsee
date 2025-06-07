@@ -186,20 +186,6 @@ const AuthForm = ({
 
   return (
     <div className={`auth-container ${design} ${className}`}>
-      <div className="auth-background">
-        <div className="floating-shapes">
-          <div className="shape shape-1"></div>
-          <div className="shape shape-2"></div>
-          <div className="shape shape-3"></div>
-          <div className="shape shape-4"></div>
-        </div>
-        
-        <div className="animal-silhouettes">
-          <div className="animal bird-1"></div>
-          <div className="animal butterfly-1"></div>
-          <div className="animal fish-1"></div>
-        </div>
-      </div>
 
       <form onSubmit={handleSubmit} className="auth-form">
         <div className="form-header">
@@ -269,7 +255,6 @@ const AuthForm = ({
                   className={`form-input ${errors.username ? 'error' : ''}`}
                   disabled={isSubmitting}
                 />
-                <div className="input-icon">👤</div>
               </div>
               {errors.username && (
                 <p className="error-message">
@@ -291,7 +276,6 @@ const AuthForm = ({
                 className={`form-input ${errors.email ? 'error' : ''}`}
                 disabled={isSubmitting}
               />
-              <div className="input-icon">📧</div>
             </div>
             {errors.email && (
               <p className="error-message">
@@ -312,7 +296,6 @@ const AuthForm = ({
                 className={`form-input ${errors.password ? 'error' : ''}`}
                 disabled={isSubmitting}
               />
-              <div className="input-icon">🔒</div>
             </div>
             {errors.password && (
               <p className="error-message">
@@ -334,7 +317,6 @@ const AuthForm = ({
                   className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
                   disabled={isSubmitting}
                 />
-                <div className="input-icon">🔐</div>
               </div>
               {errors.confirmPassword && (
                 <p className="error-message">
@@ -359,7 +341,7 @@ const AuthForm = ({
               ) : (
                 <>
                   <span className="button-icon">
-                    {effectiveMode === 'signup' ? '🚀' : '🌟'}
+                    {effectiveMode === 'signup' ? '🚀' : '🚀'}
                   </span>
                   {effectiveMode === 'signup' ? 'Create Account' : 'Sign In'}
                 </>

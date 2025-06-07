@@ -9,6 +9,7 @@ function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { 
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 var GitHubStrategy = require('passport-github2').Strategy;
 var User = require('../models/User');
@@ -20,94 +21,151 @@ console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not Set
 console.log('GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not Set');
 console.log('GITHUB_CLIENT_ID:', process.env.GITHUB_CLIENT_ID ? 'Set' : 'Not Set');
 console.log('GITHUB_CLIENT_SECRET:', process.env.GITHUB_CLIENT_SECRET ? 'Set' : 'Not Set');
-passport.serializeUser(function (user, done) {
-  done(null, user.id);
-});
-passport.deserializeUser(/*#__PURE__*/function () {
-  var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(id, done) {
-    var user, _t;
+
+// Local Strategy for username/password
+passport.use(new LocalStrategy({
+  usernameField: 'email'
+}, /*#__PURE__*/function () {
+  var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(email, password, done) {
+    var user, isMatch, _t;
     return _regenerator().w(function (_context) {
       while (1) switch (_context.n) {
         case 0:
           _context.p = 0;
           _context.n = 1;
-          return User.findById(id);
+          return User.findOne({
+            email: email
+          });
         case 1:
           user = _context.v;
-          done(null, user);
-          _context.n = 3;
-          break;
+          if (user) {
+            _context.n = 2;
+            break;
+          }
+          return _context.a(2, done(null, false, {
+            message: 'Incorrect email.'
+          }));
         case 2:
-          _context.p = 2;
-          _t = _context.v;
-          done(_t, null);
+          if (user.hasPassword) {
+            _context.n = 3;
+            break;
+          }
+          return _context.a(2, done(null, false, {
+            message: "You have previously signed in with another method. Please use that method to sign in."
+          }));
         case 3:
-          return _context.a(2);
+          _context.n = 4;
+          return user.comparePassword(password);
+        case 4:
+          isMatch = _context.v;
+          if (isMatch) {
+            _context.n = 5;
+            break;
+          }
+          return _context.a(2, done(null, false, {
+            message: 'Incorrect password.'
+          }));
+        case 5:
+          return _context.a(2, done(null, user));
+        case 6:
+          _context.p = 6;
+          _t = _context.v;
+          return _context.a(2, done(_t));
       }
-    }, _callee, null, [[0, 2]]);
+    }, _callee, null, [[0, 6]]);
   }));
-  return function (_x, _x2) {
+  return function (_x, _x2, _x3) {
     return _ref.apply(this, arguments);
   };
-}());
-var handleOAuthUser = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(profile, provider, done) {
-    var email, providerId, user, _profile$displayName, _profile$username, _t2;
+}()));
+passport.serializeUser(function (user, done) {
+  done(null, user.id);
+});
+passport.deserializeUser(/*#__PURE__*/function () {
+  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(id, done) {
+    var user, _t2;
     return _regenerator().w(function (_context2) {
       while (1) switch (_context2.n) {
         case 0:
           _context2.p = 0;
+          _context2.n = 1;
+          return User.findById(id);
+        case 1:
+          user = _context2.v;
+          done(null, user);
+          _context2.n = 3;
+          break;
+        case 2:
+          _context2.p = 2;
+          _t2 = _context2.v;
+          done(_t2, null);
+        case 3:
+          return _context2.a(2);
+      }
+    }, _callee2, null, [[0, 2]]);
+  }));
+  return function (_x4, _x5) {
+    return _ref2.apply(this, arguments);
+  };
+}());
+var handleOAuthUser = /*#__PURE__*/function () {
+  var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(profile, provider, done) {
+    var email, providerId, user, _profile$displayName, _profile$username, _t3;
+    return _regenerator().w(function (_context3) {
+      while (1) switch (_context3.n) {
+        case 0:
+          _context3.p = 0;
           email = profile.emails[0].value;
           providerId = "".concat(provider, "Id"); // 'googleId' or 'githubId'
           // First, try to find user by OAuth provider ID
-          _context2.n = 1;
+          _context3.n = 1;
           return User.findOne(_defineProperty({}, providerId, profile.id));
         case 1:
-          user = _context2.v;
+          user = _context3.v;
           if (user) {
-            _context2.n = 5;
+            _context3.n = 5;
             break;
           }
-          _context2.n = 2;
+          _context3.n = 2;
           return User.findOne({
             email: email
           });
         case 2:
-          user = _context2.v;
+          user = _context3.v;
           if (!user) {
-            _context2.n = 4;
+            _context3.n = 4;
             break;
           }
           // User exists but hasn't used this OAuth provider before
           // Update their profile with the OAuth provider ID
           user[providerId] = profile.id;
-          _context2.n = 3;
+          _context3.n = 3;
           return user.save();
         case 3:
-          return _context2.a(2, done(null, user));
+          return _context3.a(2, done(null, user));
         case 4:
           // Create new user if doesn't exist
           user = new User(_defineProperty(_defineProperty(_defineProperty({
             username: ((_profile$displayName = profile.displayName) === null || _profile$displayName === void 0 ? void 0 : _profile$displayName.replace(/\s+/g, '_').toLowerCase()) || ((_profile$username = profile.username) === null || _profile$username === void 0 ? void 0 : _profile$username.toLowerCase()) || email.split('@')[0],
             email: email
           }, providerId, profile.id), "authMethod", provider), "hasPassword", false));
-          _context2.n = 5;
+          _context3.n = 5;
           return user.save();
         case 5:
           done(null, user);
-          _context2.n = 7;
+          _context3.n = 7;
           break;
         case 6:
-          _context2.p = 6;
-          _t2 = _context2.v;
-          done(_t2, null);
+          _context3.p = 6;
+          _t3 = _context3.v;
+          done(_t3, null);
         case 7:
-          return _context2.a(2);
+          return _context3.a(2);
       }
-    }, _callee2, null, [[0, 6]]);
+    }, _callee3, null, [[0, 6]]);
   }));
-  return function handleOAuthUser(_x3, _x4, _x5) {
-    return _ref2.apply(this, arguments);
+  return function handleOAuthUser(_x6, _x7, _x8) {
+    return _ref3.apply(this, arguments);
   };
 }();
 var configureOAuthStrategies = function configureOAuthStrategies() {
@@ -123,19 +181,19 @@ var configureOAuthStrategies = function configureOAuthStrategies() {
       scope: ['profile', 'email']
     };
     passport.use(new GoogleStrategy(googleConfig, /*#__PURE__*/function () {
-      var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(accessToken, refreshToken, profile, done) {
-        return _regenerator().w(function (_context3) {
-          while (1) switch (_context3.n) {
+      var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(accessToken, refreshToken, profile, done) {
+        return _regenerator().w(function (_context4) {
+          while (1) switch (_context4.n) {
             case 0:
-              _context3.n = 1;
+              _context4.n = 1;
               return handleOAuthUser(profile, 'google', done);
             case 1:
-              return _context3.a(2);
+              return _context4.a(2);
           }
-        }, _callee3);
+        }, _callee4);
       }));
-      return function (_x6, _x7, _x8, _x9) {
-        return _ref3.apply(this, arguments);
+      return function (_x9, _x0, _x1, _x10) {
+        return _ref4.apply(this, arguments);
       };
     }()));
   } else {
@@ -152,19 +210,19 @@ var configureOAuthStrategies = function configureOAuthStrategies() {
       scope: ['user:email']
     };
     passport.use(new GitHubStrategy(githubConfig, /*#__PURE__*/function () {
-      var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(accessToken, refreshToken, profile, done) {
-        return _regenerator().w(function (_context4) {
-          while (1) switch (_context4.n) {
+      var _ref5 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(accessToken, refreshToken, profile, done) {
+        return _regenerator().w(function (_context5) {
+          while (1) switch (_context5.n) {
             case 0:
-              _context4.n = 1;
+              _context5.n = 1;
               return handleOAuthUser(profile, 'github', done);
             case 1:
-              return _context4.a(2);
+              return _context5.a(2);
           }
-        }, _callee4);
+        }, _callee5);
       }));
-      return function (_x0, _x1, _x10, _x11) {
-        return _ref4.apply(this, arguments);
+      return function (_x11, _x12, _x13, _x14) {
+        return _ref5.apply(this, arguments);
       };
     }()));
   } else {

@@ -1,4 +1,5 @@
 const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const GitHubStrategy = require('passport-github2').Strategy;
 const User = require('../models/User');
@@ -10,6 +11,29 @@ console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not Set
 console.log('GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not Set');
 console.log('GITHUB_CLIENT_ID:', process.env.GITHUB_CLIENT_ID ? 'Set' : 'Not Set');
 console.log('GITHUB_CLIENT_SECRET:', process.env.GITHUB_CLIENT_SECRET ? 'Set' : 'Not Set');
+
+// Local Strategy for username/password
+passport.use(new LocalStrategy(
+  { usernameField: 'email' },
+  async (email, password, done) => {
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return done(null, false, { message: 'Incorrect email.' });
+      }
+      if (!user.hasPassword) {
+        return done(null, false, { message: `You have previously signed in with another method. Please use that method to sign in.` });
+      }
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+      return done(null, user);
+    } catch (error) {
+      return done(error);
+    }
+  }
+));
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
