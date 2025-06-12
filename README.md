@@ -11,7 +11,7 @@
 
 ### Backend
 -   🔐 **Local Authentication:** Standard email/password signup and signin.
--   🌐 **OAuth 2.0:** Pre-configured for Google and GitHub.
+-   🌐 **OAuth 2.0:** Support for Google and GitHub.
 -   🍪 **Session Management:** Secure, cookie-based sessions using JWT and `express-session`.
 -   🛡️ **Secure Passwords:** Password hashing with `bcrypt.js`.
 -   ⚙️ **Easy Configuration:** Simple to configure via a single config object.
