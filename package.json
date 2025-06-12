@@ -1,6 +1,6 @@
 {
   "name": "dimsee",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Modern, flexible authentication solution for MERN applications with OAuth support",
   "main": "./dist/backend/index.js",
   "module": "./dist/frontend/index.js",
