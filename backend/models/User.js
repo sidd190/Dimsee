@@ -24,6 +24,9 @@ const userSchema = new mongoose.Schema({
     },
     minlength: 6
   },
+  refreshToken: {
+    type: String
+  }, // For refreshtokens to generate new accesstokens
   googleId: String,
   githubId: String,
   authMethod: {

@@ -31,10 +31,14 @@ const signinSchema = z.object({
 });
 
 // Generate JWT token
-const generateToken = (userId, jwtSecret) => {
-  return jwt.sign({ userId }, jwtSecret, { expiresIn: '7d' });
+const generateToken = (userId, jwtSecret,expiresIn) => {
+  return jwt.sign({ userId }, jwtSecret, { expiresIn });
 };
 
+//generate refresh token
+const generateRefreshToken = (userId, jwtRefreshSecret,expiresIn) => {
+  return jwt.sign({userId},jwtRefreshSecret,{expiresIn});
+}
 // Middleware to check if user is authenticated
 const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -110,15 +114,23 @@ router.get('/google', (req, res, next) => {
 
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
-  (req, res) => {
+  async (req, res) => {
     // Generate token for the authenticated user
-    const token = generateToken(req.user._id, req.app.locals.authConfig.jwtSecret);
-    
+    const token = generateToken(req.user._id, req.app.locals.authConfig.jwtSecret,req.app.locals.authConfig.jwtExpiry);
+    //refresh token
+    const refreshToken = generateRefreshToken(req.user._id, req.app.locals.authConfig.jwtRefreshSecret, req.app.locals.authConfig.jwtRefreshExpiry);
+    req.user.refreshToken = refreshToken;
+    await req.user.save({ validateBeforeSave: false });
     // Set the token in a cookie
     res.cookie('authToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: req.app.locals.authConfig.cookieMaxAge
+      maxAge: req.app.locals.authConfig.cookieMaxAge 
+    });
+    res.cookie('refreshToken', refreshToken, { 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: req.app.locals.authConfig.cookieMaxAge 
     });
 
     // Redirect to frontend
@@ -133,15 +145,24 @@ router.get('/github',
 
 router.get('/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
-  (req, res) => {
+  async (req, res) => {
     // Generate token for the authenticated user
-    const token = generateToken(req.user._id, req.app.locals.authConfig.jwtSecret);
-    
+    const token = generateToken(req.user._id, req.app.locals.authConfig.jwtSecret,req.app.locals.authConfig.jwtExpiry);
+    //refresh token
+    const refreshToken = generateRefreshToken(req.user._id, req.app.locals.authConfig.jwtRefreshSecret, req.app.locals.authConfig.jwtRefreshExpiry);
+    req.user.refreshToken = refreshToken;
+    await req.user.save({ validateBeforeSave: false });
     // Set the token in a cookie
     res.cookie('authToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: req.app.locals.authConfig.cookieMaxAge
+    });
+
+    res.cookie('refreshToken', refreshToken, { 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: req.app.locals.authConfig.cookieMaxAge 
     });
 
     // Redirect to frontend
@@ -275,6 +296,89 @@ router.post('/signout', (req, res) => {
       message: 'Signed out successfully'
     });
   });
+});
+
+// Refresh token route
+// This route does NOT require isAuthenticated, as it's meant to obtain new tokens even if the access token has expired.
+router.post('/refresh-token', async (req, res) => {
+  const incomingRefreshToken = req.cookies?.refreshToken || req.body.refreshToken;
+
+  if (!incomingRefreshToken) {
+    return res.status(401).json({
+      success: false,
+      message: 'Unauthorized Request: Refresh token missing',
+      errors: [{ field: 'general', message: 'Unauthorized Request' }]
+    });
+  }
+
+  try {
+    const decodedToken = jwt.verify(incomingRefreshToken, req.app.locals.authConfig.jwtRefreshSecret);
+
+    // Ensure the payload has userId
+    if (!decodedToken || !decodedToken.userId) {
+        return res.status(401).json({
+            success: false,
+            message: 'Invalid Refresh Token payload',
+            errors: [{ field: 'general', message: 'Invalid Refresh Token' }]
+        });
+    }
+
+    const user = await User.findById(decodedToken.userId); 
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid Refresh Token: User not found',
+        errors: [{ field: 'general', message: 'Invalid Refresh Token' }]
+      });
+    }
+
+    // Refresh token rotation with reuse detection 
+    if (user.refreshToken !== incomingRefreshToken) {
+        user.refreshToken = null; // Invalidate the stored refresh token to force re-login
+        await user.save({ validateBeforeSave: false }); 
+        return res.status(401).json({
+            success: false,
+            message: 'Refresh token invalid or reused. Please log in again.',
+            errors: [{ field: 'general', message: 'Refresh token invalid or reused.' }]
+        });
+    }
+
+    // Generate new access and refresh tokens
+    const newAccessToken = generateToken(user._id, req.app.locals.authConfig.jwtSecret, req.app.locals.authConfig.jwtExpiry);
+    const newRefreshToken = generateRefreshToken(user._id, req.app.locals.authConfig.jwtRefreshSecret, req.app.locals.authConfig.jwtRefreshExpiry);
+
+    // Update the user's refresh token in the database with the new one
+    user.refreshToken = newRefreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    // Set the new tokens in cookies
+    res.cookie('authToken', newAccessToken, { 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: req.app.locals.authConfig.cookieMaxAge
+    });
+
+    res.cookie('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: req.app.locals.authConfig.cookieMaxAge
+    });
+
+    res.json({
+      success: true,
+      message: 'Tokens refreshed successfully',
+      accessToken: newAccessToken // Send new access token in body for client to use immediately
+    });
+
+  } catch (error) {
+    // Generic error handling 
+    res.status(500).json({
+      success: false,
+      message: 'Failed to refresh token due to server error',
+      errors: [{ field: 'general', message: 'Internal server error' }]
+    });
+  }
 });
 
 // Get current user route
