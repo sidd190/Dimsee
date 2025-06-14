@@ -39,6 +39,32 @@ const generateToken = (userId, jwtSecret,expiresIn) => {
 const generateRefreshToken = (userId, jwtRefreshSecret,expiresIn) => {
   return jwt.sign({userId},jwtRefreshSecret,{expiresIn});
 }
+
+// Helper function to set authentication cookies
+const setAuthCookies = async (req, res, user) => {
+  const { jwtSecret, jwtExpiry, jwtRefreshSecret, jwtRefreshExpiry, cookieMaxAge } = req.app.locals.authConfig;
+
+  // Generate tokens
+  const token = generateToken(user._id, jwtSecret, jwtExpiry);
+  const refreshToken = generateRefreshToken(user._id, jwtRefreshSecret, jwtRefreshExpiry);
+
+  // Update user's refresh token in DB
+  user.refreshToken = refreshToken;
+  await user.save({ validateBeforeSave: false }); // Important: set to false if your User model doesn't expect all fields to be present/valid after setting refreshToken
+
+  // Set cookies
+  res.cookie('authToken', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: cookieMaxAge
+  });
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: cookieMaxAge
+  });
+};
+
 // Middleware to check if user is authenticated
 const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -115,24 +141,7 @@ router.get('/google', (req, res, next) => {
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   async (req, res) => {
-    // Generate token for the authenticated user
-    const token = generateToken(req.user._id, req.app.locals.authConfig.jwtSecret,req.app.locals.authConfig.jwtExpiry);
-    //refresh token
-    const refreshToken = generateRefreshToken(req.user._id, req.app.locals.authConfig.jwtRefreshSecret, req.app.locals.authConfig.jwtRefreshExpiry);
-    req.user.refreshToken = refreshToken;
-    await req.user.save({ validateBeforeSave: false });
-    // Set the token in a cookie
-    res.cookie('authToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: req.app.locals.authConfig.cookieMaxAge 
-    });
-    res.cookie('refreshToken', refreshToken, { 
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: req.app.locals.authConfig.cookieMaxAge 
-    });
-
+    await setAuthCookies(req, res, req.user);
     // Redirect to frontend
     res.redirect(req.app.locals.authConfig.corsOrigin);
   }
@@ -146,25 +155,7 @@ router.get('/github',
 router.get('/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
   async (req, res) => {
-    // Generate token for the authenticated user
-    const token = generateToken(req.user._id, req.app.locals.authConfig.jwtSecret,req.app.locals.authConfig.jwtExpiry);
-    //refresh token
-    const refreshToken = generateRefreshToken(req.user._id, req.app.locals.authConfig.jwtRefreshSecret, req.app.locals.authConfig.jwtRefreshExpiry);
-    req.user.refreshToken = refreshToken;
-    await req.user.save({ validateBeforeSave: false });
-    // Set the token in a cookie
-    res.cookie('authToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: req.app.locals.authConfig.cookieMaxAge
-    });
-
-    res.cookie('refreshToken', refreshToken, { 
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: req.app.locals.authConfig.cookieMaxAge 
-    });
-
+    await setAuthCookies(req, res, req.user);
     // Redirect to frontend
     res.redirect(req.app.locals.authConfig.corsOrigin);
   }
@@ -218,7 +209,7 @@ router.post('/signup', async (req, res) => {
     });
 
     await user.save();
-
+    await setAuthCookies(req, res, user); // Set JWT and refresh tokens
     // Log in the user after signup
     req.login(user, (err) => {
       if (err) {
@@ -228,7 +219,8 @@ router.post('/signup', async (req, res) => {
           message: 'Error logging in after signup'
         });
       }
-
+    
+  
       res.json({
         success: true,
         message: 'Signup successful',
@@ -246,8 +238,8 @@ router.post('/signup', async (req, res) => {
 });
 
 // Sign in route
-router.post('/signin', (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
+router.post('/signin',  (req, res, next) => {
+  passport.authenticate('local', async (err, user, info) => {
     if (err) {
       return res.status(500).json({
         success: false,
@@ -263,7 +255,7 @@ router.post('/signin', (req, res, next) => {
         errors: [{ field: 'general', message: info.message || 'Invalid credentials' }]
       });
     }
-
+    await setAuthCookies(req, res, user); // Set JWT and refresh tokens
     req.login(user, (err) => {
       if (err) {
         return res.status(500).json({
@@ -291,6 +283,10 @@ router.post('/signout', (req, res) => {
         message: 'Error signing out'
       });
     }
+    // Clear cookies
+    res.clearCookie('authToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    res.clearCookie('refreshToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    
     res.json({
       success: true,
       message: 'Signed out successfully'
