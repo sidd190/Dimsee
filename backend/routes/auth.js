@@ -31,8 +31,38 @@ const signinSchema = z.object({
 });
 
 // Generate JWT token
-const generateToken = (userId, jwtSecret) => {
-  return jwt.sign({ userId }, jwtSecret, { expiresIn: '7d' });
+const generateToken = (userId, jwtSecret,expiresIn) => {
+  return jwt.sign({ userId }, jwtSecret, { expiresIn });
+};
+
+//generate refresh token
+const generateRefreshToken = (userId, jwtRefreshSecret,expiresIn) => {
+  return jwt.sign({userId},jwtRefreshSecret,{expiresIn});
+}
+
+// Helper function to set authentication cookies
+const setAuthCookies = async (req, res, user) => {
+  const { jwtSecret, jwtExpiry, jwtRefreshSecret, jwtRefreshExpiry, cookieMaxAge } = req.app.locals.authConfig;
+
+  // Generate tokens
+  const token = generateToken(user._id, jwtSecret, jwtExpiry);
+  const refreshToken = generateRefreshToken(user._id, jwtRefreshSecret, jwtRefreshExpiry);
+
+  // Update user's refresh token in DB
+  user.refreshToken = refreshToken;
+  await user.save({ validateBeforeSave: false }); // Important: set to false if your User model doesn't expect all fields to be present/valid after setting refreshToken
+
+  // Set cookies
+  res.cookie('authToken', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: cookieMaxAge
+  });
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: cookieMaxAge
+  });
 };
 
 // Middleware to check if user is authenticated
@@ -110,17 +140,8 @@ router.get('/google', (req, res, next) => {
 
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
-  (req, res) => {
-    // Generate token for the authenticated user
-    const token = generateToken(req.user._id, req.app.locals.authConfig.jwtSecret);
-    
-    // Set the token in a cookie
-    res.cookie('authToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: req.app.locals.authConfig.cookieMaxAge
-    });
-
+  async (req, res) => {
+    await setAuthCookies(req, res, req.user);
     // Redirect to frontend
     res.redirect(req.app.locals.authConfig.corsOrigin);
   }
@@ -133,17 +154,8 @@ router.get('/github',
 
 router.get('/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
-  (req, res) => {
-    // Generate token for the authenticated user
-    const token = generateToken(req.user._id, req.app.locals.authConfig.jwtSecret);
-    
-    // Set the token in a cookie
-    res.cookie('authToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: req.app.locals.authConfig.cookieMaxAge
-    });
-
+  async (req, res) => {
+    await setAuthCookies(req, res, req.user);
     // Redirect to frontend
     res.redirect(req.app.locals.authConfig.corsOrigin);
   }
@@ -197,7 +209,7 @@ router.post('/signup', async (req, res) => {
     });
 
     await user.save();
-
+    await setAuthCookies(req, res, user); // Set JWT and refresh tokens
     // Log in the user after signup
     req.login(user, (err) => {
       if (err) {
@@ -207,7 +219,8 @@ router.post('/signup', async (req, res) => {
           message: 'Error logging in after signup'
         });
       }
-
+    
+  
       res.json({
         success: true,
         message: 'Signup successful',
@@ -225,8 +238,8 @@ router.post('/signup', async (req, res) => {
 });
 
 // Sign in route
-router.post('/signin', (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
+router.post('/signin',  (req, res, next) => {
+  passport.authenticate('local', async (err, user, info) => {
     if (err) {
       return res.status(500).json({
         success: false,
@@ -242,7 +255,7 @@ router.post('/signin', (req, res, next) => {
         errors: [{ field: 'general', message: info.message || 'Invalid credentials' }]
       });
     }
-
+    await setAuthCookies(req, res, user); // Set JWT and refresh tokens
     req.login(user, (err) => {
       if (err) {
         return res.status(500).json({
@@ -270,11 +283,98 @@ router.post('/signout', (req, res) => {
         message: 'Error signing out'
       });
     }
+    // Clear cookies
+    res.clearCookie('authToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    res.clearCookie('refreshToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    
     res.json({
       success: true,
       message: 'Signed out successfully'
     });
   });
+});
+
+// Refresh token route
+// This route does NOT require isAuthenticated, as it's meant to obtain new tokens even if the access token has expired.
+router.post('/refresh-token', async (req, res) => {
+  const incomingRefreshToken = req.cookies?.refreshToken || req.body.refreshToken;
+
+  if (!incomingRefreshToken) {
+    return res.status(401).json({
+      success: false,
+      message: 'Unauthorized Request: Refresh token missing',
+      errors: [{ field: 'general', message: 'Unauthorized Request' }]
+    });
+  }
+
+  try {
+    const decodedToken = jwt.verify(incomingRefreshToken, req.app.locals.authConfig.jwtRefreshSecret);
+
+    // Ensure the payload has userId
+    if (!decodedToken || !decodedToken.userId) {
+        return res.status(401).json({
+            success: false,
+            message: 'Invalid Refresh Token payload',
+            errors: [{ field: 'general', message: 'Invalid Refresh Token' }]
+        });
+    }
+
+    const user = await User.findById(decodedToken.userId); 
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid Refresh Token: User not found',
+        errors: [{ field: 'general', message: 'Invalid Refresh Token' }]
+      });
+    }
+
+    // Refresh token rotation with reuse detection 
+    if (user.refreshToken !== incomingRefreshToken) {
+        user.refreshToken = null; // Invalidate the stored refresh token to force re-login
+        await user.save({ validateBeforeSave: false }); 
+        return res.status(401).json({
+            success: false,
+            message: 'Refresh token invalid or reused. Please log in again.',
+            errors: [{ field: 'general', message: 'Refresh token invalid or reused.' }]
+        });
+    }
+
+    // Generate new access and refresh tokens
+    const newAccessToken = generateToken(user._id, req.app.locals.authConfig.jwtSecret, req.app.locals.authConfig.jwtExpiry);
+    const newRefreshToken = generateRefreshToken(user._id, req.app.locals.authConfig.jwtRefreshSecret, req.app.locals.authConfig.jwtRefreshExpiry);
+
+    // Update the user's refresh token in the database with the new one
+    user.refreshToken = newRefreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    // Set the new tokens in cookies
+    res.cookie('authToken', newAccessToken, { 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: req.app.locals.authConfig.cookieMaxAge
+    });
+
+    res.cookie('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: req.app.locals.authConfig.cookieMaxAge
+    });
+
+    res.json({
+      success: true,
+      message: 'Tokens refreshed successfully',
+      accessToken: newAccessToken // Send new access token in body for client to use immediately
+    });
+
+  } catch (error) {
+    // Generic error handling 
+    res.status(500).json({
+      success: false,
+      message: 'Failed to refresh token due to server error',
+      errors: [{ field: 'general', message: 'Internal server error' }]
+    });
+  }
 });
 
 // Get current user route
