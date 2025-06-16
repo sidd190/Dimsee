@@ -4,7 +4,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const rateLimit = require('express-rate-limit'); // ✅ Added for brute-force protection
+const rateLimit = require('express-rate-limit'); //  Added for brute-force protection
 require('dotenv').config();
 
 // Connect to MongoDB first
@@ -28,7 +28,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/dimsee')
       credentials: true
     }));
 
-    // ✅ Rate Limiting on /signin and /signup (Fix for Bug #2)
+    //  Rate Limiting on /signin and /signup 
     const authLimiter = rateLimit({
       windowMs: 60 * 1000, // 1 minute
       max: 5,
