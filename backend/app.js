@@ -39,7 +39,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/dimsee')
 
     // Session configuration
     app.use(session({
-      // ❗ Kept insecure fallback as requested (Bug #1 not fixed)
+      //
       secret: process.env.SESSION_SECRET || 'your-secret-key',
       resave: false,
       saveUninitialized: false,
@@ -60,7 +60,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/dimsee')
 
     // Auth configuration
     app.locals.authConfig = {
-      // ❗ Kept insecure fallback as requested (Bug #1 not fixed)
+      // 
       jwtSecret: process.env.JWT_SECRET || 'your-jwt-secret',
       cookieMaxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     };
