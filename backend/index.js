@@ -16,12 +16,9 @@ const { passport: passportInstance, configureOAuthStrategies } = require(path.jo
 require('dotenv').config();
 
 const createAuthBackend = (config = {}) => {
-  const { 
+  const {
     mongoUri = 'mongodb://localhost:27017/mern-auth',
     jwtSecret = 'your-secret-key-change-in-production',
-    jwtExpiry = '15m', //your-expiry-for-access-token-ideal-set-it-to-15m',
-    jwtRefreshSecret = 'your-secret-key-change-in-production',
-    jwtRefreshExpiry = '7d', //'your-expiry-for-refresh-token-ideal-set-it-to-7d',
     corsOrigin = 'http://localhost:5173',
     cookieMaxAge = 7 * 24 * 60 * 60 * 1000, // 7 days
     enableOAuth = false, // OAuth disabled by default
@@ -44,9 +41,6 @@ const createAuthBackend = (config = {}) => {
   app.use(cookieParser());
   app.use(session({
     secret: jwtSecret,
-    expiry: jwtExpiry,
-    refreshSecret: jwtRefreshSecret,
-    refreshExpiry: jwtRefreshExpiry,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
@@ -86,9 +80,6 @@ const createAuthBackend = (config = {}) => {
   // Make config available to routes
   app.locals.authConfig = {
     jwtSecret,
-    jwtExpiry,
-    jwtRefreshSecret,
-    jwtRefreshExpiry,
     cookieMaxAge,
     corsOrigin,
     enableOAuth,
