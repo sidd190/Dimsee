@@ -208,6 +208,15 @@ router.post('/signup', async (req, res) => {
         });
       }
 
+      // Generate token for the authenticated user
+      const token = generateToken(user._id, req.app.locals.authConfig.jwtSecret);
+      // Set the token in a cookie
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: req.app.locals.authConfig.cookieMaxAge
+      });
+
       res.json({
         success: true,
         message: 'Signup successful',
@@ -251,6 +260,15 @@ router.post('/signin', (req, res, next) => {
           errors: [{ field: 'general', message: 'Internal server error' }]
         });
       }
+
+      // Generate token for the authenticated user
+      const token = generateToken(user._id, req.app.locals.authConfig.jwtSecret);
+      // Set the token in a cookie
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: req.app.locals.authConfig.cookieMaxAge
+      });
 
       res.json({
         success: true,
