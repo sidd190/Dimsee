@@ -68,8 +68,8 @@ app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 
 **Frontend (`App.js`):**
 ```jsx
-import AuthProvider from 'dimsee/frontend/context/AuthContext';
-import AuthForm from 'dimsee/frontend/components/AuthForm';
+import {AuthProvider} from 'dimsee/frontend';
+import {AuthForm} from 'dimsee/frontend';
 
 function App() {
   return (
@@ -150,7 +150,7 @@ If you prefer an all-in-one setup, you can run the Dimsee backend inside a catch
 
     ```jsx
     // file: pages/_app.js
-    import AuthProvider from 'dimsee/frontend/context/AuthContext';
+    import {AuthProvider} from 'dimsee/frontend';
     
     function MyApp({ Component, pageProps }) {
       return (
@@ -209,7 +209,7 @@ Dimsee provides two key frontend components: `AuthStatus` and `AuthForm`. Unders
 If a user is not logged in, `AuthStatus` will render the `AuthForm`. Once they log in, it will render the content passed to it as `children`.
 
 ```jsx
-import { AuthStatus } from 'dimsee/frontend/components/AuthStatus';
+import { AuthStatus } from 'dimsee/frontend';
 
 function App() {
   return (
@@ -231,7 +231,7 @@ function App() {
 `AuthStatus` also automatically includes the `LogoutButton` and can conditionally show the `SetPasswordButton` for users who signed up with an OAuth provider.
 
 ```jsx
-import { AuthStatus } from 'dimsee/frontend/components/AuthStatus';
+import { AuthStatus } from 'dimsee/frontend';
 
 function App() {
   return (
