@@ -32,13 +32,61 @@ var signinSchema = z.object({
 });
 
 // Generate JWT token
-var generateToken = function generateToken(userId, jwtSecret) {
+var generateToken = function generateToken(userId, jwtSecret, expiresIn) {
   return jwt.sign({
     userId: userId
   }, jwtSecret, {
-    expiresIn: '7d'
+    expiresIn: expiresIn
   });
 };
+
+//generate refresh token
+var generateRefreshToken = function generateRefreshToken(userId, jwtRefreshSecret, expiresIn) {
+  return jwt.sign({
+    userId: userId
+  }, jwtRefreshSecret, {
+    expiresIn: expiresIn
+  });
+};
+
+// Helper function to set authentication cookies
+var setAuthCookies = /*#__PURE__*/function () {
+  var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(req, res, user) {
+    var _req$app$locals$authC, jwtSecret, jwtExpiry, jwtRefreshSecret, jwtRefreshExpiry, cookieMaxAge, token, refreshToken;
+    return _regenerator().w(function (_context) {
+      while (1) switch (_context.n) {
+        case 0:
+          _req$app$locals$authC = req.app.locals.authConfig, jwtSecret = _req$app$locals$authC.jwtSecret, jwtExpiry = _req$app$locals$authC.jwtExpiry, jwtRefreshSecret = _req$app$locals$authC.jwtRefreshSecret, jwtRefreshExpiry = _req$app$locals$authC.jwtRefreshExpiry, cookieMaxAge = _req$app$locals$authC.cookieMaxAge; // Generate tokens
+          token = generateToken(user._id, jwtSecret, jwtExpiry);
+          refreshToken = generateRefreshToken(user._id, jwtRefreshSecret, jwtRefreshExpiry); // Update user's refresh token in DB
+          user.refreshToken = refreshToken;
+          _context.n = 1;
+          return user.save({
+            validateBeforeSave: false
+          });
+        case 1:
+          // Important: set to false if your User model doesn't expect all fields to be present/valid after setting refreshToken
+
+          // Set cookies
+          res.cookie('authToken', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: cookieMaxAge
+          });
+          res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: cookieMaxAge
+          });
+        case 2:
+          return _context.a(2);
+      }
+    }, _callee);
+  }));
+  return function setAuthCookies(_x, _x2, _x3) {
+    return _ref.apply(this, arguments);
+  };
+}();
 
 // Middleware to check if user is authenticated
 var isAuthenticated = function isAuthenticated(req, res, next) {
@@ -53,18 +101,18 @@ var isAuthenticated = function isAuthenticated(req, res, next) {
 
 // Set password route for OAuth users
 router.post('/set-password', isAuthenticated, /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(req, res) {
+  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(req, res) {
     var password, user, _t;
-    return _regenerator().w(function (_context) {
-      while (1) switch (_context.n) {
+    return _regenerator().w(function (_context2) {
+      while (1) switch (_context2.n) {
         case 0:
-          _context.p = 0;
+          _context2.p = 0;
           password = req.body.password;
           if (!(!password || password.length < 6)) {
-            _context.n = 1;
+            _context2.n = 1;
             break;
           }
-          return _context.a(2, res.status(400).json({
+          return _context2.a(2, res.status(400).json({
             success: false,
             message: 'Password must be at least 6 characters long',
             errors: [{
@@ -73,31 +121,31 @@ router.post('/set-password', isAuthenticated, /*#__PURE__*/function () {
             }]
           }));
         case 1:
-          _context.n = 2;
+          _context2.n = 2;
           return User.findById(req.user.id);
         case 2:
-          user = _context.v;
+          user = _context2.v;
           if (user) {
-            _context.n = 3;
+            _context2.n = 3;
             break;
           }
-          return _context.a(2, res.status(404).json({
+          return _context2.a(2, res.status(404).json({
             success: false,
             message: 'User not found'
           }));
         case 3:
-          _context.n = 4;
+          _context2.n = 4;
           return user.setPassword(password);
         case 4:
           res.json({
             success: true,
             message: 'Password set successfully'
           });
-          _context.n = 6;
+          _context2.n = 6;
           break;
         case 5:
-          _context.p = 5;
-          _t = _context.v;
+          _context2.p = 5;
+          _t = _context2.v;
           console.error('Error setting password:', _t);
           res.status(500).json({
             success: false,
@@ -108,12 +156,12 @@ router.post('/set-password', isAuthenticated, /*#__PURE__*/function () {
             }]
           });
         case 6:
-          return _context.a(2);
+          return _context2.a(2);
       }
-    }, _callee, null, [[0, 5]]);
+    }, _callee2, null, [[0, 5]]);
   }));
-  return function (_x, _x2) {
-    return _ref.apply(this, arguments);
+  return function (_x4, _x5) {
+    return _ref2.apply(this, arguments);
   };
 }());
 
@@ -145,20 +193,25 @@ router.get('/google', function (req, res, next) {
 });
 router.get('/google/callback', passport.authenticate('google', {
   failureRedirect: '/login'
-}), function (req, res) {
-  // Generate token for the authenticated user
-  var token = generateToken(req.user._id, req.app.locals.authConfig.jwtSecret);
-
-  // Set the token in a cookie
-  res.cookie('authToken', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: req.app.locals.authConfig.cookieMaxAge
-  });
-
-  // Redirect to frontend
-  res.redirect(req.app.locals.authConfig.corsOrigin);
-});
+}), /*#__PURE__*/function () {
+  var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(req, res) {
+    return _regenerator().w(function (_context3) {
+      while (1) switch (_context3.n) {
+        case 0:
+          _context3.n = 1;
+          return setAuthCookies(req, res, req.user);
+        case 1:
+          // Redirect to frontend
+          res.redirect(req.app.locals.authConfig.corsOrigin);
+        case 2:
+          return _context3.a(2);
+      }
+    }, _callee3);
+  }));
+  return function (_x6, _x7) {
+    return _ref3.apply(this, arguments);
+  };
+}());
 
 // GitHub OAuth routes
 router.get('/github', passport.authenticate('github', {
@@ -166,29 +219,34 @@ router.get('/github', passport.authenticate('github', {
 }));
 router.get('/github/callback', passport.authenticate('github', {
   failureRedirect: '/login'
-}), function (req, res) {
-  // Generate token for the authenticated user
-  var token = generateToken(req.user._id, req.app.locals.authConfig.jwtSecret);
-
-  // Set the token in a cookie
-  res.cookie('authToken', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: req.app.locals.authConfig.cookieMaxAge
-  });
-
-  // Redirect to frontend
-  res.redirect(req.app.locals.authConfig.corsOrigin);
-});
+}), /*#__PURE__*/function () {
+  var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(req, res) {
+    return _regenerator().w(function (_context4) {
+      while (1) switch (_context4.n) {
+        case 0:
+          _context4.n = 1;
+          return setAuthCookies(req, res, req.user);
+        case 1:
+          // Redirect to frontend
+          res.redirect(req.app.locals.authConfig.corsOrigin);
+        case 2:
+          return _context4.a(2);
+      }
+    }, _callee4);
+  }));
+  return function (_x8, _x9) {
+    return _ref4.apply(this, arguments);
+  };
+}());
 
 // Sign up route
 router.post('/signup', /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(req, res) {
+  var _ref5 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(req, res) {
     var _req$body, username, email, password, errors, existingUser, user, _t2;
-    return _regenerator().w(function (_context2) {
-      while (1) switch (_context2.n) {
+    return _regenerator().w(function (_context5) {
+      while (1) switch (_context5.n) {
         case 0:
-          _context2.p = 0;
+          _context5.p = 0;
           _req$body = req.body, username = _req$body.username, email = _req$body.email, password = _req$body.password; // Validate input
           errors = [];
           if (!username || username.length < 3) {
@@ -210,16 +268,16 @@ router.post('/signup', /*#__PURE__*/function () {
             });
           }
           if (!(errors.length > 0)) {
-            _context2.n = 1;
+            _context5.n = 1;
             break;
           }
-          return _context2.a(2, res.status(400).json({
+          return _context5.a(2, res.status(400).json({
             success: false,
             message: 'Validation failed',
             errors: errors
           }));
         case 1:
-          _context2.n = 2;
+          _context5.n = 2;
           return User.findOne({
             $or: [{
               email: email
@@ -228,12 +286,12 @@ router.post('/signup', /*#__PURE__*/function () {
             }]
           });
         case 2:
-          existingUser = _context2.v;
+          existingUser = _context5.v;
           if (!existingUser) {
-            _context2.n = 3;
+            _context5.n = 3;
             break;
           }
-          return _context2.a(2, res.status(400).json({
+          return _context5.a(2, res.status(400).json({
             success: false,
             message: 'User already exists',
             errors: [{
@@ -248,9 +306,13 @@ router.post('/signup', /*#__PURE__*/function () {
             email: email,
             password: password
           });
-          _context2.n = 4;
+          _context5.n = 4;
           return user.save();
         case 4:
+          _context5.n = 5;
+          return setAuthCookies(req, res, user);
+        case 5:
+          // Set JWT and refresh tokens
           // Log in the user after signup
           req.login(user, function (err) {
             if (err) {
@@ -266,11 +328,11 @@ router.post('/signup', /*#__PURE__*/function () {
               user: user.toJSON()
             });
           });
-          _context2.n = 6;
+          _context5.n = 7;
           break;
-        case 5:
-          _context2.p = 5;
-          _t2 = _context2.v;
+        case 6:
+          _context5.p = 6;
+          _t2 = _context5.v;
           console.error('Signup error:', _t2);
           res.status(500).json({
             success: false,
@@ -280,57 +342,88 @@ router.post('/signup', /*#__PURE__*/function () {
               message: 'Internal server error'
             }]
           });
-        case 6:
-          return _context2.a(2);
+        case 7:
+          return _context5.a(2);
       }
-    }, _callee2, null, [[0, 5]]);
+    }, _callee5, null, [[0, 6]]);
   }));
-  return function (_x3, _x4) {
-    return _ref2.apply(this, arguments);
+  return function (_x0, _x1) {
+    return _ref5.apply(this, arguments);
   };
 }());
 
 // Sign in route
 router.post('/signin', function (req, res, next) {
-  passport.authenticate('local', function (err, user, info) {
-    if (err) {
-      return res.status(500).json({
-        success: false,
-        message: 'Authentication error',
-        errors: [{
-          field: 'general',
-          message: 'Internal server error'
-        }]
-      });
-    }
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: info.message || 'Invalid credentials',
-        errors: [{
-          field: 'general',
-          message: info.message || 'Invalid credentials'
-        }]
-      });
-    }
-    req.login(user, function (err) {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: 'Login error',
-          errors: [{
-            field: 'general',
-            message: 'Internal server error'
-          }]
-        });
-      }
-      res.json({
-        success: true,
-        message: 'Login successful',
-        user: user.toJSON()
-      });
-    });
-  })(req, res, next);
+  passport.authenticate('local', /*#__PURE__*/function () {
+    var _ref6 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6(err, user, info) {
+      return _regenerator().w(function (_context6) {
+        while (1) switch (_context6.n) {
+          case 0:
+            if (!err) {
+              _context6.n = 1;
+              break;
+            }
+            return _context6.a(2, res.status(500).json({
+              success: false,
+              message: 'Authentication error',
+              errors: [{
+                field: 'general',
+                message: 'Internal server error'
+              }]
+            }));
+          case 1:
+            if (user) {
+              _context6.n = 2;
+              break;
+            }
+            return _context6.a(2, res.status(401).json({
+              success: false,
+              message: info.message || 'Invalid credentials',
+              errors: [{
+                field: 'general',
+                message: info.message || 'Invalid credentials'
+              }]
+            }));
+          case 2:
+            _context6.n = 3;
+            return setAuthCookies(req, res, user);
+          case 3:
+            // Set JWT and refresh tokens
+            req.login(user, function (err) {
+              if (err) {
+                return res.status(500).json({
+                  success: false,
+                  message: 'Login error',
+                  errors: [{
+                    field: 'general',
+                    message: 'Internal server error'
+                  }]
+                });
+              }
+
+              // Generate token for the authenticated user
+              var token = generateToken(user._id, req.app.locals.authConfig.jwtSecret);
+              // Set the token in a cookie
+              res.cookie('authToken', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: req.app.locals.authConfig.cookieMaxAge
+              });
+              res.json({
+                success: true,
+                message: 'Login successful',
+                user: user.toJSON()
+              });
+            });
+          case 4:
+            return _context6.a(2);
+        }
+      }, _callee6);
+    }));
+    return function (_x10, _x11, _x12) {
+      return _ref6.apply(this, arguments);
+    };
+  }())(req, res, next);
 });
 
 // Sign out route
@@ -342,12 +435,144 @@ router.post('/signout', function (req, res) {
         message: 'Error signing out'
       });
     }
+    // Clear cookies
+    res.clearCookie('authToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production'
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production'
+    });
     res.json({
       success: true,
       message: 'Signed out successfully'
     });
   });
 });
+
+// Refresh token route
+// This route does NOT require isAuthenticated, as it's meant to obtain new tokens even if the access token has expired.
+router.post('/refresh-token', /*#__PURE__*/function () {
+  var _ref7 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7(req, res) {
+    var _req$cookies;
+    var incomingRefreshToken, decodedToken, user, newAccessToken, newRefreshToken, _t3;
+    return _regenerator().w(function (_context7) {
+      while (1) switch (_context7.n) {
+        case 0:
+          incomingRefreshToken = ((_req$cookies = req.cookies) === null || _req$cookies === void 0 ? void 0 : _req$cookies.refreshToken) || req.body.refreshToken;
+          if (incomingRefreshToken) {
+            _context7.n = 1;
+            break;
+          }
+          return _context7.a(2, res.status(401).json({
+            success: false,
+            message: 'Unauthorized Request: Refresh token missing',
+            errors: [{
+              field: 'general',
+              message: 'Unauthorized Request'
+            }]
+          }));
+        case 1:
+          _context7.p = 1;
+          decodedToken = jwt.verify(incomingRefreshToken, req.app.locals.authConfig.jwtRefreshSecret); // Ensure the payload has userId
+          if (!(!decodedToken || !decodedToken.userId)) {
+            _context7.n = 2;
+            break;
+          }
+          return _context7.a(2, res.status(401).json({
+            success: false,
+            message: 'Invalid Refresh Token payload',
+            errors: [{
+              field: 'general',
+              message: 'Invalid Refresh Token'
+            }]
+          }));
+        case 2:
+          _context7.n = 3;
+          return User.findById(decodedToken.userId);
+        case 3:
+          user = _context7.v;
+          if (user) {
+            _context7.n = 4;
+            break;
+          }
+          return _context7.a(2, res.status(401).json({
+            success: false,
+            message: 'Invalid Refresh Token: User not found',
+            errors: [{
+              field: 'general',
+              message: 'Invalid Refresh Token'
+            }]
+          }));
+        case 4:
+          if (!(user.refreshToken !== incomingRefreshToken)) {
+            _context7.n = 6;
+            break;
+          }
+          user.refreshToken = null; // Invalidate the stored refresh token to force re-login
+          _context7.n = 5;
+          return user.save({
+            validateBeforeSave: false
+          });
+        case 5:
+          return _context7.a(2, res.status(401).json({
+            success: false,
+            message: 'Refresh token invalid or reused. Please log in again.',
+            errors: [{
+              field: 'general',
+              message: 'Refresh token invalid or reused.'
+            }]
+          }));
+        case 6:
+          // Generate new access and refresh tokens
+          newAccessToken = generateToken(user._id, req.app.locals.authConfig.jwtSecret, req.app.locals.authConfig.jwtExpiry);
+          newRefreshToken = generateRefreshToken(user._id, req.app.locals.authConfig.jwtRefreshSecret, req.app.locals.authConfig.jwtRefreshExpiry); // Update the user's refresh token in the database with the new one
+          user.refreshToken = newRefreshToken;
+          _context7.n = 7;
+          return user.save({
+            validateBeforeSave: false
+          });
+        case 7:
+          // Set the new tokens in cookies
+          res.cookie('authToken', newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: req.app.locals.authConfig.cookieMaxAge
+          });
+          res.cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: req.app.locals.authConfig.cookieMaxAge
+          });
+          res.json({
+            success: true,
+            message: 'Tokens refreshed successfully',
+            accessToken: newAccessToken // Send new access token in body for client to use immediately
+          });
+          _context7.n = 9;
+          break;
+        case 8:
+          _context7.p = 8;
+          _t3 = _context7.v;
+          // Generic error handling 
+          res.status(500).json({
+            success: false,
+            message: 'Failed to refresh token due to server error',
+            errors: [{
+              field: 'general',
+              message: 'Internal server error'
+            }]
+          });
+        case 9:
+          return _context7.a(2);
+      }
+    }, _callee7, null, [[1, 8]]);
+  }));
+  return function (_x13, _x14) {
+    return _ref7.apply(this, arguments);
+  };
+}());
 
 // Get current user route
 router.get('/me', isAuthenticated, function (req, res) {

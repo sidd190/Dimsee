@@ -16,6 +16,7 @@ var authMiddleware = require(path.join(__dirname, 'middleware', 'auth'));
 var _require = require(path.join(__dirname, 'config', 'passport')),
   passportInstance = _require.passport,
   configureOAuthStrategies = _require.configureOAuthStrategies;
+var User = require(path.join(__dirname, 'models', 'User'));
 require('dotenv').config();
 var createAuthBackend = function createAuthBackend() {
   var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -23,6 +24,12 @@ var createAuthBackend = function createAuthBackend() {
     mongoUri = _config$mongoUri === void 0 ? 'mongodb://localhost:27017/mern-auth' : _config$mongoUri,
     _config$jwtSecret = config.jwtSecret,
     jwtSecret = _config$jwtSecret === void 0 ? 'your-secret-key-change-in-production' : _config$jwtSecret,
+    _config$jwtExpiry = config.jwtExpiry,
+    jwtExpiry = _config$jwtExpiry === void 0 ? '15m' : _config$jwtExpiry,
+    _config$jwtRefreshSec = config.jwtRefreshSecret,
+    jwtRefreshSecret = _config$jwtRefreshSec === void 0 ? 'your-secret-key-change-in-production' : _config$jwtRefreshSec,
+    _config$jwtRefreshExp = config.jwtRefreshExpiry,
+    jwtRefreshExpiry = _config$jwtRefreshExp === void 0 ? '7d' : _config$jwtRefreshExp,
     _config$corsOrigin = config.corsOrigin,
     corsOrigin = _config$corsOrigin === void 0 ? 'http://localhost:5173' : _config$corsOrigin,
     _config$cookieMaxAge = config.cookieMaxAge,
@@ -49,6 +56,9 @@ var createAuthBackend = function createAuthBackend() {
   app.use(cookieParser());
   app.use(session({
     secret: jwtSecret,
+    expiry: jwtExpiry,
+    refreshSecret: jwtRefreshSecret,
+    refreshExpiry: jwtRefreshExpiry,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
@@ -89,6 +99,9 @@ var createAuthBackend = function createAuthBackend() {
   // Make config available to routes
   app.locals.authConfig = {
     jwtSecret: jwtSecret,
+    jwtExpiry: jwtExpiry,
+    jwtRefreshSecret: jwtRefreshSecret,
+    jwtRefreshExpiry: jwtRefreshExpiry,
     cookieMaxAge: cookieMaxAge,
     corsOrigin: corsOrigin,
     enableOAuth: enableOAuth,
@@ -110,5 +123,6 @@ var createAuthBackend = function createAuthBackend() {
 };
 module.exports = {
   createAuthBackend: createAuthBackend,
-  authMiddleware: authMiddleware
+  authMiddleware: authMiddleware,
+  User: User
 };
