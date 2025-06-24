@@ -44,9 +44,12 @@ const generateRefreshToken = (userId, jwtRefreshSecret,expiresIn) => {
 const setAuthCookies = async (req, res, user) => {
   const { jwtSecret, jwtExpiry, jwtRefreshSecret, jwtRefreshExpiry, cookieMaxAge } = req.app.locals.authConfig;
 
+  const jwtExpiryFallback = jwtExpiry || '15m';
+  const jwtRefreshExpiryFallback = jwtRefreshExpiry || '7d';
+
   // Generate tokens
-  const token = generateToken(user._id, jwtSecret, jwtExpiry);
-  const refreshToken = generateRefreshToken(user._id, jwtRefreshSecret, jwtRefreshExpiry);
+  const token = generateToken(user._id, jwtSecret, jwtExpiryFallback);
+  const refreshToken = generateRefreshToken(user._id, jwtRefreshSecret, jwtRefreshExpiryFallback);
 
   // Update user's refresh token in DB
   user.refreshToken = refreshToken;
@@ -265,7 +268,8 @@ router.post('/signin',  (req, res, next) => {
       }
 
       // Generate token for the authenticated user
-      const token = generateToken(user._id, req.app.locals.authConfig.jwtSecret);
+      const jwtExpiry = req.app.locals.authConfig.jwtExpiry || '15m';
+      const token = generateToken(user._id, req.app.locals.authConfig.jwtSecret, jwtExpiry);
       // Set the token in a cookie
       res.cookie('authToken', token, {
         httpOnly: true,
@@ -349,8 +353,8 @@ router.post('/refresh-token', async (req, res) => {
     }
 
     // Generate new access and refresh tokens
-    const newAccessToken = generateToken(user._id, req.app.locals.authConfig.jwtSecret, req.app.locals.authConfig.jwtExpiry);
-    const newRefreshToken = generateRefreshToken(user._id, req.app.locals.authConfig.jwtRefreshSecret, req.app.locals.authConfig.jwtRefreshExpiry);
+    const newAccessToken = generateToken(user._id, req.app.locals.authConfig.jwtSecret, req.app.locals.authConfig.jwtExpiry || '15m');
+    const newRefreshToken = generateRefreshToken(user._id, req.app.locals.authConfig.jwtRefreshSecret, req.app.locals.authConfig.jwtRefreshExpiry || '7d');
 
     // Update the user's refresh token in the database with the new one
     user.refreshToken = newRefreshToken;
