@@ -52,13 +52,15 @@ var generateRefreshToken = function generateRefreshToken(userId, jwtRefreshSecre
 // Helper function to set authentication cookies
 var setAuthCookies = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(req, res, user) {
-    var _req$app$locals$authC, jwtSecret, jwtExpiry, jwtRefreshSecret, jwtRefreshExpiry, cookieMaxAge, token, refreshToken;
+    var _req$app$locals$authC, jwtSecret, jwtExpiry, jwtRefreshSecret, jwtRefreshExpiry, cookieMaxAge, jwtExpiryFallback, jwtRefreshExpiryFallback, token, refreshToken;
     return _regenerator().w(function (_context) {
       while (1) switch (_context.n) {
         case 0:
-          _req$app$locals$authC = req.app.locals.authConfig, jwtSecret = _req$app$locals$authC.jwtSecret, jwtExpiry = _req$app$locals$authC.jwtExpiry, jwtRefreshSecret = _req$app$locals$authC.jwtRefreshSecret, jwtRefreshExpiry = _req$app$locals$authC.jwtRefreshExpiry, cookieMaxAge = _req$app$locals$authC.cookieMaxAge; // Generate tokens
-          token = generateToken(user._id, jwtSecret, jwtExpiry);
-          refreshToken = generateRefreshToken(user._id, jwtRefreshSecret, jwtRefreshExpiry); // Update user's refresh token in DB
+          _req$app$locals$authC = req.app.locals.authConfig, jwtSecret = _req$app$locals$authC.jwtSecret, jwtExpiry = _req$app$locals$authC.jwtExpiry, jwtRefreshSecret = _req$app$locals$authC.jwtRefreshSecret, jwtRefreshExpiry = _req$app$locals$authC.jwtRefreshExpiry, cookieMaxAge = _req$app$locals$authC.cookieMaxAge;
+          jwtExpiryFallback = jwtExpiry || '15m';
+          jwtRefreshExpiryFallback = jwtRefreshExpiry || '7d'; // Generate tokens
+          token = generateToken(user._id, jwtSecret, jwtExpiryFallback);
+          refreshToken = generateRefreshToken(user._id, jwtRefreshSecret, jwtRefreshExpiryFallback); // Update user's refresh token in DB
           user.refreshToken = refreshToken;
           _context.n = 1;
           return user.save({
@@ -402,7 +404,8 @@ router.post('/signin', function (req, res, next) {
               }
 
               // Generate token for the authenticated user
-              var token = generateToken(user._id, req.app.locals.authConfig.jwtSecret);
+              var jwtExpiry = req.app.locals.authConfig.jwtExpiry || '15m';
+              var token = generateToken(user._id, req.app.locals.authConfig.jwtSecret, jwtExpiry);
               // Set the token in a cookie
               res.cookie('authToken', token, {
                 httpOnly: true,
@@ -526,8 +529,8 @@ router.post('/refresh-token', /*#__PURE__*/function () {
           }));
         case 6:
           // Generate new access and refresh tokens
-          newAccessToken = generateToken(user._id, req.app.locals.authConfig.jwtSecret, req.app.locals.authConfig.jwtExpiry);
-          newRefreshToken = generateRefreshToken(user._id, req.app.locals.authConfig.jwtRefreshSecret, req.app.locals.authConfig.jwtRefreshExpiry); // Update the user's refresh token in the database with the new one
+          newAccessToken = generateToken(user._id, req.app.locals.authConfig.jwtSecret, req.app.locals.authConfig.jwtExpiry || '15m');
+          newRefreshToken = generateRefreshToken(user._id, req.app.locals.authConfig.jwtRefreshSecret, req.app.locals.authConfig.jwtRefreshExpiry || '7d'); // Update the user's refresh token in the database with the new one
           user.refreshToken = newRefreshToken;
           _context7.n = 7;
           return user.save({

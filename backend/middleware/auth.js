@@ -1,10 +1,10 @@
 // backend/middleware/auth.js - Auth Middleware
 const jwt = require('jsonwebtoken');
 
-const authMiddleware = (req, res, next) => {
+function authMiddleware(extToken,extJwtSecret){(req, res, next) => {
   try {
-    const { jwtSecret } = req.app.locals.authConfig;
-    const token = req.cookies.authToken;
+    const { jwtSecret } = req.app.locals.authConfig || extJwtSecret;
+    const token = req.cookies.authToken || extToken;
 
     if (!token) {
       return res.status(401).json({
@@ -23,5 +23,6 @@ const authMiddleware = (req, res, next) => {
     });
   }
 };
+}
 
 module.exports = authMiddleware;
