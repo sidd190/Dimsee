@@ -52,7 +52,7 @@ npm install dimsee
 
 Here is a quick example of how to set up a basic authentication system with Dimsee by running a **standalone backend server**.
 
-**Backend (`server.js`):**
+**Backend (`server.js`) : **
 ```javascript
 const { createAuthBackend } = require('dimsee/backend');
 
