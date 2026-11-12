@@ -258,7 +258,6 @@ const AuthForm = ({
               </div>
               {errors.username && (
                 <p className="error-message">
-                  <span className="error-icon">⚠️</span>
                   {errors.username}
                 </p>
               )}
@@ -279,7 +278,6 @@ const AuthForm = ({
             </div>
             {errors.email && (
               <p className="error-message">
-                <span className="error-icon">⚠️</span>
                 {errors.email}
               </p>
             )}
@@ -299,7 +297,6 @@ const AuthForm = ({
             </div>
             {errors.password && (
               <p className="error-message">
-                <span className="error-icon">⚠️</span>
                 {errors.password}
               </p>
             )}
@@ -320,7 +317,6 @@ const AuthForm = ({
               </div>
               {errors.confirmPassword && (
                 <p className="error-message">
-                  <span className="error-icon">⚠️</span>
                   {errors.confirmPassword}
                 </p>
               )}
@@ -340,9 +336,6 @@ const AuthForm = ({
                 </>
               ) : (
                 <>
-                  <span className="button-icon">
-                    {effectiveMode === 'signup' ? '🚀' : '🚀'}
-                  </span>
                   {effectiveMode === 'signup' ? 'Create Account' : 'Sign In'}
                 </>
               )}

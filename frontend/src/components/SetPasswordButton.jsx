@@ -125,7 +125,6 @@ const SetPasswordButton = ({
           onClick={() => setShowForm(true)}
           className={buttonClasses}
         >
-          <span className="button-icon">🔐</span>
           Set Password
         </button>
       )}
@@ -172,7 +171,6 @@ const SetPasswordButton = ({
             </div>
             {passwordError && (
               <p className="error-message">
-                <span className="error-icon">⚠️</span>
                 {passwordError}
               </p>
             )}
