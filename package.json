@@ -1,6 +1,6 @@
 {
   "name": "dimsee",
-  "version": "0.6.8",
+  "version": "0.6.9",
   "description": "Modern, flexible authentication solution for MERN applications with OAuth support",
   "main": "./dist/backend/index.js",
   "module": "./dist/frontend/index.js",
@@ -29,7 +29,7 @@
   "scripts": {
     "test": "jest --passWithNoTests",
     "build": "npm run build:backend && npm run build:frontend",
-    "build:backend": "babel backend -d dist/backend --config-file ./babel.config.backend.json --copy-files",
+    "build:backend": "babel backend -d dist/backend --config-file ./babel.config.backend.json --copy-files --no-copy-ignored --ignore \"backend/**/__tests__/**\"",
     "build:frontend": "babel frontend/src -d dist/frontend --config-file ./babel.config.frontend.json --copy-files",
     "prepare": "husky install && npm run build",
     "prepublishOnly": "npm test && npm run build",
