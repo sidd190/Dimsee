@@ -339,7 +339,7 @@ Have you built a great-looking theme? We'd love to include it!
 
 ### Reporting Issues
 
-If you encounter a bug or have a feature request, please [open an issue](https://github.com/your-repo/dimsee/issues) on our GitHub repository. Provide as much detail as possible, including:
+If you encounter a bug or have a feature request, please [open an issue](https://github.com/sidd190/dimsee/issues) on our GitHub repository. Provide as much detail as possible, including:
 -   A clear description of the issue.
 -   Steps to reproduce it.
 -   Any relevant error messages or console logs.
