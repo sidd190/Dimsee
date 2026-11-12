@@ -1,33 +1,35 @@
-# Dimsee: Full-Stack Authentication Solution 🎨
+# Dimsee: Full-Stack Authentication for the MERN Stack
 
 [![NPM Version](https://img.shields.io/npm/v/dimsee.svg)](https://www.npmjs.com/package/dimsee)
 [![NPM Downloads](https://img.shields.io/npm/dm/dimsee.svg)](https://www.npmjs.com/package/dimsee)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Pull Requests Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**Dimsee** is a powerful, ready-to-use authentication package for MERN stack applications. It provides a secure, customizable backend and a beautiful, themeable React frontend component to handle user registration, login, and session management with ease.
+**Dimsee** is a drop-in authentication package for MERN applications. It pairs a configurable Express backend with a themeable React frontend, so you can add signup, login, OAuth, sessions, and protected routes without wiring auth from scratch.
 
-## 🚀 Features
+Stand up a secure backend with a single `createAuthBackend()` call, drop an `<AuthForm />` into your React app, and you have working authentication in minutes. See [CONTRIBUTING.md](CONTRIBUTING.md) to get involved and [SECURITY.md](SECURITY.md) for the security policy.
+
+## Features
 
 ### Backend
--   🔐 **Local Authentication:** Standard email/password signup and signin.
--   🌐 **OAuth 2.0:** Support for Google and GitHub.
--   🍪 **Session Management:** Secure, cookie-based sessions using JWT and `express-session`.
--   🛡️ **Secure Passwords:** Password hashing with `bcrypt.js`.
--   ⚙️ **Easy Configuration:** Simple to configure via a single config object.
--   🚧 **Route Protection:** Middleware to protect your API routes.
+-   **Local Authentication:** Standard email/password signup and signin.
+-   **OAuth 2.0:** Support for Google and GitHub.
+-   **Session Management:** Secure, cookie-based sessions using JWT and `express-session`.
+-   **Secure Passwords:** Password hashing with `bcryptjs`.
+-   **Easy Configuration:** Simple to configure via a single config object.
+-   **Route Protection:** Middleware to protect your API routes.
 
 ### Frontend
--   ⚛️ **React Component:** A single `AuthForm` component for all your auth needs.
--   🔄 **Multiple Modes:** Supports both 'signin' and 'signup' modes.
--   🎨 **Themable Designs:** Comes with three built-in themes: `modern`, `minimal`, and `colorful`.
--   🔗 **OAuth Integration:** Buttons for Google/GitHub login that activate based on backend configuration.
--   🛠️ **Customizable:** Easily extend and style with your own CSS.
--   📞 **Callbacks:** `onSuccess` and `onError` callbacks for handling auth events.
+-   **React Component:** A single `AuthForm` component for all your auth needs.
+-   **Multiple Modes:** Supports both 'signin' and 'signup' modes.
+-   **Themable Designs:** Comes with three built-in themes: `modern`, `minimal`, and `colorful`.
+-   **OAuth Integration:** Buttons for Google/GitHub login that activate based on backend configuration.
+-   **Customizable:** Easily extend and style with your own CSS.
+-   **Callbacks:** `onSuccess` and `onError` callbacks for handling auth events.
 
-## 📚 Table of Contents
+## Table of Contents
 - [Getting Started](#getting-started)
-- [Framework Guides](#-framework-guides)
+- [Framework Guides](#framework-guides)
   - [Create React App / Vite](#create-react-app--vite)
   - [Next.js](#nextjs)
 - [Frontend: `AuthForm` Component](#frontend-authform-component)
@@ -40,7 +42,7 @@
 - [License](#license)
 
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Installation
 
@@ -63,7 +65,7 @@ const app = createAuthBackend({
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 ```
 
 **Frontend (`App.js`):**
@@ -86,7 +88,7 @@ function App() {
 }
 ```
 
-## 📖 Framework Guides
+## Framework Guides
 
 Learn how to integrate Dimsee with popular React frameworks.
 
@@ -123,14 +125,14 @@ If you prefer an all-in-one setup, you can run the Dimsee backend inside a catch
     ```javascript
     // file: pages/api/auth/[...slug].js
     import { createAuthBackend } from 'dimsee/backend';
-    
+
     // Initialize the backend once
     const authApp = createAuthBackend({
         mongoUri: process.env.MONGO_URI,
         jwtSecret: process.env.JWT_SECRET,
         corsOrigin: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     });
-    
+
     // Disable Next.js's default body parser for this route
     export const config = {
         api: {
@@ -151,7 +153,7 @@ If you prefer an all-in-one setup, you can run the Dimsee backend inside a catch
     ```jsx
     // file: pages/_app.js
     import {AuthProvider} from 'dimsee/frontend';
-    
+
     function MyApp({ Component, pageProps }) {
       return (
         <AuthProvider apiUrl="/api/auth">
@@ -159,10 +161,10 @@ If you prefer an all-in-one setup, you can run the Dimsee backend inside a catch
         </AuthProvider>
       );
     }
-    
+
     export default MyApp;
     ```
-    
+
 3.  **Use Client Components**: Any component that uses `AuthForm` or `AuthStatus` must be a Client Component. Add `'use client';` to the top of the file if you are using the Next.js App Router.
 
 ## Frontend: `AuthForm` Component
@@ -311,7 +313,7 @@ The backend exposes the following API endpoints under the `/api/auth` prefix.
 
 ## Customization and Contributing
 
-We welcome contributions and custom implementations! 💖
+We welcome contributions and custom implementations!
 
 ### Customizing Styles
 
@@ -343,7 +345,7 @@ If you encounter a bug or have a feature request, please [open an issue](https:/
 -   Any relevant error messages or console logs.
 -   Your environment details (Node.js version, browser, etc.).
 
-## 🚀 Deployment and Troubleshooting
+## Deployment and Troubleshooting
 
 Moving your application to a production environment requires careful configuration to ensure security and functionality.
 
@@ -389,10 +391,10 @@ Moving your application to a production environment requires careful configurati
 ## Use Cases
 
 Dimsee is ideal for:
--   **🚀 Prototyping MERN applications:** Quickly add authentication to your projects.
+-   **Prototyping MERN applications:** Quickly add authentication to your projects.
 -   **SaaS products:** A solid foundation for user management.
--   **🏢 Internal tools:** Secure your internal applications with minimal effort.
--   **🎓 Learning:** A great way to see how full-stack authentication is implemented.
+-   **Internal tools:** Secure your internal applications with minimal effort.
+-   **Learning:** A great way to see how full-stack authentication is implemented.
 
 ## License
 
