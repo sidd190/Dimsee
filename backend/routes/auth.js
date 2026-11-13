@@ -40,6 +40,15 @@ const generateRefreshToken = (userId, jwtRefreshSecret,expiresIn) => {
   return jwt.sign({userId},jwtRefreshSecret,{expiresIn});
 }
 
+// Centralised cookie options so every auth cookie gets the same flags.
+const isProduction = () => process.env.NODE_ENV === 'production';
+const getCookieOptions = (maxAge) => ({
+  httpOnly: true,
+  secure: isProduction(),
+  sameSite: isProduction() ? 'strict' : 'lax',
+  ...(maxAge !== undefined && { maxAge })
+});
+
 // Helper function to set authentication cookies
 const setAuthCookies = async (req, res, user) => {
   const { jwtSecret, jwtExpiry, jwtRefreshSecret, jwtRefreshExpiry, cookieMaxAge } = req.app.locals.authConfig;
@@ -56,16 +65,8 @@ const setAuthCookies = async (req, res, user) => {
   await user.save({ validateBeforeSave: false }); // Important: set to false if your User model doesn't expect all fields to be present/valid after setting refreshToken
 
   // Set cookies
-  res.cookie('authToken', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: cookieMaxAge
-  });
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: cookieMaxAge
-  });
+  res.cookie('authToken', token, getCookieOptions(cookieMaxAge));
+  res.cookie('refreshToken', refreshToken, getCookieOptions(cookieMaxAge));
 };
 
 // Middleware to check if user is authenticated
@@ -267,16 +268,6 @@ router.post('/signin',  (req, res, next) => {
         });
       }
 
-      // Generate token for the authenticated user
-      const jwtExpiry = req.app.locals.authConfig.jwtExpiry || '15m';
-      const token = generateToken(user._id, req.app.locals.authConfig.jwtSecret, jwtExpiry);
-      // Set the token in a cookie
-      res.cookie('authToken', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: req.app.locals.authConfig.cookieMaxAge
-      });
-
       res.json({
         success: true,
         message: 'Login successful',
@@ -296,8 +287,8 @@ router.post('/signout', (req, res) => {
       });
     }
     // Clear cookies
-    res.clearCookie('authToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
-    res.clearCookie('refreshToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    res.clearCookie('authToken', getCookieOptions());
+    res.clearCookie('refreshToken', getCookieOptions());
     
     res.json({
       success: true,
@@ -361,17 +352,9 @@ router.post('/refresh-token', async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Set the new tokens in cookies
-    res.cookie('authToken', newAccessToken, { 
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: req.app.locals.authConfig.cookieMaxAge
-    });
-
-    res.cookie('refreshToken', newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: req.app.locals.authConfig.cookieMaxAge
-    });
+    const { cookieMaxAge } = req.app.locals.authConfig;
+    res.cookie('authToken', newAccessToken, getCookieOptions(cookieMaxAge));
+    res.cookie('refreshToken', newRefreshToken, getCookieOptions(cookieMaxAge));
 
     res.json({
       success: true,
