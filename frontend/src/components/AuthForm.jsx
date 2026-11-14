@@ -245,8 +245,12 @@ const AuthForm = ({
         <div className="form-body">
           {effectiveMode === 'signup' && (
             <div className="input-group">
+              <label htmlFor="username" className="visually-hidden">
+                Username
+              </label>
               <div className="input-wrapper">
                 <input
+                  id="username"
                   type="text"
                   name="username"
                   placeholder="Username"
@@ -254,6 +258,7 @@ const AuthForm = ({
                   onChange={handleChange}
                   className={`form-input ${errors.username ? 'error' : ''}`}
                   disabled={isSubmitting}
+                  aria-invalid={errors.username ? 'true' : undefined}
                 />
               </div>
               {errors.username && (
@@ -265,8 +270,12 @@ const AuthForm = ({
           )}
 
           <div className="input-group">
+            <label htmlFor="email" className="visually-hidden">
+              Email Address
+            </label>
             <div className="input-wrapper">
               <input
+                id="email"
                 type="email"
                 name="email"
                 placeholder="Email Address"
@@ -274,6 +283,7 @@ const AuthForm = ({
                 onChange={handleChange}
                 className={`form-input ${errors.email ? 'error' : ''}`}
                 disabled={isSubmitting}
+                aria-invalid={errors.email ? 'true' : undefined}
               />
             </div>
             {errors.email && (
@@ -284,8 +294,12 @@ const AuthForm = ({
           </div>
 
           <div className="input-group">
+            <label htmlFor="password" className="visually-hidden">
+              Password
+            </label>
             <div className="input-wrapper">
               <input
+                id="password"
                 type="password"
                 name="password"
                 placeholder="Password"
@@ -293,6 +307,7 @@ const AuthForm = ({
                 onChange={handleChange}
                 className={`form-input ${errors.password ? 'error' : ''}`}
                 disabled={isSubmitting}
+                aria-invalid={errors.password ? 'true' : undefined}
               />
             </div>
             {errors.password && (
@@ -304,8 +319,12 @@ const AuthForm = ({
 
           {effectiveMode === 'signup' && (
             <div className="input-group">
+              <label htmlFor="confirmPassword" className="visually-hidden">
+                Confirm Password
+              </label>
               <div className="input-wrapper">
                 <input
+                  id="confirmPassword"
                   type="password"
                   name="confirmPassword"
                   placeholder="Confirm Password"
@@ -313,6 +332,7 @@ const AuthForm = ({
                   onChange={handleChange}
                   className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
                   disabled={isSubmitting}
+                  aria-invalid={errors.confirmPassword ? 'true' : undefined}
                 />
               </div>
               {errors.confirmPassword && (
