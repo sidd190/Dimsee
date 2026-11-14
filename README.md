@@ -7,7 +7,7 @@
 
 **Dimsee** is a drop-in authentication package for MERN applications. It pairs a configurable Express backend with a themeable React frontend, so you can add signup, login, OAuth, sessions, and protected routes without wiring auth from scratch.
 
-Stand up a secure backend with a single `createAuthBackend()` call, drop an `<AuthForm />` into your React app, and you have working authentication in minutes. See [CONTRIBUTING.md](CONTRIBUTING.md) to get involved and [SECURITY.md](SECURITY.md) for the security policy.
+Stand up a secure backend with a single `createAuthBackend()` call, drop an `<AuthForm />` into your React app, and you have working authentication in minutes. See [CONTRIBUTING.md](CONTRIBUTING.md) to get involved, [SECURITY.md](SECURITY.md) for the security policy, and [USER_SCHEMA.md](USER_SCHEMA.md) for the User schema & extension guide.
 
 ## Features
 
@@ -35,6 +35,7 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 - [Frontend: `AuthForm` Component](#frontend-authform-component)
 - [Frontend Components: `AuthStatus` vs. `AuthForm`](#frontend-components-authstatus-vs-authform)
 - [Backend: `createAuthBackend`](#backend-createauthbackend)
+- [The `User` Model & Extending the Schema](#the-user-model--extending-the-schema)
 - [Backend API Reference](#backend-api-reference)
 - [Customization and Contributing](#customization-and-contributing)
 - [Deployment and Troubleshooting](#deployment-and-troubleshooting)
@@ -293,6 +294,81 @@ app.get('/api/my-protected-route', authMiddleware, (req, res) => {
   res.json({ message: 'You have accessed a protected route!' });
 });
 ```
+
+### The `User` Model & Extending the Schema
+
+Dimsee treats MongoDB as a first-class citizen and exports the underlying Mongoose `User` model:
+
+```javascript
+const { createAuthBackend, authMiddleware, User } = require('dimsee/backend');
+```
+
+#### Built-In Fields
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `username` | `String` | Unique user handle (minlength 3). |
+| `email` | `String` | Unique lowercase email address. |
+| `password` | `String` | Bcrypt-hashed password (automatically stripped by `toJSON`). |
+| `refreshToken` | `String` | JWT refresh token used for session rotation and reuse detection. |
+| `googleId` / `githubId` | `String` | Linked OAuth provider subject IDs. |
+| `authMethod` | `String` | Initial registration method (`'local'`, `'google'`, `'github'`). |
+| `hasPassword` | `Boolean` | True if the account has a password set. |
+
+#### Adding Custom Fields and Mongoose References (`User.schema.add`)
+
+Extend the `User` schema at application bootstrap before running queries:
+
+```javascript
+const mongoose = require('mongoose');
+const { User } = require('dimsee/backend');
+
+// Add custom fields, embedded objects, and Mongoose references
+User.schema.add({
+  role: {
+    type: String,
+    enum: ['member', 'editor', 'admin'],
+    default: 'member'
+  },
+  organization: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Organization'
+  },
+  profile: {
+    displayName: String,
+    avatarUrl: String
+  }
+});
+```
+
+#### Working with Mongoose References and `populate()`
+
+##### Populating References on `User`:
+
+```javascript
+// Retrieve user and hydrate the referenced Organization
+const user = await User.findById(req.user.userId)
+  .populate('organization', 'name slug tier');
+
+console.log(user.organization.name);
+```
+
+##### Referencing `User` from Other Models & Populating:
+
+```javascript
+// models/Project.js
+const projectSchema = new mongoose.Schema({
+  title: String,
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+});
+const Project = mongoose.model('Project', projectSchema);
+
+// Retrieve project and hydrate the owner User
+const project = await Project.findById(projectId)
+  .populate('owner', 'username email profile'); // Safely project public fields
+```
+
+For comprehensive coverage including virtual population, nested array population, deep population, protected route middleware, and common pitfalls, read the **[User Schema & Extension Guide](USER_SCHEMA.md)** (or [docs/user-schema-and-extensions.md](docs/user-schema-and-extensions.md)).
 
 ## Backend API Reference
 
