@@ -7,7 +7,7 @@
 
 **Dimsee** is a drop-in authentication package for MERN applications. It pairs a configurable Express backend with a themeable React frontend, so you can add signup, login, OAuth, sessions, and protected routes without wiring auth from scratch.
 
-Stand up a secure backend with a single `createAuthBackend()` call, drop an `<AuthForm />` into your React app, and you have working authentication in minutes. See [CONTRIBUTING.md](CONTRIBUTING.md) to get involved and [SECURITY.md](SECURITY.md) for the security policy.
+Stand up a secure backend with a single `createAuthBackend()` call, drop an `<AuthForm />` into your React app, and you have working authentication in minutes. See [CONTRIBUTING.md](CONTRIBUTING.md) to get involved, [SECURITY.md](SECURITY.md) for the security policy, and [MFA.md](MFA.md) for MFA enrollment and recovery.
 
 ## Features
 
@@ -34,6 +34,7 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
   - [Next.js](#nextjs)
 - [Frontend: `AuthForm` Component](#frontend-authform-component)
 - [Frontend Components: `AuthStatus` vs. `AuthForm`](#frontend-components-authstatus-vs-authform)
+- [Multi-Factor Authentication (MFA)](#multi-factor-authentication-mfa)
 - [Backend: `createAuthBackend`](#backend-createauthbackend)
 - [Backend API Reference](#backend-api-reference)
 - [Customization and Contributing](#customization-and-contributing)
@@ -264,6 +265,21 @@ function App() {
 | `unauthenticatedComponent` | `node`    | `undefined` | A custom component to show instead of `AuthForm` when the user is not authenticated.     |
 
 For more granular control over logout and set password button positioning and styling, refer to their individual component files.
+
+---
+
+## Multi-Factor Authentication (MFA)
+
+Dimsee provides complete Multi-Factor Authentication support powered by Time-Based One-Time Passwords (TOTP RFC 6238) and emergency recovery backup codes.
+
+- **Enrollment:** Users scan a dynamic QR code (or enter a manual setup key) into any standard authenticator app (Google Authenticator, Microsoft Authenticator, 1Password, Bitwarden, Apple Passwords).
+- **Verification:** Users verify a live 6-digit code to activate MFA on their account.
+- **Safeguards:** 10 single-use, hashed emergency recovery codes are issued upon setup.
+- **Recovery:** Self-service recovery using backup codes, device re-enrollment, and secure administrator reset workflows when devices are lost or inaccessible.
+
+For complete end-user walkthroughs, daily sign-in instructions, and recovery procedures, read the **[MFA Enrollment & Recovery Guide](MFA.md)** (or [docs/mfa-enrollment-and-recovery.md](docs/mfa-enrollment-and-recovery.md)).
+
+---
 
 ## Backend: `createAuthBackend`
 
