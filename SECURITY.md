@@ -60,6 +60,7 @@ for:
 
 Features such as email verification, MFA, and CSRF tokens are on the roadmap and
 tracked as hardening issues - see the security track in the contributor backlog.
+For user enrollment and recovery workflows, consult the [MFA Enrollment & Recovery Guide](MFA.md).
 
 ## Disclosure
 
