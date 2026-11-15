@@ -267,7 +267,7 @@ For more granular control over logout and set password button positioning and st
 
 `SetPasswordButton` accepts `showPrompt` (default `true`): the button opens a password modal. Set `showPrompt={false}` to display the password form inline immediately. It renders only for authenticated users who do not already have a password.
 
-Signup requests must include `username`, `email`, `password`, and `confirmPassword`. Usernames must contain 3–20 letters, digits, or underscores. Passwords must contain at least six characters, including an uppercase letter, a lowercase letter, and a digit, and confirmation must match. These rules are now enforced by the backend; API clients that previously omitted confirmation or used weaker passwords must update. Signin requires a valid email and a nonempty password; existing passwords are not subject to the new signup complexity checks.
+Signup requests must include `username`, `email`, `password`, and `confirmPassword`. Usernames must contain 3–20 letters, digits, or underscores. Passwords must contain at least six characters, including an uppercase letter, a lowercase letter, and a digit, and confirmation must match. These rules are now enforced by the backend; API clients that previously omitted confirmation or used weaker passwords must update. Signin requires nonempty email and password strings, without applying the new signup email-format or password-complexity checks to existing accounts.
 
 ## Backend: `createAuthBackend`
 

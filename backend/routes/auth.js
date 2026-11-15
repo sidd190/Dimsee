@@ -25,7 +25,8 @@ const signupSchema = z.object({
 });
 
 const signinSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  // Existing accounts may use addresses accepted by the earlier signup rules.
+  email: z.string().min(1, 'Email is required'),
   password: z.string().min(1, 'Password is required')
 });
 

@@ -73,7 +73,10 @@ describe('Authentication routes', () => {
     expect(User).toHaveBeenCalledWith({ username: signup.username, email: signup.email, password: signup.password });
   });
 
-  it.each([{ email: 'bad', password: 'pass' }, { email: signup.email }, { email: signup.email, password: 123 }])(
+  it.each([
+    { email: '', password: 'pass' }, { password: 'pass' }, { email: 123, password: 'pass' },
+    { email: signup.email }, { email: signup.email, password: 123 }
+  ])(
     'rejects invalid signin input before calling Passport: %j', async (body) => {
       const res = await request(app).post('/api/auth/signin').send(body);
       expect(res.statusCode).toBe(400);
@@ -85,6 +88,23 @@ describe('Authentication routes', () => {
     const res = await request(app).post('/api/auth/signin').send({ email: signup.email, password: 'old' });
     expect(res.statusCode).toBe(200);
     expect(passport.authenticate).toHaveBeenCalledWith('local', expect.any(Function));
+  });
+
+  it('allows legacy email addresses to reach credential verification', async () => {
+    const res = await request(app).post('/api/auth/signin').send({
+      email: 'alice!billing@example.com', password: 'old'
+    });
+    expect(res.statusCode).toBe(200);
+    expect(passport.authenticate).toHaveBeenCalledWith('local', expect.any(Function));
+  });
+
+  it('keeps the stricter email validation for new signup requests', async () => {
+    const res = await request(app).post('/api/auth/signup').send({
+      ...signup, email: 'alice!billing@example.com'
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.body.errors).toEqual(expect.arrayContaining([expect.objectContaining({ field: 'email' })]));
+    expect(User.findOne).not.toHaveBeenCalled();
   });
 
   describe.each(['google', 'github'])('%s OAuth redirects', (provider) => {
