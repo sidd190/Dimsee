@@ -142,8 +142,9 @@ A change is ready to merge when:
 
 ## Code of conduct
 
-Be kind, be constructive, assume good intent. We want Dimsee to be a welcoming
-first open-source experience for everyone.
+Dimsee adheres to the [Contributor Covenant v2.1](CODE_OF_CONDUCT.md). Please read
+and follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) to keep Dimsee a welcoming,
+respectful, and harassment-free community for everyone.
 
 By contributing, you agree that your contributions are licensed under the
 [MIT License](LICENSE).
