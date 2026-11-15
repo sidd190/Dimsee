@@ -5,13 +5,6 @@ const GitHubStrategy = require('passport-github2').Strategy;
 const User = require('../models/User');
 require('dotenv').config();
 
-// Debug environment variables
-console.log('Environment Variables Check:');
-console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not Set');
-console.log('GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not Set');
-console.log('GITHUB_CLIENT_ID:', process.env.GITHUB_CLIENT_ID ? 'Set' : 'Not Set');
-console.log('GITHUB_CLIENT_SECRET:', process.env.GITHUB_CLIENT_SECRET ? 'Set' : 'Not Set');
-
 // Local Strategy for username/password
 passport.use(new LocalStrategy(
   { usernameField: 'email' },
@@ -103,7 +96,7 @@ const configureOAuthStrategies = (config = {}) => {
         await handleOAuthUser(profile, 'google', done);
       }
     ));
-  } else {
+  } else if (process.env.DEBUG || config.google?.clientId) {
     console.warn('Google OAuth credentials not found. Google sign-in will be disabled.');
   }
 
@@ -121,13 +114,10 @@ const configureOAuthStrategies = (config = {}) => {
         await handleOAuthUser(profile, 'github', done);
       }
     ));
-  } else {
+  } else if (process.env.DEBUG || config.github?.clientId) {
     console.warn('GitHub OAuth credentials not found. GitHub sign-in will be disabled.');
   }
 };
-
-// Initialize with default configuration
-configureOAuthStrategies();
 
 // Export both passport and the configuration function
 module.exports = { passport, configureOAuthStrategies }; 
