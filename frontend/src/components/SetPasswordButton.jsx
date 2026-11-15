@@ -120,7 +120,7 @@ const SetPasswordButton = ({
 
   return (
     <div className="set-password-container" style={containerStyle}>
-      {!showForm && (
+      {showPrompt && !showForm && (
         <button
           onClick={() => setShowForm(true)}
           className={buttonClasses}
@@ -129,11 +129,12 @@ const SetPasswordButton = ({
         </button>
       )}
 
-      {showForm && (
-        <div className={`set-password-modal design-${design}`}>
+      {(!showPrompt || showForm) && (
+        <div className={`set-password-modal ${showPrompt ? '' : 'set-password-inline'} design-${design}`}>
           <div className="modal-header">
             <h3>Set Your Password</h3>
-            <button
+            {showPrompt && <button
+              type="button"
               onClick={() => {
                 setShowForm(false);
                 setPasswordData({ password: '', confirmPassword: '' });
@@ -143,7 +144,7 @@ const SetPasswordButton = ({
               aria-label="Close"
             >
               ×
-            </button>
+            </button>}
           </div>
 
           <form onSubmit={handleSetPassword}>
@@ -190,4 +191,4 @@ const SetPasswordButton = ({
   );
 };
 
-export default SetPasswordButton; 
+export default SetPasswordButton;

@@ -83,6 +83,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/dimsee')
     app.use('/api/auth', authRoutes);
 
     // Error handling middleware
+    // Express identifies error handlers by their four-argument signature.
+    // eslint-disable-next-line no-unused-vars
     app.use((err, req, res, next) => {
       console.error(err.stack);
       res.status(500).json({
