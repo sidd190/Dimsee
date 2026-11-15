@@ -364,6 +364,178 @@
 
 
 /* ==========================================
+   RETRO THEME (90s Desktop Window)
+   ========================================== */
+.auth-container.retro {
+  background: #008080;
+  color: #000000;
+  font-family: Tahoma, Verdana, Geneva, sans-serif;
+}
+
+.auth-container.retro .auth-form {
+  background: #c0c0c0;
+  backdrop-filter: none;
+  border: none;
+  border-radius: 0;
+  padding: 3px 32px 32px;
+  box-shadow:
+    inset -1px -1px #0a0a0a,
+    inset 1px 1px #dfdfdf,
+    inset -2px -2px #808080,
+    inset 2px 2px #ffffff,
+    4px 4px 0 rgba(0, 0, 0, 0.35);
+  transition: none;
+}
+
+.auth-container.retro .auth-form:hover {
+  transform: none;
+  box-shadow:
+    inset -1px -1px #0a0a0a,
+    inset 1px 1px #dfdfdf,
+    inset -2px -2px #808080,
+    inset 2px 2px #ffffff,
+    4px 4px 0 rgba(0, 0, 0, 0.35);
+}
+
+.auth-container.retro .form-header {
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+/* The title becomes the window's title bar */
+.auth-container.retro .form-title {
+  background: #000080;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  margin: 0 -29px 16px;
+  padding: 4px 8px;
+}
+
+.auth-container.retro .form-subtitle {
+  color: #000000;
+  font-size: 0.95rem;
+}
+
+.auth-container.retro .input-group {
+  margin-bottom: 18px;
+}
+
+/* Inset (sunken) fields. A real border is kept so the base
+   .form-input.error border color can still show. */
+.auth-container.retro .form-input {
+  background: #ffffff;
+  backdrop-filter: none;
+  color: #000000;
+  font-family: inherit;
+  font-weight: 400;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  border-radius: 0;
+  box-shadow: inset 1px 1px #0a0a0a;
+  padding: 10px 12px;
+  transition: none;
+}
+
+.auth-container.retro .form-input::placeholder {
+  color: #808080;
+}
+
+.auth-container.retro .form-input:focus {
+  background: #ffffff;
+  box-shadow: inset 1px 1px #0a0a0a;
+  outline: 1px dotted #000000;
+  outline-offset: -5px;
+  transform: none;
+}
+
+.auth-container.retro .form-input.error {
+  background: #ffffff;
+}
+
+.auth-container.retro .form-input.error:focus {
+  box-shadow: inset 1px 1px #0a0a0a;
+}
+
+.auth-container.retro .error-message {
+  color: #800000;
+  font-weight: 400;
+  margin-left: 0;
+}
+
+/* Raised buttons that look pressed when clicked */
+.auth-container.retro .submit-button,
+.auth-container.retro .oauth-button {
+  background: #c0c0c0;
+  color: #000000;
+  font-family: inherit;
+  border: none;
+  border-radius: 0;
+  box-shadow:
+    inset -1px -1px #0a0a0a,
+    inset 1px 1px #ffffff,
+    inset -2px -2px #808080,
+    inset 2px 2px #dfdfdf;
+  transition: none;
+}
+
+.auth-container.retro .submit-button {
+  font-weight: 700;
+  padding: 10px 16px;
+}
+
+.auth-container.retro .submit-button:hover:not(:disabled),
+.auth-container.retro .oauth-button:hover {
+  transform: none;
+  box-shadow:
+    inset -1px -1px #0a0a0a,
+    inset 1px 1px #ffffff,
+    inset -2px -2px #808080,
+    inset 2px 2px #dfdfdf;
+}
+
+.auth-container.retro .submit-button:active:not(:disabled),
+.auth-container.retro .oauth-button:active {
+  transform: translate(1px, 1px);
+  box-shadow:
+    inset -1px -1px #ffffff,
+    inset 1px 1px #0a0a0a,
+    inset -2px -2px #dfdfdf,
+    inset 2px 2px #808080;
+}
+
+.auth-container.retro .submit-button:disabled {
+  color: #808080;
+  text-shadow: 1px 1px #ffffff;
+  opacity: 1;
+}
+
+.auth-container.retro .loading-spinner {
+  border: 2px solid #808080;
+  border-top-color: #000080;
+}
+
+.auth-container.retro .oauth-button.google,
+.auth-container.retro .oauth-button.github {
+  background: #c0c0c0;
+  color: #000000;
+}
+
+.auth-container.retro .separator {
+  color: #000000;
+}
+
+/* Etched divider lines */
+.auth-container.retro .separator::before,
+.auth-container.retro .separator::after {
+  border-bottom: 1px solid #808080;
+  box-shadow: 0 1px 0 #ffffff;
+}
+
+
+/* ==========================================
    FORM STYLES (BASE)
    ========================================== */
 .auth-form {
@@ -597,6 +769,16 @@
     box-shadow: 10px 10px 30px #bebebe, -10px -10px 30px #ffffff;
   }
 
+  .auth-container.retro .auth-form {
+    padding: 3px 16px 24px;
+    border-radius: 0;
+  }
+
+  .auth-container.retro .form-title {
+    margin: 0 -13px 12px;
+    font-size: 0.95rem;
+  }
+
   .form-title {
     font-size: 1.6rem;
   }
@@ -631,10 +813,16 @@
   outline-color: #ff90e8;
 }
 
+.auth-container.retro .auth-form *:focus-visible {
+  outline: 1px dotted #000000;
+  outline-offset: -5px;
+}
+
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .auth-form, 
-  .auth-container.minimal .auth-form {
+  .auth-container.minimal .auth-form,
+  .auth-container.retro .auth-form {
     background: window;
     color: windowText;
     border: 2px solid windowText;
@@ -642,7 +830,8 @@
   }
 
   .form-input,
-  .auth-container.minimal .form-input {
+  .auth-container.minimal .form-input,
+  .auth-container.retro .form-input {
     background: window;
     color: windowText;
     border: 1px solid windowText;
@@ -650,7 +839,8 @@
   }
 
   .submit-button,
-  .auth-container.minimal .submit-button {
+  .auth-container.minimal .submit-button,
+  .auth-container.retro .submit-button {
     background: windowText;
     color: window;
     border: 1px solid window;
