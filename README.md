@@ -303,6 +303,7 @@ The backend exposes the following API endpoints under the `/api/auth` prefix.
 | `POST` | `/signup`              | Register a new user.                                  |
 | `POST` | `/signin`              | Log in an existing user.                              |
 | `POST` | `/signout`             | Log out the current user.                             |
+| `POST` | `/refresh-token`       | Rotate tokens and obtain a fresh access token.        |
 | `GET`  | `/me`                  | Get the profile of the currently authenticated user.  |
 | `GET`  | `/oauth-status`        | Check which OAuth providers are enabled.              |
 | `GET`  | `/google`              | Initiate Google OAuth login.                          |
@@ -310,6 +311,21 @@ The backend exposes the following API endpoints under the `/api/auth` prefix.
 | `GET`  | `/github`              | Initiate GitHub OAuth login.                          |
 | `GET`  | `/github/callback`     | Callback URL for GitHub OAuth.                        |
 | `POST` | `/set-password`        | Allow an OAuth user to set a password.                |
+
+### Token Refreshing (`/refresh-token`)
+
+Dimsee provides automatic refresh token rotation with reuse detection:
+- **Request:** Expects the `refreshToken` in an `httpOnly` cookie or JSON body `{ "refreshToken": "<token>" }`. Does not require active authentication headers.
+- **Behavior:** Verifies the refresh token, performs single-use rotation, updates the stored refresh token in MongoDB, and invalidates sessions if token reuse is detected.
+- **Response:**
+  ```json
+  {
+    "success": true,
+    "message": "Tokens refreshed successfully",
+    "accessToken": "<new-jwt-access-token>"
+  }
+  ```
+- **Cookies:** Sets updated `authToken` (access token, 15m default) and `refreshToken` (refresh token, 7d default) `httpOnly` cookies.
 
 ## Customization and Contributing
 
