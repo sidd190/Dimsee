@@ -63,8 +63,12 @@ const resolveOAuthRedirect = (value, frontendUrl) => {
 };
 
 const startOAuth = (provider, scope) => (req, res, next) => {
-  if (!req.app.locals.authConfig.enableOAuth) {
-    return res.status(403).json({ success: false, message: 'OAuth is not enabled' });
+  const authConfig = req.app?.locals?.authConfig || {};
+  const isEnabled = authConfig.configuredProviders?.[provider] ?? Boolean(
+    authConfig.enableOAuth && (authConfig.oauth?.[provider]?.clientId || process.env[`${provider.toUpperCase()}_CLIENT_ID`])
+  );
+  if (!isEnabled) {
+    return res.status(403).json({ success: false, message: `${provider.charAt(0).toUpperCase() + provider.slice(1)} OAuth is not enabled` });
   }
   const redirect = resolveOAuthRedirect(req.query.redirectUrl, req.app.locals.authConfig.corsOrigin);
   if (req.query.redirectUrl !== undefined && !redirect) {
@@ -180,9 +184,15 @@ router.post('/set-password', isAuthenticated, async (req, res) => {
 
 // OAuth status route
 router.get('/oauth-status', (req, res) => {
-  const { enableOAuth } = req.app.locals.authConfig;
-  const googleEnabled = enableOAuth && !!process.env.GOOGLE_CLIENT_ID;
-  const githubEnabled = enableOAuth && !!process.env.GITHUB_CLIENT_ID;
+  const authConfig = req.app?.locals?.authConfig || {};
+  const { enableOAuth = false, oauth = {}, configuredProviders } = authConfig;
+
+  const googleEnabled = configuredProviders?.google ?? Boolean(
+    enableOAuth && (oauth.google?.clientId || process.env.GOOGLE_CLIENT_ID)
+  );
+  const githubEnabled = configuredProviders?.github ?? Boolean(
+    enableOAuth && (oauth.github?.clientId || process.env.GITHUB_CLIENT_ID)
+  );
 
   res.json({
     enabled: googleEnabled || githubEnabled,
