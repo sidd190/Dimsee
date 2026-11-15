@@ -52,6 +52,20 @@ To try the backend end-to-end, copy `backend/.env.example` to `backend/.env`,
 fill in `MONGODB_URI` and a `JWT_SECRET`, and wire `createAuthBackend` into a
 small `server.js` (see the README "Getting Started" section).
 
+## Automated checks
+
+GitHub Actions runs [CI](.github/workflows/ci.yml) on pull requests targeting
+`main` and on pushes to `main`. It checks Node.js 22 and 24 with `npm ci`,
+`npm run lint`, `npm test -- --ci --runInBand`, `npm run build`, and
+`npm pack --dry-run --ignore-scripts`. It can also be started manually from
+the Actions tab. Tests use mocked authentication providers and user storage;
+they do not require MongoDB or OAuth credentials.
+
+Before merging, both `Checks (Node 22)` and `Checks (Node 24)` should pass.
+Maintainers can require these checks through the protection rule or ruleset
+for `main`. This workflow validates changes and package contents; publishing
+to npm remains a separate release step.
+
 ---
 
 ## Contributing a new theme (great first PR)
