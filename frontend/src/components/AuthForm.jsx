@@ -253,7 +253,11 @@ const AuthForm = ({
           {effectiveMode === 'signup' && (
             <div className="input-group">
               <div className="input-wrapper">
+                <label htmlFor="auth-username" className="sr-only">
+                  Username
+                </label>
                 <input
+                  id="auth-username"
                   type="text"
                   name="username"
                   placeholder="Username"
@@ -261,10 +265,12 @@ const AuthForm = ({
                   onChange={handleChange}
                   className={`form-input ${errors.username ? 'error' : ''}`}
                   disabled={isSubmitting}
+                  aria-invalid={Boolean(errors.username)}
+                  aria-describedby={errors.username ? 'auth-username-error' : undefined}
                 />
               </div>
               {errors.username && (
-                <p className="error-message">
+                <p id="auth-username-error" className="error-message">
                   {errors.username}
                 </p>
               )}
@@ -273,7 +279,11 @@ const AuthForm = ({
 
           <div className="input-group">
             <div className="input-wrapper">
+              <label htmlFor="auth-email" className="sr-only">
+                Email Address
+              </label>
               <input
+                id="auth-email"
                 type="email"
                 name="email"
                 placeholder="Email Address"
@@ -281,10 +291,12 @@ const AuthForm = ({
                 onChange={handleChange}
                 className={`form-input ${errors.email ? 'error' : ''}`}
                 disabled={isSubmitting}
+                aria-invalid={Boolean(errors.email)}
+                aria-describedby={errors.email ? 'auth-email-error' : undefined}
               />
             </div>
             {errors.email && (
-              <p className="error-message">
+              <p id="auth-email-error" className="error-message">
                 {errors.email}
               </p>
             )}
@@ -292,7 +304,11 @@ const AuthForm = ({
 
           <div className="input-group">
             <div className="input-wrapper">
+              <label htmlFor="auth-password" className="sr-only">
+                Password
+              </label>
               <input
+                id="auth-password"
                 type="password"
                 name="password"
                 placeholder="Password"
@@ -300,10 +316,12 @@ const AuthForm = ({
                 onChange={handleChange}
                 className={`form-input ${errors.password ? 'error' : ''}`}
                 disabled={isSubmitting}
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={errors.password ? 'auth-password-error' : undefined}
               />
             </div>
             {errors.password && (
-              <p className="error-message">
+              <p id="auth-password-error" className="error-message">
                 {errors.password}
               </p>
             )}
@@ -312,7 +330,11 @@ const AuthForm = ({
           {effectiveMode === 'signup' && (
             <div className="input-group">
               <div className="input-wrapper">
+                <label htmlFor="auth-confirm-password" className="sr-only">
+                  Confirm Password
+                </label>
                 <input
+                  id="auth-confirm-password"
                   type="password"
                   name="confirmPassword"
                   placeholder="Confirm Password"
@@ -320,10 +342,12 @@ const AuthForm = ({
                   onChange={handleChange}
                   className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
                   disabled={isSubmitting}
+                  aria-invalid={Boolean(errors.confirmPassword)}
+                  aria-describedby={errors.confirmPassword ? 'auth-confirm-password-error' : undefined}
                 />
               </div>
               {errors.confirmPassword && (
-                <p className="error-message">
+                <p id="auth-confirm-password-error" className="error-message">
                   {errors.confirmPassword}
                 </p>
               )}
