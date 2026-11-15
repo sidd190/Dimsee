@@ -20,6 +20,11 @@
     },
     {
       "files": ["frontend/**/*.{js,jsx}"],
+      "plugins": ["react"],
+      "rules": {
+        "react/jsx-uses-react": "error",
+        "react/jsx-uses-vars": "error"
+      },
       "parserOptions": {
         "ecmaFeatures": {
           "jsx": true

@@ -181,7 +181,7 @@ The `AuthForm` component is the core of the Dimsee frontend. It is a highly conf
 | `onError`     | `function` | `undefined`                  | Callback function executed on authentication failure. Receives the error object.                         |
 | `className`   | `string`   | `''`                         | Additional CSS classes to apply to the component's root element for custom styling.                      |
 | `oAuthConfig` | `object`   | `null`                       | An object to dynamically configure OAuth providers on the frontend.                                      |
-| `redirectUrl` | `string`   | `null`                       | A URL to redirect to after a successful OAuth login.                                                     |
+| `redirectUrl` | `string`   | `null`                       | Destination after successful OAuth login. Accepts relative paths or HTTP(S) URLs on the backend's configured `corsOrigin`; defaults to `corsOrigin`. External origins are rejected. |
 | `onModeChange`| `function` | `undefined`                  | A function to make the form a controlled component, managing the `mode` from a parent component.         |
 
 ---
@@ -264,6 +264,10 @@ function App() {
 | `unauthenticatedComponent` | `node`    | `undefined` | A custom component to show instead of `AuthForm` when the user is not authenticated.     |
 
 For more granular control over logout and set password button positioning and styling, refer to their individual component files.
+
+`SetPasswordButton` accepts `showPrompt` (default `true`): the button opens a password modal. Set `showPrompt={false}` to display the password form inline immediately. It renders only for authenticated users who do not already have a password.
+
+Signup requests must include `username`, `email`, `password`, and `confirmPassword`. Usernames must contain 3–20 letters, digits, or underscores. Passwords must contain at least six characters, including an uppercase letter, a lowercase letter, and a digit, and confirmation must match. These rules are now enforced by the backend; API clients that previously omitted confirmation or used weaker passwords must update. Signin requires a valid email and a nonempty password; existing passwords are not subject to the new signup complexity checks.
 
 ## Backend: `createAuthBackend`
 
