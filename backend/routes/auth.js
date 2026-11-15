@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const { z } = require('zod');
 const passport = require('passport');
 const User = require('../models/User');
-const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -26,9 +25,72 @@ const signupSchema = z.object({
 });
 
 const signinSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  // Existing accounts may use addresses accepted by the earlier signup rules.
+  email: z.string().min(1, 'Email is required'),
   password: z.string().min(1, 'Password is required')
 });
+
+const validateBody = (schema) => (req, res, next) => {
+  const result = schema.safeParse(req.body);
+  if (!result.success) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: result.error.issues.map((issue) => ({
+        field: issue.path.join('.') || 'general',
+        message: issue.message
+      }))
+    });
+  }
+  req.body = result.data;
+  next();
+};
+
+// Resolve relative paths against the frontend and reject external destinations.
+const resolveOAuthRedirect = (value, frontendUrl) => {
+  if (typeof value !== 'string' || !value.trim()) return null;
+  try {
+    const frontend = new URL(frontendUrl);
+    const target = new URL(value, frontend);
+    if (!['http:', 'https:'].includes(target.protocol) ||
+        target.origin !== frontend.origin || target.username || target.password) {
+      return null;
+    }
+    return target.href;
+  } catch {
+    return null;
+  }
+};
+
+const startOAuth = (provider, scope) => (req, res, next) => {
+  if (!req.app.locals.authConfig.enableOAuth) {
+    return res.status(403).json({ success: false, message: 'OAuth is not enabled' });
+  }
+  const redirect = resolveOAuthRedirect(req.query.redirectUrl, req.app.locals.authConfig.corsOrigin);
+  if (req.query.redirectUrl !== undefined && !redirect) {
+    return res.status(400).json({ success: false, message: 'Invalid OAuth redirect URL' });
+  }
+  if (!req.session) return next(new Error('OAuth requires session middleware'));
+  req.session.oauthRedirects = { ...req.session.oauthRedirects, [provider]: redirect };
+  passport.authenticate(provider, { scope })(req, res, next);
+};
+
+// Capture the destination before Passport regenerates the session on login.
+const takeOAuthRedirect = (provider) => (req, res, next) => {
+  res.locals.oauthRedirect = req.session?.oauthRedirects?.[provider];
+  if (req.session?.oauthRedirects) delete req.session.oauthRedirects[provider];
+  next();
+};
+
+const finishOAuth = async (req, res, next) => {
+  try {
+    await setAuthCookies(req, res, req.user);
+    res.redirect(resolveOAuthRedirect(res.locals.oauthRedirect, req.app.locals.authConfig.corsOrigin) ||
+      req.app.locals.authConfig.corsOrigin);
+  } catch (error) {
+    next(error);
+  }
+};
 
 // Generate JWT token
 const generateToken = (userId, jwtSecret,expiresIn) => {
@@ -39,6 +101,15 @@ const generateToken = (userId, jwtSecret,expiresIn) => {
 const generateRefreshToken = (userId, jwtRefreshSecret,expiresIn) => {
   return jwt.sign({userId},jwtRefreshSecret,{expiresIn});
 }
+
+// Centralised cookie options so every auth cookie gets the same flags.
+const isProduction = () => process.env.NODE_ENV === 'production';
+const getCookieOptions = (maxAge) => ({
+  httpOnly: true,
+  secure: isProduction(),
+  sameSite: isProduction() ? 'strict' : 'lax',
+  ...(maxAge !== undefined && { maxAge })
+});
 
 // Helper function to set authentication cookies
 const setAuthCookies = async (req, res, user) => {
@@ -56,16 +127,8 @@ const setAuthCookies = async (req, res, user) => {
   await user.save({ validateBeforeSave: false }); // Important: set to false if your User model doesn't expect all fields to be present/valid after setting refreshToken
 
   // Set cookies
-  res.cookie('authToken', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: cookieMaxAge
-  });
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: cookieMaxAge
-  });
+  res.cookie('authToken', token, getCookieOptions(cookieMaxAge));
+  res.cookie('refreshToken', refreshToken, getCookieOptions(cookieMaxAge));
 };
 
 // Middleware to check if user is authenticated
@@ -131,63 +194,29 @@ router.get('/oauth-status', (req, res) => {
 });
 
 // Google OAuth routes
-router.get('/google', (req, res, next) => {
-  if (!req.app.locals.authConfig.enableOAuth) {
-    return res.status(403).json({
-      success: false,
-      message: 'Google OAuth is not enabled'
-    });
-  }
-  passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
-});
+router.get('/google', startOAuth('google', ['profile', 'email']));
 
 router.get('/google/callback',
+  takeOAuthRedirect('google'),
   passport.authenticate('google', { failureRedirect: '/login' }),
-  async (req, res) => {
-    await setAuthCookies(req, res, req.user);
-    // Redirect to frontend
-    res.redirect(req.app.locals.authConfig.corsOrigin);
-  }
+  finishOAuth
 );
 
 // GitHub OAuth routes
 router.get('/github',
-  passport.authenticate('github', { scope: ['user:email'] })
+  startOAuth('github', ['user:email'])
 );
 
 router.get('/github/callback',
+  takeOAuthRedirect('github'),
   passport.authenticate('github', { failureRedirect: '/login' }),
-  async (req, res) => {
-    await setAuthCookies(req, res, req.user);
-    // Redirect to frontend
-    res.redirect(req.app.locals.authConfig.corsOrigin);
-  }
+  finishOAuth
 );
 
 // Sign up route
-router.post('/signup', async (req, res) => {
+router.post('/signup', validateBody(signupSchema), async (req, res) => {
   try {
     const { username, email, password } = req.body;
-
-    // Validate input
-    const errors = [];
-    if (!username || username.length < 3) {
-      errors.push({ field: 'username', message: 'Username must be at least 3 characters long' });
-    }
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      errors.push({ field: 'email', message: 'Invalid email address' });
-    }
-    if (!password || password.length < 6) {
-      errors.push({ field: 'password', message: 'Password must be at least 6 characters long' });
-    }
-
-    if (errors.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors
-      });
-    }
 
     // Check if user already exists
     const existingUser = await User.findOne({
@@ -240,7 +269,7 @@ router.post('/signup', async (req, res) => {
 });
 
 // Sign in route
-router.post('/signin',  (req, res, next) => {
+router.post('/signin', validateBody(signinSchema), (req, res, next) => {
   passport.authenticate('local', async (err, user, info) => {
     if (err) {
       return res.status(500).json({
@@ -267,16 +296,6 @@ router.post('/signin',  (req, res, next) => {
         });
       }
 
-      // Generate token for the authenticated user
-      const jwtExpiry = req.app.locals.authConfig.jwtExpiry || '15m';
-      const token = generateToken(user._id, req.app.locals.authConfig.jwtSecret, jwtExpiry);
-      // Set the token in a cookie
-      res.cookie('authToken', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: req.app.locals.authConfig.cookieMaxAge
-      });
-
       res.json({
         success: true,
         message: 'Login successful',
@@ -296,8 +315,8 @@ router.post('/signout', (req, res) => {
       });
     }
     // Clear cookies
-    res.clearCookie('authToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
-    res.clearCookie('refreshToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    res.clearCookie('authToken', getCookieOptions());
+    res.clearCookie('refreshToken', getCookieOptions());
     
     res.json({
       success: true,
@@ -361,17 +380,9 @@ router.post('/refresh-token', async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Set the new tokens in cookies
-    res.cookie('authToken', newAccessToken, { 
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: req.app.locals.authConfig.cookieMaxAge
-    });
-
-    res.cookie('refreshToken', newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: req.app.locals.authConfig.cookieMaxAge
-    });
+    const { cookieMaxAge } = req.app.locals.authConfig;
+    res.cookie('authToken', newAccessToken, getCookieOptions(cookieMaxAge));
+    res.cookie('refreshToken', newRefreshToken, getCookieOptions(cookieMaxAge));
 
     res.json({
       success: true,

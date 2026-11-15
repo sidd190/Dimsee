@@ -182,7 +182,7 @@ The `AuthForm` component is the core of the Dimsee frontend. It is a highly conf
 | `onError`     | `function` | `undefined`                  | Callback function executed on authentication failure. Receives the error object.                         |
 | `className`   | `string`   | `''`                         | Additional CSS classes to apply to the component's root element for custom styling.                      |
 | `oAuthConfig` | `object`   | `null`                       | An object to dynamically configure OAuth providers on the frontend.                                      |
-| `redirectUrl` | `string`   | `null`                       | A URL to redirect to after a successful OAuth login.                                                     |
+| `redirectUrl` | `string`   | `null`                       | Destination after successful OAuth login. Accepts relative paths or HTTP(S) URLs on the backend's configured `corsOrigin`; defaults to `corsOrigin`. External origins are rejected. |
 | `onModeChange`| `function` | `undefined`                  | A function to make the form a controlled component, managing the `mode` from a parent component.         |
 
 ---
