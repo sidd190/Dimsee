@@ -63,12 +63,8 @@ const resolveOAuthRedirect = (value, frontendUrl) => {
 };
 
 const startOAuth = (provider, scope) => (req, res, next) => {
-  const authConfig = req.app?.locals?.authConfig || {};
-  const isEnabled = authConfig.configuredProviders?.[provider] ?? Boolean(
-    authConfig.enableOAuth && (authConfig.oauth?.[provider]?.clientId || process.env[`${provider.toUpperCase()}_CLIENT_ID`])
-  );
-  if (!isEnabled) {
-    return res.status(403).json({ success: false, message: `${provider.charAt(0).toUpperCase() + provider.slice(1)} OAuth is not enabled` });
+  if (!req.app.locals.authConfig.enableOAuth) {
+    return res.status(403).json({ success: false, message: 'OAuth is not enabled' });
   }
   const redirect = resolveOAuthRedirect(req.query.redirectUrl, req.app.locals.authConfig.corsOrigin);
   if (req.query.redirectUrl !== undefined && !redirect) {
