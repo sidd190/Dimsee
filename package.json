@@ -38,9 +38,22 @@
   },
   "jest": {
     "transform": {
-      "^.+\\.jsx?$": ["babel-jest", {
-        "presets": [["@babel/preset-env", { "targets": { "node": "current" } }], "@babel/preset-react"]
-      }]
+      "^.+\\.jsx?$": [
+        "babel-jest",
+        {
+          "presets": [
+            [
+              "@babel/preset-env",
+              {
+                "targets": {
+                  "node": "current"
+                }
+              }
+            ],
+            "@babel/preset-react"
+          ]
+        }
+      ]
     },
     "testPathIgnorePatterns": [
       "/node_modules/",
