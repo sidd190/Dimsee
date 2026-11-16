@@ -105,6 +105,10 @@ const AuthForm = ({
         newErrors.username = 'Username is required';
       } else if (formData.username.length < 3) {
         newErrors.username = 'Username must be at least 3 characters';
+      } else if (formData.username.length > 20) {
+        newErrors.username = 'Username must be less than 20 characters';
+      } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+        newErrors.username = 'Username can only contain letters, numbers, and underscores';
       }
     }
 
@@ -116,8 +120,10 @@ const AuthForm = ({
 
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
+    } else if (effectiveMode === 'signup' && formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
+    } else if (effectiveMode === 'signup' && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      newErrors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
     }
 
     if (effectiveMode === 'signup') {
@@ -178,7 +184,8 @@ const AuthForm = ({
     }
     
     // Use apiUrl from context
-    window.location.href = `${apiUrl}/${provider}`;
+    const query = redirectUrl ? `?${new URLSearchParams({ redirectUrl })}` : '';
+    window.location.href = `${apiUrl}/${provider}${query}`;
   };
 
   const handleModeSwitch = () => {
