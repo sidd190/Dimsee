@@ -28,7 +28,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/dimsee')
       credentials: true
     }));
 
-    //  Rate Limiting on /signin and /signup 
+    // Rate Limiting on sensitive auth routes
     const authLimiter = rateLimit({
       windowMs: 60 * 1000, // 1 minute
       max: 5,
@@ -36,6 +36,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/dimsee')
     });
     app.use('/api/auth/signin', authLimiter);
     app.use('/api/auth/signup', authLimiter);
+    app.use('/api/auth/refresh-token', authLimiter);
+    app.use('/api/auth/set-password', authLimiter);
 
     // Session configuration
     app.use(session({

@@ -5,6 +5,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 
 // Use path.join for proper path resolution
@@ -94,6 +95,17 @@ const createAuthBackend = (config = {}) => {
     enableOAuth,
     mongoUri
   };
+
+  // Rate limiting on sensitive auth endpoints
+  const authLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 5,
+    message: { success: false, message: 'Too many attempts. Please try again later.' }
+  });
+  app.use('/api/auth/signin', authLimiter);
+  app.use('/api/auth/signup', authLimiter);
+  app.use('/api/auth/refresh-token', authLimiter);
+  app.use('/api/auth/set-password', authLimiter);
 
   // Auth routes
   app.use('/api/auth', authRoutes);
