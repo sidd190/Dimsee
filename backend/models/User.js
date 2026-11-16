@@ -25,10 +25,19 @@ const userSchema = new mongoose.Schema({
     minlength: 8
   },
   refreshToken: {
-    type: String
+    type: String,
+    index: true
   }, // For refreshtokens to generate new accesstokens
-  googleId: String,
-  githubId: String,
+  googleId: {
+    type: String,
+    sparse: true,
+    index: true
+  },
+  githubId: {
+    type: String,
+    sparse: true,
+    index: true
+  },
   authMethod: {
     type: String,
     enum: ['local', 'google', 'github'],
@@ -37,14 +46,15 @@ const userSchema = new mongoose.Schema({
   hasPassword: {
     type: Boolean,
     default: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
 }, {
   timestamps: true
 });
+
+// Explicit compound / single indexes for hot path queries
+userSchema.index({ email: 1 });
+userSchema.index({ username: 1 });
+userSchema.index({ refreshToken: 1 });
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
