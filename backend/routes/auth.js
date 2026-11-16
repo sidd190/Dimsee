@@ -8,6 +8,11 @@ const User = require('../models/User');
 const router = express.Router();
 
 // Validation schemas
+const passwordComplexityRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+const passwordSchema = z.string()
+  .min(8, 'Password must be at least 8 characters long')
+  .regex(passwordComplexityRegex, 'Password must contain at least one uppercase letter, one lowercase letter, and one number');
+
 const signupSchema = z.object({
   username: z.string()
     .min(3, 'Username must be at least 3 characters')
@@ -15,13 +20,15 @@ const signupSchema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
   email: z.string()
     .email('Please enter a valid email address'),
-  password: z.string()
-    .min(6, 'Password must be at least 6 characters')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase letter, one lowercase letter, and one number'),
+  password: passwordSchema,
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"]
+});
+
+const setPasswordSchema = z.object({
+  password: passwordSchema
 });
 
 const signinSchema = z.object({
@@ -140,17 +147,9 @@ const isAuthenticated = (req, res, next) => {
 };
 
 // Set password route for OAuth users
-router.post('/set-password', isAuthenticated, async (req, res) => {
+router.post('/set-password', isAuthenticated, validateBody(setPasswordSchema), async (req, res) => {
   try {
     const { password } = req.body;
-
-    if (!password || password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password must be at least 6 characters long',
-        errors: [{ field: 'password', message: 'Password must be at least 6 characters long' }]
-      });
-    }
 
     // Get the current user
     const user = await User.findById(req.user.id);

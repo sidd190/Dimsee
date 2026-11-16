@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     required: function() {
       return !this.googleId && !this.githubId; // Only required if not using OAuth
     },
-    minlength: 6
+    minlength: 8
   },
   refreshToken: {
     type: String
