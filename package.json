@@ -16,13 +16,12 @@
     "./frontend": {
       "import": "./dist/frontend/index.js",
       "require": "./dist/frontend/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "sideEffects": false,
   "files": [
     "dist/",
-    "frontend/index.js",
-    "frontend/src/components/*.css",
     "README.md",
     "LICENSE"
   ],
@@ -108,6 +107,6 @@
   "engines": {
     "node": ">=14.0.0"
   },
-  "browser": "./dist/index.mjs",
+  "browser": "./dist/frontend/index.js",
   "readmeFilename": "README.md"
 }
