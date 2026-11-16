@@ -364,6 +364,88 @@
 
 
 /* ==========================================
+   DARK THEME (Sleek High-Contrast Dark Mode)
+   ========================================== */
+.auth-container.dark {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+.auth-container.dark .auth-form {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  padding: 40px;
+}
+
+.auth-container.dark .form-title {
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+.auth-container.dark .form-subtitle {
+  color: #94a3b8;
+}
+
+.auth-container.dark .form-input {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #f8fafc;
+}
+
+.auth-container.dark .form-input::placeholder {
+  color: #64748b;
+}
+
+.auth-container.dark .form-input:focus {
+  background: #0f172a;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.auth-container.dark .submit-button {
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.auth-container.dark .submit-button:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+}
+
+.auth-container.dark .oauth-button {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  border-radius: 10px;
+}
+
+.auth-container.dark .oauth-button:hover {
+  background: #1e293b;
+  border-color: #475569;
+}
+
+.auth-container.dark .separator {
+  color: #64748b;
+}
+
+.auth-container.dark .separator::before,
+.auth-container.dark .separator::after {
+  background: #334155;
+}
+
+.auth-container.dark .switch-mode-link {
+  color: #60a5fa !important;
+}
+
+
+/* ==========================================
    FORM STYLES (BASE)
    ========================================== */
 .auth-form {
