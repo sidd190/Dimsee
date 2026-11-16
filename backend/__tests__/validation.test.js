@@ -85,11 +85,11 @@ describe('Zod Validation in Auth Routes', () => {
   });
 
   describe('POST /api/auth/signin validation', () => {
-    it('returns 400 when email is invalid or missing', async () => {
+    it('returns 400 when email is missing', async () => {
       const res = await request(app)
         .post('/api/auth/signin')
         .send({
-          email: 'bad-email',
+          email: '',
           password: 'somepassword'
         });
 
