@@ -148,6 +148,19 @@ const LogoutButton = ({
           backgroundColor: '#fca5a5',
           cursor: 'not-allowed'
         }
+      },
+      colorful: {
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 4px 15px rgba(102, 126, 234, 0.35)',
+        ':hover': {
+          opacity: 0.9
+        },
+        ':disabled': {
+          opacity: 0.6,
+          cursor: 'not-allowed'
+        }
       }
     };
 
@@ -156,11 +169,13 @@ const LogoutButton = ({
       color: '#6b7280'
     };
 
+    const selectedDesign = designs[design] || designs.modern;
+
     return { 
       buttonStyle: {
         ...baseButtonStyle,
         ...sizes[size],
-        ...designs[design]
+        ...selectedDesign
       },
       userInfoStyle 
     };
