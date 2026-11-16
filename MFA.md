@@ -346,7 +346,7 @@ If you bought a new phone or wiped your device, but still have your recovery cod
 
 ### Method 3: Administrative / Help-Desk Recovery
 
-If you have lost your authenticator device **and** have lost all emergency recovery codes, self-service recovery is impossible. You must contact your application administrator or support team.
+If you have lost your authenticator device and have lost all emergency recovery codes, check first whether you still have an active session on another device or browser. If you do, use [Method 2: Re-Enrolling on a New Device](#method-2-re-enrolling-on-a-new-device) to re-enroll your authenticator and generate new codes from that session. If you have neither an active session nor recovery codes, self-service recovery is impossible and you must contact your application administrator or support team.
 
 #### Why is this strictly controlled?
 MFA is designed to prevent account takeovers. If support agents could disable MFA without rigorous identity verification, attackers could impersonate you and bypass your security.
@@ -449,7 +449,7 @@ If you must disable MFA (for example, before transferring an account or testing)
 
 **Symptom:** You lost your phone and do not have your recovery codes saved.
 
-**Solution:** Follow [Method 3: Administrative / Help-Desk Recovery](#method-3-administrative--help-desk-recovery). Contact your system administrator to initiate verified identity recovery.
+**Solution:** If you are still logged in on another device or browser, use [Method 2: Re-Enrolling on a New Device](#method-2-re-enrolling-on-a-new-device) to access Security Settings, re-enroll your new authenticator, and generate fresh recovery codes. If you do not have an active session on any device, self-service recovery is impossible; follow [Method 3: Administrative / Help-Desk Recovery](#method-3-administrative--help-desk-recovery) to contact your system administrator for verified identity recovery.
 
 ---
 
@@ -481,7 +481,7 @@ For developers implementing Dimsee in a MERN application, the following architec
 | Method | Endpoint | Description | Auth Required |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/auth/mfa/setup` | Generates a new TOTP secret & QR code URI | Session / JWT |
-| `POST` | `/api/auth/mfa/enable` | Verifies initial TOTP code & issues 10 hashed backup codes | Session / JWT |
+| `POST` | `/api/auth/mfa/enable` | Verifies initial TOTP code, returns plaintext backup codes once, and stores only their hashes | Session / JWT |
 | `POST` | `/api/auth/mfa/verify` | Validates 6-digit TOTP or backup code during login challenge | Pre-auth Token |
 | `POST` | `/api/auth/mfa/recovery-codes/regenerate` | Generates fresh recovery codes (burns previous set) | Session + Step-up |
 | `POST` | `/api/auth/mfa/disable` | Deactivates MFA on account | Session + Step-up |
@@ -523,4 +523,4 @@ mfa: {
 - **Never Store Plaintext Recovery Codes:** Like passwords, backup codes must be hashed (e.g. with `bcrypt`) before saving to MongoDB. Return plaintext codes to the user only once upon generation.
 - **Single-Use Enforcement:** Upon code consumption, set `used: true` and record `usedAt` in MongoDB within an atomic transaction or atomic update.
 - **Rate Limiting:** Protect `/api/auth/mfa/verify` with strict rate limiting (e.g., maximum 5 failed attempts per 5 minutes) to prevent brute-forcing 6-digit TOTP combinations or recovery codes.
-- **Session Revocation & Token Lifecycle on MFA Reset:** When an administrator resets a user's MFA, clearing the stored refresh token (`user.refreshToken = null`) prevents the client from obtaining new access tokens via `/api/auth/refresh-token`. However, because Dimsee's default `authMiddleware` verifies JWT access tokens statelessly without querying the database on each request, already-issued access tokens are not immediately invalidated and remain valid until their expiration window (default 15 minutes) elapses. If immediate session termination is required upon MFA reset, the application must implement a per-request revocation check (such as validating a `tokenVersion` or `mfaResetAt` timestamp in the database during middleware execution).
+- **Session Revocation & Token Lifecycle on MFA Reset:** Both MFA reset and refresh-token rotation condition their `refreshToken` write on the stored value matching the expected value (e.g., matching the current token or `null` write condition), and reject the operation when no document matches. When an administrator resets a user's MFA, clearing the stored refresh token (`user.refreshToken = null`) prevents the client from obtaining new access tokens via `/api/auth/refresh-token`. However, because Dimsee's default `authMiddleware` verifies JWT access tokens statelessly without querying the database on each request, already-issued access tokens are not immediately invalidated and remain valid until their expiration window (default 15 minutes) elapses. If immediate session termination is required upon MFA reset, the application must implement a per-request revocation check (such as validating a `tokenVersion` or `mfaResetAt` timestamp in the database during middleware execution).
