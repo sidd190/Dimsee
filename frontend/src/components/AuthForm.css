@@ -364,6 +364,91 @@
 
 
 /* ==========================================
+   SUNSET THEME (Warm Sunset Gradient)
+   ========================================== */
+.auth-container.sunset {
+  background: linear-gradient(135deg, #1f102e 0%, #3a1c4a 40%, #7c2d53 75%, #b45309 100%);
+  color: #ffffff;
+}
+
+.auth-container.sunset .auth-form {
+  background: rgba(43, 20, 60, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(180, 83, 9, 0.25);
+  padding: 40px;
+}
+
+.auth-container.sunset .form-title {
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.auth-container.sunset .form-subtitle {
+  color: #fcd34d;
+  opacity: 0.85;
+}
+
+.auth-container.sunset .form-input {
+  background: rgba(30, 15, 45, 0.7);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 12px;
+  color: #ffffff;
+}
+
+.auth-container.sunset .form-input::placeholder {
+  color: rgba(253, 230, 138, 0.5);
+}
+
+.auth-container.sunset .form-input:focus {
+  background: rgba(45, 20, 65, 0.8);
+  border-color: #fbbf24;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.25);
+}
+
+.auth-container.sunset .submit-button {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.auth-container.sunset .submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d97706, #dc2626);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(239, 68, 68, 0.35);
+}
+
+.auth-container.sunset .oauth-button {
+  background: rgba(45, 20, 65, 0.6);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #ffffff;
+  border-radius: 12px;
+}
+
+.auth-container.sunset .oauth-button:hover {
+  background: rgba(60, 25, 85, 0.8);
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+.auth-container.sunset .separator {
+  color: rgba(253, 230, 138, 0.7);
+}
+
+.auth-container.sunset .separator::before,
+.auth-container.sunset .separator::after {
+  background: rgba(245, 158, 11, 0.25);
+}
+
+.auth-container.sunset .switch-mode-link {
+  color: #fbbf24 !important;
+}
+
+
+/* ==========================================
    FORM STYLES (BASE)
    ========================================== */
 .auth-form {
