@@ -43,6 +43,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Dependency security audit
+        run: npm run audit
+
       - name: Test
         run: npm test -- --ci --runInBand
 

@@ -61,6 +61,21 @@ for:
 Features such as email verification, MFA, and CSRF tokens are on the roadmap and
 tracked as hardening issues - see the security track in the contributor backlog.
 
+## Dependency Auditing & Known Advisories
+
+We regularly audit dependencies with `npm audit` and integrate security checks into our continuous integration pipeline.
+
+### Audit Command & CI Integration
+- Run `npm run audit` locally to perform a severity triage.
+- CI pipeline automatically executes `npm run audit` (`npm audit --audit-level=critical`) to block high-risk regressions.
+
+### Triage of Current Advisories
+
+| Package | Advisory ID | Severity | Context & Assessment | Remediation Plan |
+| ------- | ----------- | -------- | -------------------- | ---------------- |
+| `deepmerge` | GHSA-gcqx-w48m-w2h4 | Low | Transitive development dependency via `jest`. No runtime production exposure. | Upstream update with next Jest major bump. |
+| `zod` | GHSA-mrhx-c7xc-m3w5 | High | Algorithmic complexity on oversized constrained collections. Dimsee validates strict, shallow auth payloads bounded by Express body limits. | Planned migration to Zod 4.x in 1.0.0 milestone. |
+
 ## Disclosure
 
 We follow coordinated disclosure: once a fix is released, we publish a security
