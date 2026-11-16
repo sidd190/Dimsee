@@ -491,6 +491,46 @@
   font-size: 1rem;
 }
 
+/* Password Visibility Toggle & OAuth States */
+.password-wrapper .form-input {
+  padding-right: 48px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  opacity: 0.65;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 2;
+  border-radius: 6px;
+}
+
+.password-toggle-btn:hover {
+  opacity: 1;
+}
+
+.password-toggle-btn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.oauth-button:disabled,
+.oauth-button[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Submit Button */
 .submit-button {
   width: 100%;
