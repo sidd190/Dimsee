@@ -364,6 +364,116 @@
 
 
 /* ==========================================
+   NEOBRUTALIST THEME (Bold High-Contrast Blocks)
+   ========================================== */
+.auth-container.neobrutalist {
+  background: #fef08a;
+  color: #000000;
+  font-family: inherit;
+}
+
+.auth-container.neobrutalist .auth-form {
+  background: #ffffff;
+  border: 3px solid #000000;
+  border-radius: 0px;
+  box-shadow: 6px 6px 0px #000000;
+  padding: 36px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-container.neobrutalist .auth-form:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px #000000;
+}
+
+.auth-container.neobrutalist .form-title {
+  color: #000000;
+  font-size: 2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+
+.auth-container.neobrutalist .form-subtitle {
+  color: #000000;
+  font-weight: 600;
+}
+
+.auth-container.neobrutalist .form-input {
+  background: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 0px;
+  color: #000000;
+  box-shadow: 3px 3px 0px #000000;
+  font-weight: 600;
+}
+
+.auth-container.neobrutalist .form-input::placeholder {
+  color: #71717a;
+}
+
+.auth-container.neobrutalist .form-input:focus {
+  background: #ffffff;
+  border-color: #000000;
+  box-shadow: 4px 4px 0px #000000;
+}
+
+.auth-container.neobrutalist .submit-button {
+  background: #ff595e;
+  color: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 0px;
+  box-shadow: 4px 4px 0px #000000;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.auth-container.neobrutalist .submit-button:hover:not(:disabled) {
+  background: #ff4046;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px #000000;
+}
+
+.auth-container.neobrutalist .submit-button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.auth-container.neobrutalist .oauth-button {
+  background: #ffffff;
+  border: 2px solid #000000;
+  color: #000000;
+  border-radius: 0px;
+  box-shadow: 3px 3px 0px #000000;
+  font-weight: 700;
+}
+
+.auth-container.neobrutalist .oauth-button:hover {
+  background: #f4f4f5;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000000;
+}
+
+.auth-container.neobrutalist .separator {
+  color: #000000;
+  font-weight: 800;
+}
+
+.auth-container.neobrutalist .separator::before,
+.auth-container.neobrutalist .separator::after {
+  background: #000000;
+  height: 2px;
+}
+
+.auth-container.neobrutalist .switch-mode-link {
+  color: #000000 !important;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+
+/* ==========================================
    FORM STYLES (BASE)
    ========================================== */
 .auth-form {
