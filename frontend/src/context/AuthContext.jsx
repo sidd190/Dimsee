@@ -6,10 +6,29 @@ const AuthContext = createContext();
 // Configure axios defaults
 axios.defaults.withCredentials = true;
 
-const AuthProvider = ({ children, apiUrl = 'http://localhost:5000/api/auth' }) => {
+const AuthProvider = ({ children, apiUrl = 'http://localhost:5000/api/auth', persistUser = false }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Helper to manage in-memory user state and optional localStorage persistence
+  const saveUser = (userData) => {
+    setUser(userData);
+    if (persistUser && typeof window !== 'undefined' && window.localStorage) {
+      if (userData) {
+        localStorage.setItem('user', JSON.stringify(userData));
+      } else {
+        localStorage.removeItem('user');
+      }
+    }
+  };
+
+  const clearUser = () => {
+    setUser(null);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem('user');
+    }
+  };
 
   // Create axios instance with base URL
   const authAPI = axios.create({
@@ -21,14 +40,13 @@ const AuthProvider = ({ children, apiUrl = 'http://localhost:5000/api/auth' }) =
     try {
       const response = await authAPI.get('/me');
       if (response.data.success) {
-        setUser(response.data.user);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        saveUser(response.data.user);
         return true;
       }
       return false;
     } catch (error) {
       console.log('Not authenticated');
-      localStorage.removeItem('user');
+      clearUser();
       return false;
     } finally {
       setLoading(false);
@@ -49,8 +67,7 @@ const AuthProvider = ({ children, apiUrl = 'http://localhost:5000/api/auth' }) =
       const response = await authAPI.post('/signup', userData);
       
       if (response.data.success) {
-        setUser(response.data.user);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        saveUser(response.data.user);
         return { success: true, message: response.data.message };
       }
     } catch (error) {
@@ -70,8 +87,7 @@ const AuthProvider = ({ children, apiUrl = 'http://localhost:5000/api/auth' }) =
       const response = await authAPI.post('/signin', userData);
       
       if (response.data.success) {
-        setUser(response.data.user);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        saveUser(response.data.user);
         return { success: true, message: response.data.message };
       }
     } catch (error) {
@@ -88,14 +104,12 @@ const AuthProvider = ({ children, apiUrl = 'http://localhost:5000/api/auth' }) =
   const signout = async () => {
     try {
       await authAPI.post('/signout');
-      setUser(null);
-      localStorage.removeItem('user');
+      clearUser();
       return { success: true };
     } catch (error) {
       console.error('Signout error:', error);
       // Clear local state even if request fails
-      setUser(null);
-      localStorage.removeItem('user');
+      clearUser();
       return { success: false };
     }
   };
@@ -108,8 +122,7 @@ const AuthProvider = ({ children, apiUrl = 'http://localhost:5000/api/auth' }) =
       if (response.data.success) {
         // Update user data to reflect that they now have a password
         const updatedUser = { ...user, hasPassword: true };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        saveUser(updatedUser);
         return { success: true, message: response.data.message };
       }
     } catch (error) {
