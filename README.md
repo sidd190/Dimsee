@@ -176,7 +176,7 @@ The `AuthForm` component is the core of the Dimsee frontend. It is a highly conf
 | Prop          | Type       | Default                      | Description                                                                                              |
 |---------------|------------|------------------------------|----------------------------------------------------------------------------------------------------------|
 | `mode`        | `string`   | `'signin'`                   | Determines if the form is in `'signin'` or `'signup'` mode.                                              |
-| `design`      | `string`   | `'modern'`                   | The visual theme of the form. Options: `'modern'`, `'minimal'`, `'colorful'`.                             |
+| `design`      | `string`   | `'modern'`                   | The visual theme of the form. Options: `'modern'`, `'minimal'`, `'colorful'`, `'aurora'`.                  |
 | `onSuccess`   | `function` | `undefined`                  | Callback function executed on successful authentication. Receives response data.                           |
 | `onError`     | `function` | `undefined`                  | Callback function executed on authentication failure. Receives the error object.                         |
 | `className`   | `string`   | `''`                         | Additional CSS classes to apply to the component's root element for custom styling.                      |

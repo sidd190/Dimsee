@@ -364,6 +364,91 @@
 
 
 /* ==========================================
+   AURORA THEME (Nordic Northern Lights)
+   ========================================== */
+.auth-container.aurora {
+  background: linear-gradient(135deg, #051923 0%, #003554 40%, #006466 70%, #0b525b 100%);
+  color: #e0fbfc;
+}
+
+.auth-container.aurora .auth-form {
+  background: rgba(5, 25, 35, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(78, 205, 196, 0.35);
+  border-radius: 20px;
+  box-shadow: 0 0 35px rgba(78, 205, 196, 0.18);
+  padding: 40px;
+}
+
+.auth-container.aurora .form-title {
+  color: #4ecdc4;
+  font-weight: 700;
+}
+
+.auth-container.aurora .form-subtitle {
+  color: #98ff98;
+  opacity: 0.8;
+}
+
+.auth-container.aurora .form-input {
+  background: rgba(0, 53, 84, 0.45);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  border-radius: 12px;
+  color: #e0fbfc;
+}
+
+.auth-container.aurora .form-input::placeholder {
+  color: rgba(126, 214, 223, 0.5);
+}
+
+.auth-container.aurora .form-input:focus {
+  background: rgba(0, 53, 84, 0.65);
+  border-color: #4ecdc4;
+  box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+}
+
+.auth-container.aurora .submit-button {
+  background: linear-gradient(135deg, #00b4d8, #06d6a0);
+  color: #051923;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.auth-container.aurora .submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0096c7, #05b584);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(6, 214, 160, 0.3);
+}
+
+.auth-container.aurora .oauth-button {
+  background: rgba(0, 53, 84, 0.4);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  color: #e0fbfc;
+  border-radius: 12px;
+}
+
+.auth-container.aurora .oauth-button:hover {
+  background: rgba(0, 53, 84, 0.7);
+  border-color: #4ecdc4;
+}
+
+.auth-container.aurora .separator {
+  color: rgba(78, 205, 196, 0.7);
+}
+
+.auth-container.aurora .separator::before,
+.auth-container.aurora .separator::after {
+  background: rgba(78, 205, 196, 0.3);
+}
+
+.auth-container.aurora .switch-mode-link {
+  color: #4ecdc4 !important;
+}
+
+
+/* ==========================================
    FORM STYLES (BASE)
    ========================================== */
 .auth-form {
