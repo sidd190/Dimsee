@@ -1,0 +1,21 @@
+# Dimsee Full Technical Specification
+
+> Complete technical architecture, API signatures, security mechanisms, and integration details for LLMs and autonomous coding agents.
+
+## 1. Package Exports
+- CommonJS: `require('dimsee')` exports `{ createAuthBackend, authMiddleware, User }`
+- ES Modules: `import { AuthProvider, AuthForm, AuthStatus, LogoutButton, SetPasswordButton, useAuth } from 'dimsee'`
+
+## 2. Backend API Reference
+- `POST /api/auth/signup`: Create user with `{ username, email, password, confirmPassword }`. Enforces 8+ char passwords with uppercase, lowercase, and numbers.
+- `POST /api/auth/signin`: Authenticate with `{ email, password }`. Constant-time response on failure.
+- `POST /api/auth/signout`: Invalidate session and clear HTTP-only cookies.
+- `POST /api/auth/refresh-token`: Rotate refresh token and re-issue short-lived access token with automatic reuse detection.
+- `POST /api/auth/set-password`: Allows OAuth accounts to set local passwords; revokes existing refresh tokens.
+- `GET /api/auth/me`: Returns sanitized current user profile.
+- `GET /api/auth/oauth-status`: Returns configuration status of Google and GitHub OAuth providers.
+
+## 3. Database Schema
+- Mongoose collection: `users`
+- Fields: `username` (unique, indexed), `email` (unique, indexed), `password` (hashed with bcrypt), `refreshToken` (indexed), `googleId` (sparse), `githubId` (sparse), `hasPassword` (boolean), `authMethod` (enum: local, google, github).
+- Automatic timestamps: `createdAt`, `updatedAt`.
