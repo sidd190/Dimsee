@@ -160,8 +160,11 @@ router.post('/set-password', isAuthenticated, validateBody(setPasswordSchema), a
       });
     }
 
-    // Set the password
+    // Set the password and revoke prior refresh tokens
     await user.setPassword(password);
+
+    // Rotate tokens: generate and set fresh auth and refresh cookies for the user
+    await setAuthCookies(req, res, user);
 
     res.json({
       success: true,
