@@ -69,6 +69,7 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 userSchema.methods.setPassword = async function(password) {
   this.password = password;
   this.hasPassword = true;
+  this.refreshToken = null; // Revoke existing refresh token on credential change
   await this.save();
 };
 
