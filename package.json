@@ -7,16 +7,20 @@
   "exports": {
     ".": {
       "import": "./dist/frontend/index.js",
-      "require": "./dist/backend/index.js"
+      "require": "./dist/backend/index.js",
+      "default": "./dist/backend/index.js"
     },
     "./backend": {
+      "import": "./dist/backend/index.js",
       "require": "./dist/backend/index.js",
-      "import": "./dist/backend/index.js"
+      "default": "./dist/backend/index.js"
     },
     "./frontend": {
       "import": "./dist/frontend/index.js",
-      "require": "./dist/frontend/index.js"
-    }
+      "require": "./dist/frontend/index.js",
+      "default": "./dist/frontend/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "sideEffects": false,
   "files": [
