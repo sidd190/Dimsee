@@ -1,0 +1,48 @@
+# Dimsee
+
+> Modern, flexible authentication solution for MERN applications with OAuth support, JWT access/refresh token rotation, and customizable React UI components.
+
+Dimsee provides complete, secure authentication primitives for React and Express/MongoDB architectures, including pre-built React components, backend route handlers, token rotation, and OAuth integrations.
+
+## Documentation & References
+
+- [API Reference](docs/API_REFERENCE.md): Comprehensive REST endpoints, payloads, and response schemas.
+- [Security Posture & Threat Model](docs/THREAT_MODEL.md): Token architecture, brute force protection, secret separation, and session handling.
+- [Contributing Guide](CONTRIBUTING.md): Code of conduct, development workflow, and testing requirements.
+- [Customization Guide](CUSTOMIZATION.md): Theming, styling, and customizing the frontend AuthForm and context.
+
+## Core Packages & Architecture
+
+### Backend Usage
+```javascript
+const { createAuthBackend, authMiddleware, User } = require('dimsee');
+
+const app = createAuthBackend({
+  mongoUri: process.env.MONGODB_URI,
+  jwtSecret: process.env.JWT_SECRET,
+  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET,
+  corsOrigin: process.env.FRONTEND_URL
+});
+
+app.get('/api/protected', authMiddleware, (req, res) => {
+  res.json({ user: req.user });
+});
+```
+
+### Frontend Usage
+```jsx
+import { AuthProvider, AuthForm, useAuth } from 'dimsee';
+
+function App() {
+  return (
+    <AuthProvider backendUrl="http://localhost:5000">
+      <AuthForm theme="default" />
+    </AuthProvider>
+  );
+}
+```
+
+## Security Best Practices
+- Keep `jwtSecret` and `jwtRefreshSecret` cryptographically distinct and never commit them to source control.
+- Ensure `NODE_ENV=production` is set in production to enforce `secure` cookies and strict secret validation.
+- All auth cookies are `httpOnly` with `sameSite: 'strict'` in production.
