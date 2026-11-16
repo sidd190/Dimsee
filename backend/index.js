@@ -63,16 +63,24 @@ const createAuthBackend = (config = {}) => {
   app.use(passportInstance.initialize());
   app.use(passportInstance.session());
 
+  const googleClientId = oauth.google?.clientId || process.env.GOOGLE_CLIENT_ID;
+  const githubClientId = oauth.github?.clientId || process.env.GITHUB_CLIENT_ID;
+
+  const configuredProviders = {
+    google: Boolean(enableOAuth && googleClientId),
+    github: Boolean(enableOAuth && githubClientId)
+  };
+
   // Configure OAuth strategies based on priority
   if (enableOAuth) {
     const oAuthConfig = {
       google: {
-        clientId: oauth.google?.clientId || process.env.GOOGLE_CLIENT_ID,
+        clientId: googleClientId,
         clientSecret: oauth.google?.clientSecret || process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: oauth.google?.callbackURL || process.env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback'
       },
       github: {
-        clientId: oauth.github?.clientId || process.env.GITHUB_CLIENT_ID,
+        clientId: githubClientId,
         clientSecret: oauth.github?.clientSecret || process.env.GITHUB_CLIENT_SECRET,
         callbackURL: oauth.github?.callbackURL || process.env.GITHUB_CALLBACK_URL || '/api/auth/github/callback'
       }
@@ -92,6 +100,8 @@ const createAuthBackend = (config = {}) => {
     cookieMaxAge,
     corsOrigin,
     enableOAuth,
+    oauth,
+    configuredProviders,
     mongoUri
   };
 

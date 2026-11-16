@@ -180,9 +180,15 @@ router.post('/set-password', isAuthenticated, async (req, res) => {
 
 // OAuth status route
 router.get('/oauth-status', (req, res) => {
-  const { enableOAuth } = req.app.locals.authConfig;
-  const googleEnabled = enableOAuth && !!process.env.GOOGLE_CLIENT_ID;
-  const githubEnabled = enableOAuth && !!process.env.GITHUB_CLIENT_ID;
+  const authConfig = req.app?.locals?.authConfig || {};
+  const { enableOAuth = false, oauth = {}, configuredProviders } = authConfig;
+
+  const googleEnabled = configuredProviders?.google ?? Boolean(
+    enableOAuth && (oauth.google?.clientId || process.env.GOOGLE_CLIENT_ID)
+  );
+  const githubEnabled = configuredProviders?.github ?? Boolean(
+    enableOAuth && (oauth.github?.clientId || process.env.GITHUB_CLIENT_ID)
+  );
 
   res.json({
     enabled: googleEnabled || githubEnabled,
