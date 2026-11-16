@@ -21,24 +21,36 @@ describe('Rate Limiting', () => {
     app.post('/api/auth/signin', authLimiter, (req, res) => {
       res.json({ success: true, message: 'Auth attempt accepted' });
     });
+    app.post('/api/auth/refresh-token', authLimiter, (req, res) => {
+      res.json({ success: true, message: 'Token refresh accepted' });
+    });
+    app.post('/api/auth/set-password', authLimiter, (req, res) => {
+      res.json({ success: true, message: 'Password set accepted' });
+    });
   });
 
-  it('allows requests up to the limit', async () => {
-    for (let i = 0; i < 3; i++) {
-      const res = await request(app).post('/api/auth/signin');
-      expect(res.statusCode).toBe(200);
-      expect(res.body.success).toBe(true);
-    }
-  });
+  describe.each([
+    ['/api/auth/signin'],
+    ['/api/auth/refresh-token'],
+    ['/api/auth/set-password']
+  ])('endpoint %s rate limiting', (endpoint) => {
+    it('allows requests up to the limit', async () => {
+      for (let i = 0; i < 3; i++) {
+        const res = await request(app).post(endpoint);
+        expect(res.statusCode).toBe(200);
+        expect(res.body.success).toBe(true);
+      }
+    });
 
-  it('blocks requests after the limit is reached', async () => {
-    for (let i = 0; i < 3; i++) {
-      await request(app).post('/api/auth/signin');
-    }
+    it('blocks requests after the limit is reached', async () => {
+      for (let i = 0; i < 3; i++) {
+        await request(app).post(endpoint);
+      }
 
-    const res = await request(app).post('/api/auth/signin');
-    expect(res.statusCode).toBe(429);
-    expect(res.body.success).toBe(false);
-    expect(res.body.message).toMatch(/too many attempts/i);
+      const res = await request(app).post(endpoint);
+      expect(res.statusCode).toBe(429);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toMatch(/too many attempts/i);
+    });
   });
 });
