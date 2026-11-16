@@ -364,6 +364,100 @@
 
 
 /* ==========================================
+   TERMINAL THEME (Monospace Hacker Aesthetic)
+   ========================================== */
+.auth-container.terminal {
+  background: #090d09;
+  color: #10b981;
+  font-family: 'Source Code Pro', monospace, Courier, monospace;
+}
+
+.auth-container.terminal .auth-form {
+  background: #0d140e;
+  border: 1px solid #10b981;
+  border-radius: 4px;
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
+  padding: 36px;
+  font-family: inherit;
+}
+
+.auth-container.terminal .form-title {
+  color: #10b981;
+  font-family: inherit;
+  font-size: 1.8rem;
+  letter-spacing: 0.5px;
+}
+
+.auth-container.terminal .form-subtitle {
+  color: #34d399;
+  font-family: inherit;
+  opacity: 0.8;
+}
+
+.auth-container.terminal .form-input {
+  background: #050a06;
+  border: 1px solid #065f46;
+  border-radius: 4px;
+  color: #34d399;
+  font-family: inherit;
+}
+
+.auth-container.terminal .form-input::placeholder {
+  color: #047857;
+}
+
+.auth-container.terminal .form-input:focus {
+  background: #050a06;
+  border-color: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+}
+
+.auth-container.terminal .submit-button {
+  background: #10b981;
+  color: #050a06;
+  border: 1px solid #10b981;
+  border-radius: 4px;
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.auth-container.terminal .submit-button:hover:not(:disabled) {
+  background: #34d399;
+  border-color: #34d399;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.auth-container.terminal .oauth-button {
+  background: #050a06;
+  border: 1px solid #065f46;
+  color: #34d399;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.auth-container.terminal .oauth-button:hover {
+  background: #0d140e;
+  border-color: #10b981;
+}
+
+.auth-container.terminal .separator {
+  color: #047857;
+  font-family: inherit;
+}
+
+.auth-container.terminal .separator::before,
+.auth-container.terminal .separator::after {
+  background: #065f46;
+}
+
+.auth-container.terminal .switch-mode-link {
+  color: #10b981 !important;
+  font-family: inherit;
+}
+
+
+/* ==========================================
    FORM STYLES (BASE)
    ========================================== */
 .auth-form {
