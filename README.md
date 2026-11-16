@@ -37,6 +37,7 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 - [Backend: `createAuthBackend`](#backend-createauthbackend)
 - [Backend API Reference](#backend-api-reference)
 - [Customization and Contributing](#customization-and-contributing)
+- [Migration Guide](MIGRATION.md)
 - [Deployment and Troubleshooting](#deployment-and-troubleshooting)
 - [Use Cases](#use-cases)
 - [License](#license)
