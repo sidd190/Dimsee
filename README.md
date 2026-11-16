@@ -7,7 +7,7 @@
 
 **Dimsee** is a drop-in authentication package for MERN applications. It pairs a configurable Express backend with a themeable React frontend, so you can add signup, login, OAuth, sessions, and protected routes without wiring auth from scratch.
 
-Stand up a secure backend with a single `createAuthBackend()` call, drop an `<AuthForm />` into your React app, and you have working authentication in minutes. See [CONTRIBUTING.md](CONTRIBUTING.md) to get involved and [SECURITY.md](SECURITY.md) for the security policy.
+Stand up a secure backend with a single `createAuthBackend()` call, drop an `<AuthForm />` into your React app, and you have working authentication in minutes. See [CONTRIBUTING.md](CONTRIBUTING.md) to get involved, [SECURITY.md](SECURITY.md) for the security policy, and [MFA.md](MFA.md) for planned MFA enrollment and recovery specifications.
 
 ## Features
 
@@ -34,6 +34,7 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
   - [Next.js](#nextjs)
 - [Frontend: `AuthForm` Component](#frontend-authform-component)
 - [Frontend Components: `AuthStatus` vs. `AuthForm`](#frontend-components-authstatus-vs-authform)
+- [Multi-Factor Authentication (MFA)](#multi-factor-authentication-mfa)
 - [Backend: `createAuthBackend`](#backend-createauthbackend)
 - [Backend API Reference](#backend-api-reference)
 - [Customization and Contributing](#customization-and-contributing)
@@ -268,6 +269,16 @@ For more granular control over logout and set password button positioning and st
 `SetPasswordButton` accepts `showPrompt` (default `true`): the button opens a password modal. Set `showPrompt={false}` to display the password form inline immediately. It renders only for authenticated users who do not already have a password.
 
 Signup requests must include `username`, `email`, `password`, and `confirmPassword`. Usernames must contain 3–20 letters, digits, or underscores. Passwords must contain at least six characters, including an uppercase letter, a lowercase letter, and a digit, and confirmation must match. These rules are now enforced by the backend; API clients that previously omitted confirmation or used weaker passwords must update. Signin requires nonempty email and password strings, without applying the new signup email-format or password-complexity checks to existing accounts.
+
+---
+
+## Multi-Factor Authentication (MFA)
+
+Multi-Factor Authentication (MFA) is currently **not implemented** in Dimsee and is tracked on the project roadmap (see [SECURITY.md](SECURITY.md)). The codebase does not yet provide MFA enrollment, verification, recovery codes, or related authentication workflows.
+
+The **[MFA Enrollment & Recovery Guide](MFA.md)** (also available at [docs/mfa-enrollment-and-recovery.md](docs/mfa-enrollment-and-recovery.md)) outlines the planned architectural specifications and workflows (TOTP app pairing, emergency recovery codes, daily sign-in challenges, and account recovery) for when MFA is implemented in a future release.
+
+---
 
 ## Backend: `createAuthBackend`
 
