@@ -364,6 +364,91 @@
 
 
 /* ==========================================
+   PASTEL THEME (Soft Dreamy Palette)
+   ========================================== */
+.auth-container.pastel {
+  background: linear-gradient(135deg, #e0e7ff 0%, #fae8ff 50%, #fce7f3 100%);
+  color: #4c1d95;
+}
+
+.auth-container.pastel .auth-form {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(224, 231, 255, 0.9);
+  border-radius: 24px;
+  box-shadow: 0 10px 25px -5px rgba(192, 132, 252, 0.18);
+  padding: 40px;
+}
+
+.auth-container.pastel .form-title {
+  color: #6b21a8;
+  font-weight: 700;
+}
+
+.auth-container.pastel .form-subtitle {
+  color: #7e22ce;
+  opacity: 0.75;
+}
+
+.auth-container.pastel .form-input {
+  background: #fdf4ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 14px;
+  color: #581c87;
+}
+
+.auth-container.pastel .form-input::placeholder {
+  color: #c084fc;
+}
+
+.auth-container.pastel .form-input:focus {
+  background: #ffffff;
+  border-color: #c084fc;
+  box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.25);
+}
+
+.auth-container.pastel .submit-button {
+  background: linear-gradient(135deg, #c084fc, #f472b6);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-weight: 600;
+}
+
+.auth-container.pastel .submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(244, 114, 182, 0.3);
+}
+
+.auth-container.pastel .oauth-button {
+  background: #ffffff;
+  border: 1px solid #e9d5ff;
+  color: #581c87;
+  border-radius: 14px;
+}
+
+.auth-container.pastel .oauth-button:hover {
+  background: #fdf4ff;
+  border-color: #c084fc;
+}
+
+.auth-container.pastel .separator {
+  color: #a855f7;
+}
+
+.auth-container.pastel .separator::before,
+.auth-container.pastel .separator::after {
+  background: #e9d5ff;
+}
+
+.auth-container.pastel .switch-mode-link {
+  color: #9333ea !important;
+}
+
+
+/* ==========================================
    FORM STYLES (BASE)
    ========================================== */
 .auth-form {
