@@ -30,7 +30,6 @@ describe('User Schema Verification (Issue #15 & Issue #92)', () => {
     const uniqueKeys = new Set(indexedKeys);
     expect(indexedKeys.length).toBe(uniqueKeys.size);
   });
-  });
 
   it('omits password from JSON representation', () => {
     const user = new User({
