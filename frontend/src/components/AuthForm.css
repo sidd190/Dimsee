@@ -973,8 +973,7 @@
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .auth-form, 
-  .auth-container.minimal .auth-form,
-  .auth-container.retro .auth-form {
+  .auth-container.minimal .auth-form {
     background: window;
     color: windowText;
     border: 2px solid windowText;
@@ -982,8 +981,7 @@
   }
 
   .form-input,
-  .auth-container.minimal .form-input,
-  .auth-container.retro .form-input {
+  .auth-container.minimal .form-input {
     background: window;
     color: windowText;
     border: 1px solid windowText;
@@ -991,11 +989,42 @@
   }
 
   .submit-button,
-  .auth-container.minimal .submit-button,
-  .auth-container.retro .submit-button {
+  .auth-container.minimal .submit-button {
     background: windowText;
     color: window;
     border: 1px solid window;
+  }
+}
+
+/* Retro in increased-contrast mode ("more" is the value browsers support) */
+@media (prefers-contrast: more) {
+  .auth-container.retro::before,
+  .auth-container.retro::after,
+  .auth-container.retro .auth-form {
+    background: window;
+    color: windowText;
+    border-color: windowText;
+    box-shadow: none;
+  }
+
+  .auth-container.retro .form-title,
+  .auth-container.retro .form-subtitle,
+  .auth-container.retro .error-message,
+  .auth-container.retro .separator {
+    color: windowText;
+  }
+
+  .auth-container.retro .form-input,
+  .auth-container.retro .oauth-button {
+    background: window;
+    color: windowText;
+    border-color: windowText;
+  }
+
+  .auth-container.retro .submit-button {
+    background: windowText;
+    color: window;
+    box-shadow: none;
   }
 }
 
