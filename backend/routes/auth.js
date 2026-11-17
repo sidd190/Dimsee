@@ -1,9 +1,11 @@
 // backend/routes/auth.js - Authentication Routes
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { z } = require('zod');
 const passport = require('passport');
 const User = require('../models/User');
+const { tokenDenylist } = require('../services/tokenDenylist');
 
 const router = express.Router();
 
@@ -104,10 +106,11 @@ const generateToken = (userId, jwtSecret,expiresIn) => {
   return jwt.sign({ userId }, jwtSecret, { expiresIn });
 };
 
-//generate refresh token
-const generateRefreshToken = (userId, jwtRefreshSecret,expiresIn) => {
-  return jwt.sign({userId},jwtRefreshSecret,{expiresIn});
-}
+// Generate unique refresh token with cryptographically random jti
+const generateRefreshToken = (userId, jwtRefreshSecret, expiresIn) => {
+  const jti = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
+  return jwt.sign({ userId, jti }, jwtRefreshSecret, { expiresIn });
+};
 
 // Centralised cookie options so every auth cookie gets the same flags.
 const isProduction = () => process.env.NODE_ENV === 'production';
@@ -129,9 +132,13 @@ const setAuthCookies = async (req, res, user) => {
   const token = generateToken(user._id, jwtSecret, jwtExpiryFallback);
   const refreshToken = generateRefreshToken(user._id, jwtRefreshSecret, jwtRefreshExpiryFallback);
 
-  // Update user's refresh token in DB
-  user.refreshToken = refreshToken;
-  await user.save({ validateBeforeSave: false }); // Important: set to false if your User model doesn't expect all fields to be present/valid after setting refreshToken
+  // Update user's refresh token in DB as a secure SHA-256 hash
+  if (typeof user.setRefreshToken === 'function') {
+    await user.setRefreshToken(refreshToken);
+  } else {
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+  }
 
   // Set cookies
   res.cookie('authToken', token, getCookieOptions(cookieMaxAge));
@@ -308,7 +315,33 @@ router.post('/signin', validateBody(signinSchema), (req, res, next) => {
 });
 
 // Sign out route
-router.post('/signout', (req, res) => {
+router.post('/signout', async (req, res) => {
+  const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+  if (incomingRefreshToken) {
+    tokenDenylist.revoke(incomingRefreshToken);
+  }
+
+  // Revoke user's refresh token in DB if authenticated or found via token payload
+  if (req.user && typeof req.user.revokeAllRefreshTokens === 'function') {
+    try {
+      await req.user.revokeAllRefreshTokens();
+    } catch (e) {
+      console.error('Error revoking tokens on signout:', e);
+    }
+  } else if (incomingRefreshToken) {
+    try {
+      const decoded = jwt.decode(incomingRefreshToken);
+      if (decoded && decoded.userId) {
+        const u = await User.findById(decoded.userId);
+        if (u && typeof u.revokeAllRefreshTokens === 'function') {
+          await u.revokeAllRefreshTokens();
+        }
+      }
+    } catch (_err) {
+      // Ignore token decode errors on signout
+    }
+  }
+
   req.logout((err) => {
     if (err) {
       return res.status(500).json({
@@ -340,16 +373,25 @@ router.post('/refresh-token', async (req, res) => {
     });
   }
 
+  // Check server-side revocation denylist
+  if (tokenDenylist.isRevoked(incomingRefreshToken)) {
+    return res.status(401).json({
+      success: false,
+      message: 'Refresh token has been revoked. Please log in again.',
+      errors: [{ field: 'general', message: 'Token revoked' }]
+    });
+  }
+
   try {
     const decodedToken = jwt.verify(incomingRefreshToken, req.app.locals.authConfig.jwtRefreshSecret);
 
     // Ensure the payload has userId
     if (!decodedToken || !decodedToken.userId) {
-        return res.status(401).json({
-            success: false,
-            message: 'Invalid Refresh Token payload',
-            errors: [{ field: 'general', message: 'Invalid Refresh Token' }]
-        });
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid Refresh Token payload',
+        errors: [{ field: 'general', message: 'Invalid Refresh Token' }]
+      });
     }
 
     const user = await User.findById(decodedToken.userId); 
@@ -362,44 +404,121 @@ router.post('/refresh-token', async (req, res) => {
       });
     }
 
-    // Refresh token rotation with reuse detection 
-    if (user.refreshToken !== incomingRefreshToken) {
-        user.refreshToken = null; // Invalidate the stored refresh token to force re-login
-        await user.save({ validateBeforeSave: false }); 
-        return res.status(401).json({
-            success: false,
-            message: 'Refresh token invalid or reused. Please log in again.',
-            errors: [{ field: 'general', message: 'Refresh token invalid or reused.' }]
-        });
+    // Explicit replay detection: check if incoming token matches the previously rotated token
+    if (typeof user.verifyPreviousRefreshToken === 'function' && user.verifyPreviousRefreshToken(incomingRefreshToken)) {
+      tokenDenylist.revoke(incomingRefreshToken);
+      if (typeof user.revokeAllRefreshTokens === 'function') {
+        await user.revokeAllRefreshTokens();
+      } else {
+        user.refreshToken = null;
+        await user.save({ validateBeforeSave: false });
+      }
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token reuse detected. All active sessions have been revoked for security. Please log in again.',
+        errors: [{ field: 'general', message: 'Token replay detected' }]
+      });
     }
+
+    // Verify active refresh token using constant-time comparison
+    const isValidToken = typeof user.verifyRefreshToken === 'function' 
+      ? user.verifyRefreshToken(incomingRefreshToken)
+      : user.refreshToken === incomingRefreshToken;
+
+    if (!isValidToken) {
+      tokenDenylist.revoke(incomingRefreshToken);
+      if (typeof user.revokeAllRefreshTokens === 'function') {
+        await user.revokeAllRefreshTokens();
+      } else {
+        user.refreshToken = null;
+        await user.save({ validateBeforeSave: false });
+      }
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token invalid or reused. Please log in again.',
+        errors: [{ field: 'general', message: 'Refresh token invalid or reused.' }]
+      });
+    }
+
+    // Add consumed token to denylist so it cannot be reused
+    tokenDenylist.revoke(incomingRefreshToken);
 
     // Generate new access and refresh tokens
     const newAccessToken = generateToken(user._id, req.app.locals.authConfig.jwtSecret, req.app.locals.authConfig.jwtExpiry || '15m');
     const newRefreshToken = generateRefreshToken(user._id, req.app.locals.authConfig.jwtRefreshSecret, req.app.locals.authConfig.jwtRefreshExpiry || '7d');
 
-    // Update the user's refresh token in the database with the new one
-    user.refreshToken = newRefreshToken;
-    await user.save({ validateBeforeSave: false });
+    // Update the user's refresh token in the database as a SHA-256 hash and rotate previous
+    if (typeof user.setRefreshToken === 'function') {
+      await user.setRefreshToken(newRefreshToken);
+    } else {
+      user.refreshToken = newRefreshToken;
+      await user.save({ validateBeforeSave: false });
+    }
 
     // Set the new tokens in cookies
     const { cookieMaxAge } = req.app.locals.authConfig;
     res.cookie('authToken', newAccessToken, getCookieOptions(cookieMaxAge));
     res.cookie('refreshToken', newRefreshToken, getCookieOptions(cookieMaxAge));
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Tokens refreshed successfully',
-      accessToken: newAccessToken // Send new access token in body for client to use immediately
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken
     });
 
   } catch (error) {
-    // Generic error handling 
-    res.status(500).json({
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token has expired. Please log in again.',
+        errors: [{ field: 'general', message: 'Refresh token expired' }]
+      });
+    }
+    return res.status(401).json({
       success: false,
-      message: 'Failed to refresh token due to server error',
-      errors: [{ field: 'general', message: 'Internal server error' }]
+      message: 'Invalid Refresh Token',
+      errors: [{ field: 'general', message: error.message || 'Invalid Refresh Token' }]
     });
   }
+});
+
+// Explicit server-side token revocation endpoint
+router.post('/revoke-token', async (req, res) => {
+  const tokenToRevoke = req.body?.refreshToken || req.cookies?.refreshToken;
+  if (!tokenToRevoke) {
+    return res.status(400).json({
+      success: false,
+      message: 'Refresh token required for revocation',
+      errors: [{ field: 'refreshToken', message: 'Token required' }]
+    });
+  }
+
+  // Add to denylist immediately
+  tokenDenylist.revoke(tokenToRevoke);
+
+  try {
+    const decoded = jwt.decode(tokenToRevoke);
+    if (decoded && decoded.userId) {
+      const user = await User.findById(decoded.userId);
+      if (user) {
+        if (typeof user.revokeAllRefreshTokens === 'function') {
+          await user.revokeAllRefreshTokens();
+        } else {
+          user.refreshToken = null;
+          await user.save({ validateBeforeSave: false });
+        }
+      }
+    }
+  } catch (_err) {
+    // Ignore decode errors on token revocation
+  }
+
+  res.clearCookie('refreshToken', getCookieOptions());
+  return res.json({
+    success: true,
+    message: 'Refresh token successfully revoked'
+  });
 });
 
 // Get current user route

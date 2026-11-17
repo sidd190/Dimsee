@@ -12,6 +12,7 @@ const authRoutes = require(path.join(__dirname, 'routes', 'auth'));
 const authMiddleware = require(path.join(__dirname, 'middleware', 'auth'));
 const { passport: passportInstance, configureOAuthStrategies } = require(path.join(__dirname, 'config', 'passport'));
 const User = require(path.join(__dirname, 'models', 'User'));
+const { tokenDenylist } = require(path.join(__dirname, 'services', 'tokenDenylist'));
 
 require('dotenv').config();
 
@@ -136,4 +137,4 @@ const createAuthBackend = (config = {}) => {
   return app;
 };
 
-module.exports = { createAuthBackend, authMiddleware, User };
+module.exports = { createAuthBackend, authMiddleware, User, tokenDenylist };
