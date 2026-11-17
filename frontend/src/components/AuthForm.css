@@ -364,174 +364,293 @@
 
 
 /* ==========================================
-   RETRO THEME (90s Desktop Window)
+   RETRO THEME (close-up of a beige 90s CRT)
    ========================================== */
+/* A beige CRT monitor seen up close on a dark teal desk. The monitor's frame
+   (with its chin) and its hatched bezel are drawn by the container at a fixed
+   size, so the computer stays the same size on every page. The form is the
+   glass: it fills the screen area, and its content scrolls inside it when a
+   page is taller than the screen. */
 .auth-container.retro {
-  background: #008080;
-  color: #000000;
-  font-family: Tahoma, Verdana, Geneva, sans-serif;
+  --ink: #1f2a3c;
+  --beige: #f2dea9;
+  --beige-deep: #e6cf8f;
+  --tan: #c8b38a;
+  --glass: #7fa9ba;
+  --glass-light: #e8f2f4;
+  --glass-ink: #17263a;
+  --mw: min(720px, calc(100vw - 32px));  /* monitor width */
+  --mh: min(720px, calc(100vh - 48px));  /* monitor height */
+  --b1: 36px;    /* frame outline plus the beige border around the bezel */
+  --chin: 100px; /* the chin below the bezel */
+  --b2: 20px;    /* bezel outline plus the tan margin around the glass */
+  height: 100vh;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.07), transparent 65%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 6px),
+    #0d3a3f;
+  color: var(--glass-ink);
+  font-family: 'VT323', 'Courier New', monospace;
 }
 
+/* The global box-sizing rule skips pseudo-elements */
+.auth-container.retro::before,
+.auth-container.retro::after,
+.auth-container.retro *::before,
+.auth-container.retro *::after {
+  box-sizing: border-box;
+}
+
+/* The monitor's frame, with a strip, a button and a power light in the chin */
+.auth-container.retro::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--mw);
+  height: var(--mh);
+  transform: translate(-50%, -50%);
+  border: 8px solid var(--ink);
+  border-radius: 28px;
+  background:
+    linear-gradient(var(--beige-deep), var(--beige-deep)) left 32px bottom 34px / 120px 18px no-repeat,
+    linear-gradient(var(--ink), var(--ink)) left 28px bottom 30px / 128px 26px no-repeat,
+    linear-gradient(var(--beige-deep), var(--beige-deep)) right 80px bottom 34px / 40px 20px no-repeat,
+    linear-gradient(var(--ink), var(--ink)) right 76px bottom 30px / 48px 28px no-repeat,
+    radial-gradient(circle, #8fd18f 0 10px, var(--ink) 10.5px 14px, transparent 14.5px) right 26px bottom 29px / 30px 30px no-repeat,
+    var(--beige);
+  box-shadow: 0 12px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* The hatched tan bezel around the glass */
+.auth-container.retro::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - var(--mw) / 2 + var(--b1));
+  top: calc(50% - var(--mh) / 2 + var(--b1));
+  width: calc(var(--mw) - 2 * var(--b1));
+  height: calc(var(--mh) - var(--b1) - var(--chin));
+  border: 6px solid var(--ink);
+  border-radius: 26px;
+  background:
+    repeating-linear-gradient(45deg, rgba(70, 52, 24, 0.16) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(-45deg, rgba(70, 52, 24, 0.1) 0 1px, transparent 1px 6px),
+    var(--tan);
+}
+
+/* The glass: the form, sized to the screen area. Its content scrolls inside
+   it and sits centered when there's room (the auto margins below). */
 .auth-container.retro .auth-form {
-  background: #c0c0c0;
+  position: absolute;
+  z-index: 1;
+  left: calc(50% - var(--mw) / 2 + var(--b1) + var(--b2));
+  top: calc(50% - var(--mh) / 2 + var(--b1) + var(--b2));
+  width: calc(var(--mw) - 2 * (var(--b1) + var(--b2)));
+  height: calc(var(--mh) - var(--b1) - var(--chin) - 2 * var(--b2));
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink) transparent;
+  padding: 16px 40px 18px;
+  background:
+    repeating-linear-gradient(0deg, rgba(23, 38, 58, 0.06) 0 1px, transparent 1px 3px),
+    radial-gradient(rgba(23, 38, 58, 0.22) 0.9px, transparent 1.2px) 0 0 / 5px 5px,
+    var(--glass);
   backdrop-filter: none;
-  border: none;
-  border-radius: 0;
-  padding: 3px 32px 32px;
-  box-shadow:
-    inset -1px -1px #0a0a0a,
-    inset 1px 1px #dfdfdf,
-    inset -2px -2px #808080,
-    inset 2px 2px #ffffff,
-    4px 4px 0 rgba(0, 0, 0, 0.35);
+  border: 8px solid var(--ink);
+  border-radius: 40px / 46px;
+  box-shadow: inset 0 0 55px rgba(23, 38, 58, 0.3);
+  transform: none;
   transition: none;
 }
 
 .auth-container.retro .auth-form:hover {
   transform: none;
-  box-shadow:
-    inset -1px -1px #0a0a0a,
-    inset 1px 1px #dfdfdf,
-    inset -2px -2px #808080,
-    inset 2px 2px #ffffff,
-    4px 4px 0 rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 55px rgba(23, 38, 58, 0.3);
 }
 
+/* Center short pages vertically; tall pages scroll from the top */
+.auth-container.retro .form-header {
+  margin-top: auto;
+}
+
+.auth-container.retro .auth-form > :last-child {
+  margin-bottom: auto;
+}
+
+/* What's on the screen */
 .auth-container.retro .form-header {
   text-align: left;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
-/* The title becomes the window's title bar */
 .auth-container.retro .form-title {
-  background: #000080;
-  color: #ffffff;
+  color: var(--glass-ink);
   font-family: inherit;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: normal;
-  margin: 0 -29px 16px;
-  padding: 4px 8px;
+  font-size: 2.7rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
 .auth-container.retro .form-subtitle {
-  color: #000000;
-  font-size: 0.95rem;
+  margin-top: 4px;
+  color: var(--glass-ink);
+  font-size: 1.3rem;
+  letter-spacing: 1px;
+}
+
+/* Sign in (two input rows, not four) has room for a bigger title */
+.auth-container.retro .auth-form:not(:has(.input-group ~ .input-group ~ .input-group)) .form-title {
+  font-size: 4rem;
+}
+
+/* A blinking text cursor after the subtitle */
+.auth-container.retro .form-subtitle::after {
+  content: '';
+  display: inline-block;
+  width: 0.55em;
+  height: 0.85em;
+  margin-left: 6px;
+  vertical-align: -3px;
+  background: var(--glass-ink);
+  animation: retro-blink 1.1s steps(1) infinite;
+}
+
+@keyframes retro-blink {
+  50% { opacity: 0; }
 }
 
 .auth-container.retro .input-group {
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 }
 
-/* Inset (sunken) fields. A real border is kept so the base
-   .form-input.error border color can still show. */
 .auth-container.retro .form-input {
-  background: #ffffff;
+  background: var(--glass-light);
   backdrop-filter: none;
-  color: #000000;
-  font-family: inherit;
+  color: var(--glass-ink);
+  font-family: 'Source Code Pro', 'Courier New', monospace;
+  font-size: 15px;
   font-weight: 400;
-  border: 2px solid;
-  border-color: #808080 #ffffff #ffffff #808080;
-  border-radius: 0;
-  box-shadow: inset 1px 1px #0a0a0a;
-  padding: 10px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 5px;
+  box-shadow: none;
+  padding: 7px 10px;
   transition: none;
 }
 
 .auth-container.retro .form-input::placeholder {
-  color: #808080;
+  color: #4a6070;
+  opacity: 1;
 }
 
 .auth-container.retro .form-input:focus {
-  background: #ffffff;
-  box-shadow: inset 1px 1px #0a0a0a;
-  outline: 1px dotted #000000;
-  outline-offset: -5px;
+  background: var(--glass-light);
+  border-color: var(--ink);
+  box-shadow: 4px 4px 0 rgba(23, 38, 58, 0.35);
   transform: none;
 }
 
+/* The base error rule recolors the border red with !important */
 .auth-container.retro .form-input.error {
-  background: #ffffff;
+  background: var(--glass-light);
 }
 
 .auth-container.retro .form-input.error:focus {
-  box-shadow: inset 1px 1px #0a0a0a;
+  box-shadow: 4px 4px 0 rgba(23, 38, 58, 0.35);
 }
 
 .auth-container.retro .error-message {
-  color: #800000;
+  color: #5c0010;
+  font-size: 1.2rem;
   font-weight: 400;
+  margin-top: 4px;
   margin-left: 0;
 }
 
-/* Raised buttons that look pressed when clicked */
 .auth-container.retro .submit-button,
 .auth-container.retro .oauth-button {
-  background: #c0c0c0;
-  color: #000000;
   font-family: inherit;
-  border: none;
-  border-radius: 0;
-  box-shadow:
-    inset -1px -1px #0a0a0a,
-    inset 1px 1px #ffffff,
-    inset -2px -2px #808080,
-    inset 2px 2px #dfdfdf;
+  border: 4px solid var(--ink);
+  border-radius: 5px;
+  box-shadow: 5px 5px 0 rgba(23, 38, 58, 0.35);
   transition: none;
 }
 
 .auth-container.retro .submit-button {
-  font-weight: 700;
-  padding: 10px 16px;
+  background: var(--glass-ink);
+  color: var(--glass-light);
+  font-size: 1.9rem;
+  font-weight: 400;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  padding: 0 14px 3px;
 }
 
-.auth-container.retro .submit-button:hover:not(:disabled),
-.auth-container.retro .oauth-button:hover {
+.auth-container.retro .oauth-button,
+.auth-container.retro .oauth-button.google,
+.auth-container.retro .oauth-button.github {
+  background: var(--glass-light);
+  color: var(--glass-ink);
+  font-size: 1.3rem;
+  padding: 5px 12px;
+}
+
+.auth-container.retro .oauth-buttons {
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.auth-container.retro .submit-button:hover:not(:disabled) {
+  background: #24395a;
   transform: none;
-  box-shadow:
-    inset -1px -1px #0a0a0a,
-    inset 1px 1px #ffffff,
-    inset -2px -2px #808080,
-    inset 2px 2px #dfdfdf;
+  box-shadow: 5px 5px 0 rgba(23, 38, 58, 0.35);
+}
+
+.auth-container.retro .oauth-button:hover {
+  background: #ffffff;
+  transform: none;
+  box-shadow: 5px 5px 0 rgba(23, 38, 58, 0.35);
 }
 
 .auth-container.retro .submit-button:active:not(:disabled),
 .auth-container.retro .oauth-button:active {
-  transform: translate(1px, 1px);
-  box-shadow:
-    inset -1px -1px #ffffff,
-    inset 1px 1px #0a0a0a,
-    inset -2px -2px #dfdfdf,
-    inset 2px 2px #808080;
-}
-
-.auth-container.retro .submit-button:disabled {
-  color: #808080;
-  text-shadow: 1px 1px #ffffff;
-  opacity: 1;
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 rgba(23, 38, 58, 0.35);
 }
 
 .auth-container.retro .loading-spinner {
-  border: 2px solid #808080;
-  border-top-color: #000080;
-}
-
-.auth-container.retro .oauth-button.google,
-.auth-container.retro .oauth-button.github {
-  background: #c0c0c0;
-  color: #000000;
+  border: 2px solid rgba(232, 242, 244, 0.35);
+  border-top-color: var(--glass-light);
 }
 
 .auth-container.retro .separator {
-  color: #000000;
+  margin: 6px 0 12px;
+  color: var(--glass-ink);
 }
 
-/* Etched divider lines */
+.auth-container.retro .separator span {
+  font-size: 1.3rem;
+}
+
 .auth-container.retro .separator::before,
 .auth-container.retro .separator::after {
-  border-bottom: 1px solid #808080;
-  box-shadow: 0 1px 0 #ffffff;
+  border-bottom: 2px dashed var(--ink);
+}
+
+/* The switch link's colors are inline in AuthForm.jsx, so give it a light
+   label behind them (inset shadow) to keep it readable on the glass */
+.auth-container.retro .switch-mode-link {
+  border-radius: 4px;
+  font-family: 'Source Code Pro', 'Courier New', monospace;
+  box-shadow:
+    inset 0 0 0 999px var(--glass-light),
+    0 0 0 6px var(--glass-light),
+    0 0 0 10px var(--ink);
 }
 
 
@@ -769,14 +888,47 @@
     box-shadow: 10px 10px 30px #bebebe, -10px -10px 30px #ffffff;
   }
 
+  .auth-container.retro {
+    --mw: calc(100vw - 20px);
+    --mh: calc(100vh - 20px);
+    --b1: 18px;
+    --chin: 58px;
+    --b2: 12px;
+  }
+
+  .auth-container.retro::before {
+    border-width: 6px;
+    border-radius: 20px;
+    background:
+      linear-gradient(var(--beige-deep), var(--beige-deep)) left 19px bottom 19px / 70px 12px no-repeat,
+      linear-gradient(var(--ink), var(--ink)) left 16px bottom 16px / 76px 18px no-repeat,
+      linear-gradient(var(--beige-deep), var(--beige-deep)) right 51px bottom 19px / 26px 12px no-repeat,
+      linear-gradient(var(--ink), var(--ink)) right 48px bottom 16px / 32px 18px no-repeat,
+      radial-gradient(circle, #8fd18f 0 6px, var(--ink) 6.5px 9px, transparent 9.5px) right 14px bottom 15px / 20px 20px no-repeat,
+      var(--beige);
+  }
+
+  .auth-container.retro::after {
+    border-width: 5px;
+    border-radius: 16px;
+  }
+
   .auth-container.retro .auth-form {
-    padding: 3px 16px 24px;
-    border-radius: 0;
+    padding: 18px 20px;
+    border-width: 6px;
+    border-radius: 24px / 28px;
   }
 
   .auth-container.retro .form-title {
-    margin: 0 -13px 12px;
-    font-size: 0.95rem;
+    font-size: 2.6rem;
+  }
+
+  .auth-container.retro .form-subtitle {
+    font-size: 1.35rem;
+  }
+
+  .auth-container.retro .submit-button {
+    font-size: 2rem;
   }
 
   .form-title {
@@ -814,8 +966,8 @@
 }
 
 .auth-container.retro .auth-form *:focus-visible {
-  outline: 1px dotted #000000;
-  outline-offset: -5px;
+  outline: 3px dashed #17263a;
+  outline-offset: 2px;
 }
 
 /* High contrast mode support */
