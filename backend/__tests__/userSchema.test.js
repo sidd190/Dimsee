@@ -9,14 +9,26 @@ describe('User Schema Verification (Issue #15 & Issue #92)', () => {
     expect(User.schema.paths.createdAt.defaultValue).toBeUndefined();
   });
 
-  it('declares indexes on hot paths: email, username, and refreshToken (Issue #92)', () => {
+  it('declares indexes on hot paths without duplicate specifications (Issue #92)', () => {
     const indexes = User.schema.indexes();
-    const indexedFieldNames = indexes.map(([fields]) => Object.keys(fields)).flat();
+    
+    // Each index entry is [fieldsObject, optionsObject]
+    const emailIndex = indexes.find(([fields]) => fields.email !== undefined);
+    const usernameIndex = indexes.find(([fields]) => fields.username !== undefined);
+    const refreshTokenIndex = indexes.find(([fields]) => fields.refreshToken !== undefined);
 
-    // Check individual indexed paths or schema indexes
-    expect(indexedFieldNames).toContain('email');
-    expect(indexedFieldNames).toContain('username');
-    expect(indexedFieldNames).toContain('refreshToken');
+    expect(emailIndex).toBeDefined();
+    expect(emailIndex[1].unique).toBe(true);
+
+    expect(usernameIndex).toBeDefined();
+    expect(usernameIndex[1].unique).toBe(true);
+
+    expect(refreshTokenIndex).toBeDefined();
+
+    // Verify there are no duplicate index specifications for any field
+    const indexedKeys = indexes.map(([fields]) => Object.keys(fields).sort().join(','));
+    const uniqueKeys = new Set(indexedKeys);
+    expect(indexedKeys.length).toBe(uniqueKeys.size);
   });
 
   it('omits password from JSON representation', () => {

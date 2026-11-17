@@ -51,11 +51,6 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Explicit compound / single indexes for hot path queries
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
-userSchema.index({ refreshToken: 1 });
-
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   if (this.isModified('password') && this.password) {
