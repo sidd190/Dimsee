@@ -38,9 +38,22 @@
   },
   "jest": {
     "transform": {
-      "^.+\\.jsx?$": ["babel-jest", {
-        "presets": [["@babel/preset-env", { "targets": { "node": "current" } }], "@babel/preset-react"]
-      }]
+      "^.+\\.jsx?$": [
+        "babel-jest",
+        {
+          "presets": [
+            [
+              "@babel/preset-env",
+              {
+                "targets": {
+                  "node": "current"
+                }
+              }
+            ],
+            "@babel/preset-react"
+          ]
+        }
+      ]
     },
     "testPathIgnorePatterns": [
       "/node_modules/",
@@ -85,12 +98,12 @@
     "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
-    "zod": "^3.22.2"
+    "zod": "^4.6.7"
   },
   "peerDependencies": {
+    "axios": "^1.0.0",
     "react": ">=16.8.0",
-    "react-dom": ">=16.8.0",
-    "axios": "^1.0.0"
+    "react-dom": ">=16.8.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.23.9",
