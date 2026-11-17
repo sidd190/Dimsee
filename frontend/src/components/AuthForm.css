@@ -509,22 +509,6 @@
   font-size: 4rem;
 }
 
-/* A blinking text cursor after the subtitle */
-.auth-container.retro .form-subtitle::after {
-  content: '';
-  display: inline-block;
-  width: 0.55em;
-  height: 0.85em;
-  margin-left: 6px;
-  vertical-align: -3px;
-  background: var(--glass-ink);
-  animation: retro-blink 1.1s steps(1) infinite;
-}
-
-@keyframes retro-blink {
-  50% { opacity: 0; }
-}
-
 .auth-container.retro .input-group {
   margin-bottom: 10px;
 }
@@ -642,15 +626,23 @@
   border-bottom: 2px dashed var(--ink);
 }
 
-/* The switch link's colors are inline in AuthForm.jsx, so give it a light
-   label behind them (inset shadow) to keep it readable on the glass */
+/* The switch link sits on a light label (inset shadow) on the glass. Its
+   colors are inline in AuthForm.jsx (#667eea / #764ba2), so the theme
+   overrides them with !important, using the glass inks (13.4:1 and
+   12.7:1 on the label; #667eea was only 3.2:1) */
 .auth-container.retro .switch-mode-link {
+  color: var(--glass-ink) !important;
   border-radius: 4px;
   font-family: 'Source Code Pro', 'Courier New', monospace;
   box-shadow:
     inset 0 0 0 999px var(--glass-light),
     0 0 0 6px var(--glass-light),
     0 0 0 10px var(--ink);
+}
+
+.auth-container.retro .switch-mode-link span {
+  color: var(--ink) !important;
+  font-weight: 700;
 }
 
 
@@ -890,7 +882,7 @@
 
   .auth-container.retro {
     --mw: calc(100vw - 20px);
-    --mh: var(--mw); /* stays square on phones */
+    --mh: min(var(--mw), calc(100vh - 20px)); /* square on phones, never taller than the window */
     --b1: 12px;
     --chin: 42px;
     --b2: 8px;
@@ -1042,6 +1034,8 @@
   }
 
   .auth-container.retro .form-input,
+  .auth-container.retro .form-input:focus,
+  .auth-container.retro .form-input.error,
   .auth-container.retro .oauth-button {
     background: window;
     color: windowText;
