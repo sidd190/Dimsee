@@ -890,46 +890,73 @@
 
   .auth-container.retro {
     --mw: calc(100vw - 20px);
-    --mh: calc(100vh - 20px);
-    --b1: 18px;
-    --chin: 58px;
-    --b2: 12px;
+    --mh: var(--mw); /* stays square on phones */
+    --b1: 12px;
+    --chin: 42px;
+    --b2: 8px;
   }
 
   .auth-container.retro::before {
     border-width: 6px;
     border-radius: 20px;
     background:
-      linear-gradient(var(--beige-deep), var(--beige-deep)) left 19px bottom 19px / 70px 12px no-repeat,
-      linear-gradient(var(--ink), var(--ink)) left 16px bottom 16px / 76px 18px no-repeat,
-      linear-gradient(var(--beige-deep), var(--beige-deep)) right 51px bottom 19px / 26px 12px no-repeat,
-      linear-gradient(var(--ink), var(--ink)) right 48px bottom 16px / 32px 18px no-repeat,
-      radial-gradient(circle, #8fd18f 0 6px, var(--ink) 6.5px 9px, transparent 9.5px) right 14px bottom 15px / 20px 20px no-repeat,
+      linear-gradient(var(--beige-deep), var(--beige-deep)) left 15px bottom 11px / 60px 10px no-repeat,
+      linear-gradient(var(--ink), var(--ink)) left 12px bottom 8px / 66px 16px no-repeat,
+      linear-gradient(var(--beige-deep), var(--beige-deep)) right 45px bottom 11px / 22px 10px no-repeat,
+      linear-gradient(var(--ink), var(--ink)) right 42px bottom 8px / 28px 16px no-repeat,
+      radial-gradient(circle, #8fd18f 0 5px, var(--ink) 5.5px 8px, transparent 8.5px) right 12px bottom 7px / 18px 18px no-repeat,
       var(--beige);
   }
 
   .auth-container.retro::after {
-    border-width: 5px;
-    border-radius: 16px;
+    border-width: 4px;
+    border-radius: 14px;
   }
 
   .auth-container.retro .auth-form {
-    padding: 18px 20px;
-    border-width: 6px;
-    border-radius: 24px / 28px;
+    padding: 10px 14px;
+    border-width: 5px;
+    border-radius: 20px / 24px;
   }
 
-  .auth-container.retro .form-title {
-    font-size: 2.6rem;
+  /* Smaller screen text so sign in fits the square glass */
+  .auth-container.retro .form-header {
+    margin-bottom: 8px;
+  }
+
+  .auth-container.retro .auth-form .form-title {
+    font-size: 1.9rem;
+  }
+
+  .auth-container.retro .auth-form:not(:has(.input-group ~ .input-group ~ .input-group)) .form-title {
+    font-size: 2.3rem;
   }
 
   .auth-container.retro .form-subtitle {
-    font-size: 1.35rem;
+    margin-top: 2px;
+    font-size: 1.05rem;
+  }
+
+  .auth-container.retro .input-group {
+    margin-bottom: 8px;
+  }
+
+  .auth-container.retro .form-input {
+    font-size: 14px;
+    padding: 5px 8px;
   }
 
   .auth-container.retro .submit-button {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
+
+  .auth-container.retro .oauth-button,
+  .auth-container.retro .oauth-button.google,
+  .auth-container.retro .oauth-button.github {
+    font-size: 1.1rem;
+    padding: 3px 8px;
+  }
+
 
   .form-title {
     font-size: 1.6rem;
