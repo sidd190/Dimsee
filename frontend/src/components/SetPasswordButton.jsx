@@ -57,8 +57,13 @@ const SetPasswordButton = ({
       return;
     }
 
-    if (passwordData.password.length < 6) {
-      setPasswordError('Password must be at least 6 characters');
+    if (passwordData.password.length < 8) {
+      setPasswordError('Password must be at least 8 characters long');
+      return;
+    }
+
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(passwordData.password)) {
+      setPasswordError('Password must contain at least one uppercase letter, one lowercase letter, and one number');
       return;
     }
 
@@ -70,7 +75,8 @@ const SetPasswordButton = ({
         setPasswordData({ password: '', confirmPassword: '' });
         if (onSuccess) onSuccess(result);
       } else {
-        setPasswordError(result.message);
+        const fieldError = result.errors?.find(err => err.field === 'password')?.message;
+        setPasswordError(fieldError || result.message || 'Failed to set password');
         if (onError) onError(result);
       }
     } catch (error) {
