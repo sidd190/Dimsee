@@ -4,6 +4,7 @@
 const { checkJwtSecrets } = require('./checks/jwtSecrets');
 const { checkCorsOrigin } = require('./checks/corsOrigin');
 const { formatHumanReport } = require('./reporters/human');
+const { formatJsonReport } = require('./reporters/json');
 
 /**
  * Registry of available audit checks.
@@ -17,7 +18,7 @@ const CHECKS = [
  * Runs security audit on a Dimsee configuration or running app instance.
  * @param {Object} input - Dimsee configuration object or Express app with app.locals.authConfig
  * @param {Object} [options] - Audit options
- * @param {string} [options.format] - Output format: 'raw' (default) or 'human'
+ * @param {string} [options.format] - Output format: 'raw' (default), 'human', or 'json'
  * @returns {Object|string} Audit report object or formatted string
  */
 function audit(input = {}, options = {}) {
@@ -58,6 +59,10 @@ function audit(input = {}, options = {}) {
     return formatHumanReport(rawReport, options);
   }
 
+  if (options.format === 'json') {
+    return formatJsonReport(rawReport, options);
+  }
+
   return rawReport;
 }
 
@@ -66,5 +71,6 @@ module.exports = {
   CHECKS,
   checkJwtSecrets,
   checkCorsOrigin,
-  formatHumanReport
+  formatHumanReport,
+  formatJsonReport
 };
