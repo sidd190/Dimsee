@@ -96,6 +96,11 @@ Dimsee provides an automated configuration auditing function (`audit`) to evalua
 const { audit, createAuthBackend } = require("dimsee/backend");
 
 const app = createAuthBackend({ /* ... */ });
+// Console-ready color-coded report:
+const humanReport = audit(app, { format: "human" });
+console.log(humanReport);
+
+// Or raw audit findings:
 const report = audit(app);
 
 if (!report.passed) {
