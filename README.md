@@ -97,6 +97,10 @@ const { audit, createAuthBackend } = require("dimsee/backend");
 
 const app = createAuthBackend({ /* ... */ });
 // Console-ready color-coded report:
+// Machine-readable JSON output for CI pipelines:
+const jsonReport = audit(app, { format: "json" });
+
+// Console-ready color-coded report:
 const humanReport = audit(app, { format: "human" });
 console.log(humanReport);
 
