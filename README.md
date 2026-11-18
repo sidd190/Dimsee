@@ -27,7 +27,10 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 -   **Customizable:** Easily extend and style with your own CSS.
 -   **Callbacks:** `onSuccess` and `onError` callbacks for handling auth events.
 
+[![LLM Context](https://img.shields.io/badge/llms--full.txt-available-purple.svg)](llms-full.txt)
+
 ## Table of Contents
+- [LLM & AI Assistant Context](#llm--ai-assistant-context)
 - [Getting Started](#getting-started)
 - [Framework Guides](#framework-guides)
   - [Create React App / Vite](#create-react-app--vite)
@@ -41,6 +44,18 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 - [Use Cases](#use-cases)
 - [License](#license)
 
+
+## LLM & AI Assistant Context
+
+To provide coding assistants and LLMs with full context about Dimsee in a standardized format, this repository provides:
+
+- [llms.txt](llms.txt): A concise overview, API reference summary, and directory of documentation files following the [llmstxt.org](https://llmstxt.org) standard.
+- [llms-full.txt](llms-full.txt): A comprehensive, machine-readable concatenation of all project documentation (README, guides, security, customization, and contribution instructions) suitable for context windows.
+
+You can regenerate these files anytime by running:
+```bash
+npm run docs:llms
+```
 
 ## Getting Started
 

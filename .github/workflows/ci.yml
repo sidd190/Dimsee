@@ -50,4 +50,8 @@ jobs:
         run: npm run build
 
       - name: Check package contents
+        run: npm run docs:llms
+      - name: Verify llms files are up to date
+        run: git diff --exit-code llms.txt llms-full.txt
+      - name: Validate package contents
         run: npm pack --dry-run --ignore-scripts

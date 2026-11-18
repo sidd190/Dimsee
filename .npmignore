@@ -35,3 +35,7 @@ tsconfig.json
 babel.config.js
 rollup.config.js
 webpack.config.js 
+# LLM documentation dumps (served from repository)
+llms.txt
+llms-full.txt
+scripts/generate-llms.js
