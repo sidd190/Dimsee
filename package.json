@@ -35,7 +35,8 @@
     "prepublishOnly": "npm test && npm run build",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "mcp:docs": "node scripts/mcp-server.js"
+    "mcp:docs": "node scripts/mcp-server.js",
+    "docs:llms": "node scripts/generate-llms.js"
   },
   "jest": {
     "transform": {
