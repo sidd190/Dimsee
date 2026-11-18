@@ -139,3 +139,6 @@ We welcome contributions! If you've created a great new design, you can add it a
     *   In your pull request description, include a screenshot of your new theme in action!
 
 Thank you for helping make this component better! 
+
+---
+*For AI context and documentation indexing, refer to [llms.txt](llms.txt).*
