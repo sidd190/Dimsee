@@ -126,6 +126,7 @@ A change is ready to merge when:
 - [ ] New behaviour has a test (where practical)
 - [ ] Docs/README updated if the public API or props changed
 - [ ] UI changes include a screenshot
+- [ ] Update [llms.txt](llms.txt) if core architecture or public API signatures changed
 
 ---
 
