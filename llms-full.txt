@@ -157,10 +157,12 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 -   **Customizable:** Easily extend and style with your own CSS.
 -   **Callbacks:** `onSuccess` and `onError` callbacks for handling auth events.
 
-[![LLM Context](https://img.shields.io/badge/llms--full.txt-available-purple.svg)](llms-full.txt)
+[![llms.txt](https://img.shields.io/badge/llms.txt-available-blue.svg)](llms.txt)
+[![MCP Server](https://img.shields.io/badge/MCP-dimsee--docs--mcp-purple.svg)](scripts/mcp-server.js)
+[![Secure Snippets](https://img.shields.io/badge/Secure%20Snippets-vetted-green.svg)](SECURE_SNIPPETS.md)
 
 ## Table of Contents
-- [LLM & AI Assistant Context](#llm--ai-assistant-context)
+- [AI Assistant & LLM Integration](#ai-assistant--llm-integration)
 - [Getting Started](#getting-started)
 - [Framework Guides](#framework-guides)
   - [Create React App / Vite](#create-react-app--vite)
@@ -175,17 +177,18 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 - [License](#license)
 
 
-## LLM & AI Assistant Context
+## AI Assistant & LLM Integration
 
-To provide coding assistants and LLMs with full context about Dimsee in a standardized format, this repository provides:
+Dimsee includes first-class support for AI coding tools, agents, and IDE assistants to ensure safe, idiomatic authentication setups:
 
-- [llms.txt](llms.txt): A concise overview, API reference summary, and directory of documentation files following the [llmstxt.org](https://llmstxt.org) standard.
-- [llms-full.txt](llms-full.txt): A comprehensive, machine-readable concatenation of all project documentation (README, guides, security, customization, and contribution instructions) suitable for context windows.
-
-You can regenerate these files anytime by running:
-```bash
-npm run docs:llms
-```
+- **[llms.txt](llms.txt)**: Standardized overview and index linking core docs adhering to the [llmstxt.org](https://llmstxt.org) convention.
+- **[llms-full.txt](llms-full.txt)**: Complete machine-readable documentation dump suitable for LLM context windows.
+- **[SECURE_SNIPPETS.md](SECURE_SNIPPETS.md)**: Curated, copy-paste-ready integration snippets designed to be secure by construction.
+- **Documentation MCP Server**: Run an in-process or stdio Model Context Protocol server exposing Dimsee documentation, tools, and vetted code snippets to MCP-compliant assistants:
+  ```bash
+  # Launch the Docs MCP Server
+  npm run mcp:docs
+  ```
 
 ## Getting Started
 
@@ -827,7 +830,7 @@ A change is ready to merge when:
 - [ ] New behaviour has a test (where practical)
 - [ ] Docs/README updated if the public API or props changed
 - [ ] UI changes include a screenshot
-- [ ] Docs changes updated in llms files if public APIs changed (`npm run docs:llms`)
+- [ ] LLM docs and MCP server tests pass (`npm test` and `npm run docs:llms`)
 
 ---
 
@@ -870,9 +873,9 @@ report issues and what Dimsee does and does not protect against.
 Security fixes land on the latest minor; please upgrade before reporting against
 an old release.
 
-## Machine-Readable Security Guidance
+## Machine-Readable Security Guidance & MCP
 
-For AI code generation tools and agents, security best practices and constraints are embedded in [llms.txt](llms.txt) and [llms-full.txt](llms-full.txt) to prevent insecure implementations.
+AI assistants can directly query vetted security snippets and guidelines via [llms.txt](llms.txt), [SECURE_SNIPPETS.md](SECURE_SNIPPETS.md), or through the documentation MCP server (`npm run mcp:docs`).
 
 ## Reporting a vulnerability
 

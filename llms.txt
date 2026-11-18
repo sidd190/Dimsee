@@ -1,37 +1,35 @@
 # Dimsee
 
-> Drop-in full-stack authentication package for MERN (MongoDB, Express, React, Node.js) and Next.js applications with built-in OAuth support, session management, and themeable React UI components.
-
-Dimsee simplifies full-stack authentication into a single \`createAuthBackend()\` Express server initialization and modular React components (\`<AuthForm />\`, \`<AuthStatus />\`, \`<AuthProvider />\`).
+> Drop-in full-stack authentication for MERN applications. Pairs a configurable Express backend with a themeable React frontend so you can add signup, login, OAuth, sessions, and protected routes without wiring auth from scratch.
 
 - Version: 0.6.9
-- Repository: https://github.com/sidd190/Dimsee
-- npm Package: https://www.npmjs.com/package/dimsee
 - License: MIT
+- npm: https://www.npmjs.com/package/dimsee
+- GitHub: https://github.com/sidd190/Dimsee
+- Issues: https://github.com/sidd190/Dimsee/issues
 
-## Core Documentation
+## Documentation
 
-- [README.md](README.md): Primary library guide, quickstart examples, Next.js / Vite framework guides, complete component prop specifications, and deployment checklist.
-- [CUSTOMIZATION.md](CUSTOMIZATION.md): Detailed CSS class hierarchy, selector specificity tips, and step-by-step instructions for contributing custom themes.
-- [CONTRIBUTING.md](CONTRIBUTING.md): Local developer environment setup, testing standards, CI automated checks, and pull request conventions.
-- [SECURITY.md](SECURITY.md): Security architecture, session cookie policies, reporting procedures, and supported versions.
-- [VISION.md](VISION.md): Architectural roadmap, first-class MongoDB design philosophy, and future release milestones.
-- [CHANGELOG.md](CHANGELOG.md): Historical record of features, security patches, and releases.
+- [README.md](README.md): Full setup guide, API reference, framework guides (CRA/Vite/Next.js), component props, deployment checklist, and troubleshooting.
+- [CUSTOMIZATION.md](CUSTOMIZATION.md): CSS class structure, theme customization guide, and instructions for contributing a new theme.
+- [CONTRIBUTING.md](CONTRIBUTING.md): Local setup, CI workflow, PR process, commit conventions, and definition of done.
+- [SECURITY.md](SECURITY.md): Security model, known limitations, vulnerability reporting, and disclosure policy.
+- [VISION.md](VISION.md): Project direction, design principles, roadmap milestones, and non-goals.
+- [CHANGELOG.md](CHANGELOG.md): Version history and release notes.
 
-## Core API Reference
+## Quick API Reference
 
-### Backend Setup (\`dimsee/backend\`)
+### Backend
 
-\`\`\`javascript
+```javascript
 const { createAuthBackend, authMiddleware } = require('dimsee/backend');
 
-// Initialize configured Express authentication application
 const app = createAuthBackend({
   mongoUri: process.env.MONGO_URI, // MongoDB connection string
-  jwtSecret: process.env.JWT_SECRET, // JWT signing secret (min 32 characters in production)
-  corsOrigin: process.env.CORS_ORIGIN, // Exact frontend origin URL (e.g. 'https://example.com')
-  cookieMaxAge: 7 * 24 * 60 * 60 * 1000, // Session cookie duration (defaults to 7 days)
-  enableOAuth: false, // Set true to enable Google and GitHub OAuth 2.0
+  jwtSecret: process.env.JWT_SECRET, // >= 32 random characters
+  corsOrigin: process.env.CORS_ORIGIN, // exact frontend origin
+  cookieMaxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (ms)
+  enableOAuth: false, // set true to enable OAuth
   oauth: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -46,61 +44,52 @@ const app = createAuthBackend({
   }
 });
 
-// Route protection middleware
+// Protect custom routes
 app.get('/api/protected', authMiddleware, (req, res) => {
-  res.json({ message: 'Protected resource accessed', user: req.user });
+  res.json({ user: req.user });
 });
-\`\`\`
+```
 
-### Frontend Setup (\`dimsee/frontend\`)
+### Frontend
 
-\`\`\`jsx
-import React from 'react';
+```jsx
 import { AuthProvider, AuthForm, AuthStatus } from 'dimsee/frontend';
 
-// Context Wrapper
-function App() {
-  return (
-    <AuthProvider apiUrl={process.env.VITE_API_URL || 'http://localhost:5000/api/auth'}>
-      {/* AuthStatus acts as an authentication controller */}
-      <AuthStatus formDesign="modern" showUserInfo={true}>
-        <ProtectedDashboard />
-      </AuthStatus>
-    </AuthProvider>
-  );
-}
+// Wrap application with AuthProvider
+<AuthProvider apiUrl={process.env.VITE_API_URL || 'http://localhost:5000/api/auth'}>
+  <AuthStatus>
+    <Dashboard />
+  </AuthStatus>
+</AuthProvider>
 
-// Standalone form usage
-function LoginPage() {
-  return (
-    <AuthForm
-      mode="signin"
-      design="modern"
-      onSuccess={(data) => console.log('Login success:', data)}
-      onError={(err) => console.error('Login error:', err)}
-    />
-  );
-}
-\`\`\`
+// Or use standalone AuthForm
+<AuthForm
+  mode="signin"
+  design="modern"
+  onSuccess={(data) => console.log('Authenticated', data)}
+  onError={(err) => console.error('Auth error', err)}
+/>
+```
 
-### Endpoints Summary (Prefix: \`/api/auth\`)
+### REST Endpoints (prefixed with /api/auth)
 
-- \`POST /signup\`: Register a new user with username, email, password, and confirmPassword.
-- \`POST /signin\`: Authenticate existing user with email and password credentials.
-- \`POST /signout\`: Clear authentication session cookies and log out.
-- \`GET /me\`: Fetch currently authenticated user profile.
-- \`GET /oauth-status\`: Retrieve configuration state of OAuth providers.
-- \`GET /google\`: Initiate Google OAuth 2.0 flow.
-- \`GET /google/callback\`: Callback handler for Google OAuth redirect.
-- \`GET /github\`: Initiate GitHub OAuth flow.
-- \`GET /github/callback\`: Callback handler for GitHub OAuth redirect.
-- \`POST /set-password\`: Allow an OAuth-created user account to establish a password.
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | /signup | Register a new user account |
+| POST | /signin | Authenticate existing user |
+| POST | /signout | Log out current user (clears session cookie) |
+| GET | /me | Retrieve current authenticated user profile |
+| GET | /oauth-status | Check enabled OAuth providers |
+| GET | /google | Initiate Google OAuth flow |
+| GET | /google/callback | Google OAuth redirect callback |
+| GET | /github | Initiate GitHub OAuth flow |
+| GET | /github/callback | GitHub OAuth redirect callback |
+| POST | /set-password | Set password for OAuth-authenticated account |
 
-## Guidance for AI Code Generators and Agents
+## Critical Security Guidance for AI Code Generation
 
-When authoring or generating Dimsee implementations:
-1. Always load configuration secrets (\`mongoUri\`, \`jwtSecret\`, \`corsOrigin\`) from environment variables. Never embed credentials in source code.
-2. Dimsee uses server-set HTTP-only cookies for session management. Do not attempt to store session tokens manually in \`localStorage\` or \`sessionStorage\`.
-3. In Next.js environments, initialize \`createAuthBackend()\` once per module and disable Next's default bodyParser (\`export const config = { api: { bodyParser: false } }\`).
-4. Apply \`authMiddleware\` explicitly on every backend route requiring authentication; API endpoints are public unless guarded.
-5. In production deployments, ensure \`NODE_ENV=production\` so cookies are set with \`Secure\` and \`SameSite=Strict\`.
+- Always source `mongoUri`, `jwtSecret`, and `corsOrigin` from environment variables. Never hardcode secrets.
+- Always apply `authMiddleware` explicitly to every private route; routes are public by default.
+- Use HTTP-only cookies for session management. Do not persist auth tokens in `localStorage` or `sessionStorage` (XSS risk).
+- When using Next.js, never prefix sensitive credentials (`MONGO_URI`, `JWT_SECRET`) with `NEXT_PUBLIC_`.
+- Apply rate limiting on `/signin` and `/signup` in production deployments.
