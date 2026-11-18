@@ -174,6 +174,9 @@ If you prefer an all-in-one setup, you can run the Dimsee backend inside a catch
 
 3.  **Use Client Components**: Any component that uses `AuthForm` or `AuthStatus` must be a Client Component. Add `'use client';` to the top of the file if you are using the Next.js App Router.
 
+> [!WARNING]
+> When using the Next.js App Router, do **not** use `NEXT_PUBLIC_` prefix for `MONGO_URI` or `JWT_SECRET`. Only values intended to be public (like your app's own URL) should use `NEXT_PUBLIC_`. Sensitive server-only vars must remain unprefixed.
+
 ## Frontend: `AuthForm` Component
 
 The `AuthForm` component is the core of the Dimsee frontend. It is a highly configurable React component that handles user interaction for both signing in and signing up.
