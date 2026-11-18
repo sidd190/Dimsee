@@ -103,6 +103,7 @@ if (!report.passed) {
 }
 ```
 
+- **CORS Origin Audit**: Flags wildcard (`"*"`), missing, or insecure HTTP origins when in production.
 - **JWT Secrets Audit**: Checks that `jwtSecret` (for access tokens) and `jwtRefreshSecret` (for refresh tokens) are distinct, configured, and not left at default placeholders.
 
 

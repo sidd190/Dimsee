@@ -49,6 +49,7 @@ Dimsee aims to give a MERN app a secure-by-default auth baseline:
 
 Use `audit()` to automatically detect configuration drift or weak secrets:
 - Access and refresh token secrets must be distinct and non-default.
+- Wildcard (`*`) and insecure HTTP origins are forbidden in production CORS configurations.
 
 ## Known limitations & your responsibilities
 
