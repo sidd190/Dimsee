@@ -45,6 +45,10 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 - [License](#license)
 
 
+## llms.txt AI Context
+
+Dimsee provides a root [llms.txt](llms.txt) following the [llmstxt.org](https://llmstxt.org) standard. It offers language models and AI development tools a curated overview of the library, key documentation links, API usage examples, and secure code generation principles.
+
 ## Getting Started
 
 ### Installation
