@@ -27,6 +27,8 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 -   **Customizable:** Easily extend and style with your own CSS.
 -   **Callbacks:** `onSuccess` and `onError` callbacks for handling auth events.
 
+> For copy-paste secure setup code, jump to [Secure Snippets](#secure-snippets) or see [SECURE_SNIPPETS.md](SECURE_SNIPPETS.md).
+
 ## Table of Contents
 - [Getting Started](#getting-started)
 - [Framework Guides](#framework-guides)
@@ -37,7 +39,7 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 - [Backend: `createAuthBackend`](#backend-createauthbackend)
 - [Backend API Reference](#backend-api-reference)
 - [Customization and Contributing](#customization-and-contributing)
-- [Secure Snippets](#secure-snippets)
+- [Secure Snippets](#secure-snippets) _(see also [SECURE_SNIPPETS.md](SECURE_SNIPPETS.md))_
 - [Deployment and Troubleshooting](#deployment-and-troubleshooting)
 - [Use Cases](#use-cases)
 - [License](#license)
