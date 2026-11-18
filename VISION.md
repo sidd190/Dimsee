@@ -91,3 +91,7 @@ claims, turning posture into something you can see.
 
 Direction is set in the open. Big bets get an RFC discussion before implementation.
 The contributor ladder (good first issue through complex) stays the on-ramp.
+
+
+---
+*For AI assistants reading project architecture and documentation, see [llms.txt](llms.txt).*

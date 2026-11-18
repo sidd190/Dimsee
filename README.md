@@ -27,7 +27,10 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 -   **Customizable:** Easily extend and style with your own CSS.
 -   **Callbacks:** `onSuccess` and `onError` callbacks for handling auth events.
 
+[![llms.txt](https://img.shields.io/badge/llms.txt-standardized-blue.svg)](llms.txt)
+
 ## Table of Contents
+- [llms.txt AI Context](#llmstxt-ai-context)
 - [Getting Started](#getting-started)
 - [Framework Guides](#framework-guides)
   - [Create React App / Vite](#create-react-app--vite)
@@ -41,6 +44,10 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 - [Use Cases](#use-cases)
 - [License](#license)
 
+
+## llms.txt AI Context
+
+Dimsee provides a root [llms.txt](llms.txt) following the [llmstxt.org](https://llmstxt.org) standard. It offers language models and AI development tools a curated overview of the library, key documentation links, API usage examples, and secure code generation principles.
 
 ## Getting Started
 
