@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import useAuth from '../hooks/useAuth';
+import './LogoutButton.css';
 
 const LogoutButton = ({ 
   design = 'modern',
@@ -82,91 +83,18 @@ const LogoutButton = ({
     };
   };
 
-  // Design styles
-  const getButtonStyle = () => {
-    const baseButtonStyle = {
-      border: 'none',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      fontWeight: '500',
-      transition: 'all 0.2s ease',
-      outline: 'none',
-      fontFamily: 'inherit'
-    };
+  // Design, size, hover and disabled styles live in LogoutButton.css
+  const buttonClasses = [
+    'logout-button',
+    `design-${design}`,
+    `size-${size}`
+  ].join(' ');
 
-    const sizes = {
-      small: { padding: '6px 12px', fontSize: '14px' },
-      medium: { padding: '8px 16px', fontSize: '16px' },
-      large: { padding: '12px 24px', fontSize: '18px' }
-    };
-
-    const designs = {
-      modern: {
-        backgroundColor: '#dc2626',
-        color: 'white',
-        ':hover': {
-          backgroundColor: '#b91c1c'
-        },
-        ':disabled': {
-          backgroundColor: '#fca5a5',
-          cursor: 'not-allowed'
-        }
-      },
-      minimal: {
-        backgroundColor: '#e5e7eb',
-        color: '#374151',
-        ':hover': {
-          backgroundColor: '#d1d5db'
-        },
-        ':disabled': {
-          backgroundColor: '#f3f4f6',
-          cursor: 'not-allowed'
-        }
-      },
-      outline: {
-        backgroundColor: 'transparent',
-        color: '#dc2626',
-        border: '2px solid #dc2626',
-        ':hover': {
-          backgroundColor: '#dc2626',
-          color: 'white'
-        },
-        ':disabled': {
-          borderColor: '#fca5a5',
-          color: '#fca5a5',
-          cursor: 'not-allowed'
-        }
-      },
-      rounded: {
-        backgroundColor: '#dc2626',
-        color: 'white',
-        borderRadius: '50px',
-        ':hover': {
-          backgroundColor: '#b91c1c'
-        },
-        ':disabled': {
-          backgroundColor: '#fca5a5',
-          cursor: 'not-allowed'
-        }
-      }
-    };
-
-    const userInfoStyle = {
-      fontSize: '14px',
-      color: '#6b7280'
-    };
-
-    return { 
-      buttonStyle: {
-        ...baseButtonStyle,
-        ...sizes[size],
-        ...designs[design]
-      },
-      userInfoStyle 
-    };
+  const userInfoStyle = {
+    fontSize: '14px',
+    color: '#6b7280'
   };
 
-  const { buttonStyle, userInfoStyle } = getButtonStyle();
   const containerStyle = getContainerStyle();
 
   return (
@@ -181,25 +109,11 @@ const LogoutButton = ({
       )}
       
       <button
+        type="button"
         onClick={handleLogout}
         disabled={isLoggingOut}
-        style={buttonStyle}
+        className={buttonClasses}
         title={`Sign out ${user.username}`}
-        onMouseEnter={(e) => {
-          if (!isLoggingOut) {
-            const design = getButtonStyle().buttonStyle;
-            if (design[':hover']) {
-              Object.assign(e.target.style, design[':hover']);
-            }
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!isLoggingOut) {
-            const design = getButtonStyle().buttonStyle;
-            e.target.style.backgroundColor = design.backgroundColor;
-            e.target.style.color = design.color;
-          }
-        }}
       >
         {isLoggingOut ? 'Signing out...' : 'Sign Out'}
       </button>
