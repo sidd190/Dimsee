@@ -32,6 +32,7 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 [![Secure Snippets](https://img.shields.io/badge/Secure%20Snippets-vetted-green.svg)](SECURE_SNIPPETS.md)
 
 ## Table of Contents
+- [AI Assistant & LLM Integration](#ai-assistant--llm-integration)
 - [Getting Started](#getting-started)
 - [Framework Guides](#framework-guides)
   - [Create React App / Vite](#create-react-app--vite)
