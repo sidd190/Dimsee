@@ -30,6 +30,7 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 [![llms.txt](https://img.shields.io/badge/llms.txt-standardized-blue.svg)](llms.txt)
 
 ## Table of Contents
+- [llms.txt AI Context](#llmstxt-ai-context)
 - [Getting Started](#getting-started)
 - [Framework Guides](#framework-guides)
   - [Create React App / Vite](#create-react-app--vite)
