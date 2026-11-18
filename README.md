@@ -763,6 +763,8 @@ Moving your application to a production environment requires careful configurati
     ```
 5.  **Configure OAuth Redirect URIs**: In your Google/GitHub developer console, add your production callback URL (e.g., `https://api.your-app.com/api/auth/google/callback`) to the list of authorized redirect URIs.
 
+6.  **Enable Rate Limiting** on auth endpoints to prevent brute-force attacks. See [Snippet 10 – Rate Limiting](#10-rate-limiting--hardening-endpoints) for a drop-in `express-rate-limit` setup. If running behind a proxy (Nginx, Cloudflare), also add `app.set('trust proxy', 1)` so limits use the real client IP.
+
 ### Common Issues
 
 -   **"CORS Error"**: This means the `corsOrigin` in your backend config does not exactly match the URL of your frontend. Check for typos, and ensure it includes `https://`.
