@@ -193,6 +193,9 @@ The `AuthForm` component is the core of the Dimsee frontend. It is a highly conf
 
 ---
 
+> [!TIP]
+> Dimsee uses **HTTP-only cookies** for session tokens — you do not need to store tokens in `localStorage` (which is vulnerable to XSS). The `onSuccess` callback is for navigation/UI only, not token handling.
+
 ## Frontend Components: `AuthStatus` vs. `AuthForm`
 
 Dimsee provides two key frontend components: `AuthStatus` and `AuthForm`. Understanding their differences is key to using the package effectively.
