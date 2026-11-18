@@ -294,6 +294,10 @@ The `createAuthBackend` function sets up and returns a fully configured Express 
 | `enableOAuth` | `boolean`| `false`                           | A flag to enable or disable OAuth functionality.                            |
 | `oauth`       | `object` | `{}`                              | An object containing credentials for OAuth providers (Google, GitHub).      |
 
+> [!CAUTION]
+> Change `jwtSecret` before deploying. Use at least 32 random characters.  
+> Generate one with: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"`
+
 ### Protecting Routes
 
 The package also exports an `authMiddleware` that you can use to protect your own API routes.
