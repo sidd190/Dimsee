@@ -4,7 +4,16 @@
 const backend = require('./backend');
 
 // Backend exports
-const { createAuthBackend, authMiddleware, User } = backend;
+const {
+  createAuthBackend,
+  authMiddleware,
+  User,
+  audit,
+  // Email transport primitives
+  EmailService,
+  ConsoleTransport,
+  SmtpTransport,
+} = backend;
 
 // Frontend exports
 const AuthStatus = require('./frontend/src/components/AuthStatus');
@@ -16,9 +25,14 @@ module.exports = {
   createAuthBackend,
   authMiddleware,
   User,
+  audit,
+  // Email / Magic-link
+  EmailService,
+  ConsoleTransport,
+  SmtpTransport,
   // Frontend
   AuthStatus,
   useAuth,
   // Optional components
-  AuthForm // Still available but not the main focus
+  AuthForm, // Still available but not the main focus
 };

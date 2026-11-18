@@ -9,23 +9,35 @@ const path = require('path');
 
 // Use path.join for proper path resolution
 const authRoutes = require(path.join(__dirname, 'routes', 'auth'));
+const magicLinkRoutes = require(path.join(__dirname, 'routes', 'magicLink'));
 const authMiddleware = require(path.join(__dirname, 'middleware', 'auth'));
 const { passport: passportInstance, configureOAuthStrategies } = require(path.join(__dirname, 'config', 'passport'));
 const User = require(path.join(__dirname, 'models', 'User'));
+const { EmailService } = require(path.join(__dirname, 'email', 'emailService'));
+const { ConsoleTransport } = require(path.join(__dirname, 'email', 'transports', 'console'));
 
 require('dotenv').config();
 
 const createAuthBackend = (config = {}) => {
-  const { 
+  const {
     mongoUri = 'mongodb://localhost:27017/mern-auth',
     jwtSecret = 'your-secret-key-change-in-production',
-    jwtExpiry = '15m', //your-expiry-for-access-token-ideal-set-it-to-15m',
+    jwtExpiry = '15m',
     jwtRefreshSecret = 'your-secret-key-change-in-production',
-    jwtRefreshExpiry = '7d', //'your-expiry-for-refresh-token-ideal-set-it-to-7d',
+    jwtRefreshExpiry = '7d',
     corsOrigin = 'http://localhost:5173',
     cookieMaxAge = 7 * 24 * 60 * 60 * 1000, // 7 days
     enableOAuth = false, // OAuth disabled by default
-    oauth = {}
+    oauth = {},
+    // ── Magic-link / email options ──────────────────────────────────────────
+    // emailTransport: an EmailTransport instance; defaults to ConsoleTransport.
+    emailTransport = null,
+    // magicLinkTtl: token lifetime in seconds (default 15 minutes).
+    magicLinkTtl = 900,
+    // magicLinkSuccessPath: frontend path to redirect to after verification.
+    magicLinkSuccessPath = '/',
+    // appName: shown in the magic-link email body.
+    appName = 'Dimsee',
   } = config;
 
   // Connect to MongoDB using mongoUri from props
@@ -84,6 +96,8 @@ const createAuthBackend = (config = {}) => {
   }
 
   // Make config available to routes
+  const emailService = new EmailService(emailTransport || new ConsoleTransport());
+
   app.locals.authConfig = {
     jwtSecret,
     jwtExpiry,
@@ -92,11 +106,17 @@ const createAuthBackend = (config = {}) => {
     cookieMaxAge,
     corsOrigin,
     enableOAuth,
-    mongoUri
+    mongoUri,
+    // Magic-link settings
+    emailService,
+    magicLinkTtl,
+    magicLinkSuccessPath,
+    appName,
   };
 
   // Auth routes
   app.use('/api/auth', authRoutes);
+  app.use('/api/auth/magic-link', magicLinkRoutes);
 
   // Protected route example
   app.get('/api/protected', authMiddleware, (req, res) => {
@@ -110,4 +130,15 @@ const createAuthBackend = (config = {}) => {
   return app;
 };
 
-module.exports = { createAuthBackend, authMiddleware, User };
+const { audit } = require('./audit');
+
+module.exports = {
+  createAuthBackend,
+  authMiddleware,
+  User,
+  audit,
+  // Email transport primitives — consumers can import and pass their own.
+  EmailService,
+  ConsoleTransport,
+  SmtpTransport: require('./email/transports/smtp').SmtpTransport,
+};

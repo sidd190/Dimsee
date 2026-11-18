@@ -126,6 +126,7 @@ A change is ready to merge when:
 - [ ] New behaviour has a test (where practical)
 - [ ] Docs/README updated if the public API or props changed
 - [ ] UI changes include a screenshot
+- [ ] LLM docs and MCP server tests pass (`npm test` and `npm run docs:llms`)
 
 ---
 
