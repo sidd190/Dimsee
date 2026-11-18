@@ -110,4 +110,6 @@ const createAuthBackend = (config = {}) => {
   return app;
 };
 
-module.exports = { createAuthBackend, authMiddleware, User };
+const { audit } = require("./audit");
+
+module.exports = { createAuthBackend, authMiddleware, User, audit };

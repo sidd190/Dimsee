@@ -38,9 +38,22 @@
   },
   "jest": {
     "transform": {
-      "^.+\\.jsx?$": ["babel-jest", {
-        "presets": [["@babel/preset-env", { "targets": { "node": "current" } }], "@babel/preset-react"]
-      }]
+      "^.+\\.jsx?$": [
+        "babel-jest",
+        {
+          "presets": [
+            [
+              "@babel/preset-env",
+              {
+                "targets": {
+                  "node": "current"
+                }
+              }
+            ],
+            "@babel/preset-react"
+          ]
+        }
+      ]
     },
     "testPathIgnorePatterns": [
       "/node_modules/",
@@ -62,7 +75,8 @@
     "google-auth",
     "github-auth",
     "session",
-    "jwt"
+    "jwt",
+    "security-audit"
   ],
   "author": "Siddharth <sidd190@gmail.com>",
   "license": "MIT",
