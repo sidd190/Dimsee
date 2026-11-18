@@ -34,13 +34,27 @@
     "prepare": "husky install && npm run build",
     "prepublishOnly": "npm test && npm run build",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "mcp:docs": "node scripts/mcp-server.js"
   },
   "jest": {
     "transform": {
-      "^.+\\.jsx?$": ["babel-jest", {
-        "presets": [["@babel/preset-env", { "targets": { "node": "current" } }], "@babel/preset-react"]
-      }]
+      "^.+\\.jsx?$": [
+        "babel-jest",
+        {
+          "presets": [
+            [
+              "@babel/preset-env",
+              {
+                "targets": {
+                  "node": "current"
+                }
+              }
+            ],
+            "@babel/preset-react"
+          ]
+        }
+      ]
     },
     "testPathIgnorePatterns": [
       "/node_modules/",
@@ -109,5 +123,8 @@
     "node": ">=14.0.0"
   },
   "browser": "./dist/index.mjs",
-  "readmeFilename": "README.md"
+  "readmeFilename": "README.md",
+  "bin": {
+    "dimsee-docs-mcp": "./scripts/mcp-server.js"
+  }
 }
