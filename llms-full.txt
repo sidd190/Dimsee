@@ -1,0 +1,1015 @@
+# Dimsee — Comprehensive LLM Context Documentation Dump
+# Version: 0.6.9
+# Format: llms-full.txt (https://llmstxt.org)
+#
+# This machine-readable document contains the complete documentation of Dimsee
+# for consumption by AI coding assistants and large language models.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1. Overview & Quick API Reference
+2. Documentation Files:
+   2.1 README (README.md)
+   2.2 CUSTOMIZATION (CUSTOMIZATION.md)
+   2.3 CONTRIBUTING (CONTRIBUTING.md)
+   2.4 SECURITY (SECURITY.md)
+   2.5 VISION (VISION.md)
+   2.6 CHANGELOG (CHANGELOG.md)
+
+================================================================================
+SECTION 1: OVERVIEW & ARCHITECTURE
+================================================================================
+
+Dimsee is a drop-in authentication package for MERN (MongoDB, Express, React, Node.js)
+and Next.js applications. It pairs a configurable Express backend with a themeable
+React frontend, supporting username/password credentials, Google/GitHub OAuth,
+cookie-based session management, and route protection.
+
+# Dimsee
+
+> Drop-in full-stack authentication for MERN applications. Pairs a configurable Express backend with a themeable React frontend so you can add signup, login, OAuth, sessions, and protected routes without wiring auth from scratch.
+
+- Version: 0.6.9
+- License: MIT
+- npm: https://www.npmjs.com/package/dimsee
+- GitHub: https://github.com/sidd190/Dimsee
+- Issues: https://github.com/sidd190/Dimsee/issues
+
+## Documentation
+
+- [README.md](README.md): Full setup guide, API reference, framework guides (CRA/Vite/Next.js), component props, deployment checklist, and troubleshooting.
+- [CUSTOMIZATION.md](CUSTOMIZATION.md): CSS class structure, theme customization guide, and instructions for contributing a new theme.
+- [CONTRIBUTING.md](CONTRIBUTING.md): Local setup, CI workflow, PR process, commit conventions, and definition of done.
+- [SECURITY.md](SECURITY.md): Security model, known limitations, vulnerability reporting, and disclosure policy.
+- [VISION.md](VISION.md): Project direction, design principles, roadmap milestones, and non-goals.
+- [CHANGELOG.md](CHANGELOG.md): Version history and release notes.
+
+## Quick API Reference
+
+### Backend
+
+```javascript
+const { createAuthBackend, authMiddleware } = require('dimsee/backend');
+
+const app = createAuthBackend({
+  mongoUri: process.env.MONGO_URI, // MongoDB connection string
+  jwtSecret: process.env.JWT_SECRET, // >= 32 random characters
+  corsOrigin: process.env.CORS_ORIGIN, // exact frontend origin
+  cookieMaxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (ms)
+  enableOAuth: false, // set true to enable OAuth
+  oauth: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback'
+    },
+    github: {
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      callbackURL: process.env.GITHUB_CALLBACK_URL || '/api/auth/github/callback'
+    }
+  }
+});
+
+// Protect custom routes
+app.get('/api/protected', authMiddleware, (req, res) => {
+  res.json({ user: req.user });
+});
+```
+
+### Frontend
+
+```jsx
+import { AuthProvider, AuthForm, AuthStatus } from 'dimsee/frontend';
+
+// Wrap application with AuthProvider
+<AuthProvider apiUrl={process.env.VITE_API_URL || 'http://localhost:5000/api/auth'}>
+  <AuthStatus>
+    <Dashboard />
+  </AuthStatus>
+</AuthProvider>
+
+// Or use standalone AuthForm
+<AuthForm
+  mode="signin"
+  design="modern"
+  onSuccess={(data) => console.log('Authenticated', data)}
+  onError={(err) => console.error('Auth error', err)}
+/>
+```
+
+### REST Endpoints (prefixed with /api/auth)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | /signup | Register a new user account |
+| POST | /signin | Authenticate existing user |
+| POST | /signout | Log out current user (clears session cookie) |
+| GET | /me | Retrieve current authenticated user profile |
+| GET | /oauth-status | Check enabled OAuth providers |
+| GET | /google | Initiate Google OAuth flow |
+| GET | /google/callback | Google OAuth redirect callback |
+| GET | /github | Initiate GitHub OAuth flow |
+| GET | /github/callback | GitHub OAuth redirect callback |
+| POST | /set-password | Set password for OAuth-authenticated account |
+
+## Critical Security Guidance for AI Code Generation
+
+- Always source `mongoUri`, `jwtSecret`, and `corsOrigin` from environment variables. Never hardcode secrets.
+- Always apply `authMiddleware` explicitly to every private route; routes are public by default.
+- Use HTTP-only cookies for session management. Do not persist auth tokens in `localStorage` or `sessionStorage` (XSS risk).
+- When using Next.js, never prefix sensitive credentials (`MONGO_URI`, `JWT_SECRET`) with `NEXT_PUBLIC_`.
+- Apply rate limiting on `/signin` and `/signup` in production deployments.
+
+
+================================================================================
+SECTION 2.1: README (Source: README.md)
+================================================================================
+
+# Dimsee: Full-Stack Authentication for the MERN Stack
+
+[![NPM Version](https://img.shields.io/npm/v/dimsee.svg)](https://www.npmjs.com/package/dimsee)
+[![NPM Downloads](https://img.shields.io/npm/dm/dimsee.svg)](https://www.npmjs.com/package/dimsee)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Pull Requests Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+**Dimsee** is a drop-in authentication package for MERN applications. It pairs a configurable Express backend with a themeable React frontend, so you can add signup, login, OAuth, sessions, and protected routes without wiring auth from scratch.
+
+Stand up a secure backend with a single `createAuthBackend()` call, drop an `<AuthForm />` into your React app, and you have working authentication in minutes. See [CONTRIBUTING.md](CONTRIBUTING.md) to get involved and [SECURITY.md](SECURITY.md) for the security policy.
+
+## Features
+
+### Backend
+-   **Local Authentication:** Standard email/password signup and signin.
+-   **OAuth 2.0:** Support for Google and GitHub.
+-   **Session Management:** Secure, cookie-based sessions using JWT and `express-session`.
+-   **Secure Passwords:** Password hashing with `bcryptjs`.
+-   **Easy Configuration:** Simple to configure via a single config object.
+-   **Route Protection:** Middleware to protect your API routes.
+
+### Frontend
+-   **React Component:** A single `AuthForm` component for all your auth needs.
+-   **Multiple Modes:** Supports both 'signin' and 'signup' modes.
+-   **Themable Designs:** Comes with three built-in themes: `modern`, `minimal`, and `colorful`.
+-   **OAuth Integration:** Buttons for Google/GitHub login that activate based on backend configuration.
+-   **Customizable:** Easily extend and style with your own CSS.
+-   **Callbacks:** `onSuccess` and `onError` callbacks for handling auth events.
+
+## Table of Contents
+- [Getting Started](#getting-started)
+- [Framework Guides](#framework-guides)
+  - [Create React App / Vite](#create-react-app--vite)
+  - [Next.js](#nextjs)
+- [Frontend: `AuthForm` Component](#frontend-authform-component)
+- [Frontend Components: `AuthStatus` vs. `AuthForm`](#frontend-components-authstatus-vs-authform)
+- [Backend: `createAuthBackend`](#backend-createauthbackend)
+- [Backend API Reference](#backend-api-reference)
+- [Customization and Contributing](#customization-and-contributing)
+- [Deployment and Troubleshooting](#deployment-and-troubleshooting)
+- [Use Cases](#use-cases)
+- [License](#license)
+
+
+## Getting Started
+
+### Installation
+
+```bash
+npm install dimsee
+```
+
+### Basic Usage
+
+Here is a quick example of how to set up a basic authentication system with Dimsee by running a **standalone backend server**.
+
+**Backend (`server.js`) : **
+```javascript
+const { createAuthBackend } = require('dimsee/backend');
+
+const app = createAuthBackend({
+  mongoUri: process.env.MONGO_URI,
+  jwtSecret: process.env.JWT_SECRET,
+  corsOrigin: 'http://localhost:3000', // Your frontend URL
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+```
+
+**Frontend (`App.js`):**
+```jsx
+import {AuthProvider} from 'dimsee/frontend';
+import {AuthForm} from 'dimsee/frontend';
+
+function App() {
+  return (
+    <AuthProvider apiUrl="http://localhost:5000/api/auth">
+      <div className="App">
+        <AuthForm
+          design="modern"
+          onSuccess={(data) => console.log('Auth Success:', data)}
+          onError={(error) => console.error('Auth Error:', error)}
+        />
+      </div>
+    </AuthProvider>
+  );
+}
+```
+
+## Framework Guides
+
+Learn how to integrate Dimsee with popular React frameworks.
+
+### Create React App / Vite
+
+For projects bootstrapped with **Create React App** or **Vite**, the setup is straightforward. You run the Dimsee backend as a separate server and connect your frontend to it.
+
+1.  **Set up the Backend**: Use the code from the [Basic Usage](#basic-usage) section to create your `server.js`.
+2.  **Environment Variables**: In your CRA/Vite project root, create a `.env` file.
+    -   **Vite**: `VITE_API_URL=http://localhost:5000/api/auth`
+    -   **Create React App**: `REACT_APP_API_URL=http://localhost:5000/api/auth`
+3.  **Configure `AuthProvider`**: In your main `App.js` or `main.jsx`, wrap your app with `AuthProvider` and pass the API URL from your environment variables.
+
+    ```jsx
+    // Example for Vite
+    <AuthProvider apiUrl={import.meta.env.VITE_API_URL}>
+      <App />
+    </AuthProvider>
+    ```
+
+### Next.js
+
+With Next.js, you have two primary options for the backend:
+
+1.  **(Recommended)** Run a [standalone backend server](#basic-usage) just like with CRA/Vite. This is the simplest and most scalable approach.
+2.  **(Advanced)** Integrate the backend directly into Next.js API Routes.
+
+#### Option 2: Integrated API Route
+
+If you prefer an all-in-one setup, you can run the Dimsee backend inside a catch-all API route.
+
+1.  **Create API Route**: Create a file at `pages/api/auth/[...slug].js` (or `app/api/auth/[...slug]/route.js` for App Router).
+
+    ```javascript
+    // file: pages/api/auth/[...slug].js
+    import { createAuthBackend } from 'dimsee/backend';
+
+    // Initialize the backend once
+    const authApp = createAuthBackend({
+        mongoUri: process.env.MONGO_URI,
+        jwtSecret: process.env.JWT_SECRET,
+        corsOrigin: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    });
+
+    // Disable Next.js's default body parser for this route
+    export const config = {
+        api: {
+            bodyParser: false,
+        },
+    };
+
+    export default function handler(req, res) {
+        // Rewrite the URL to remove the `/api/auth` prefix
+        req.url = req.url.replace('/api/auth', '');
+        // Let the Dimsee Express app handle the request
+        return authApp(req, res);
+    }
+    ```
+
+2.  **Configure Frontend**: In your `_app.js` (or `layout.js` for App Router), wrap your application with the `AuthProvider`. The `apiUrl` now points to your internal API route.
+
+    ```jsx
+    // file: pages/_app.js
+    import {AuthProvider} from 'dimsee/frontend';
+
+    function MyApp({ Component, pageProps }) {
+      return (
+        <AuthProvider apiUrl="/api/auth">
+          <Component {...pageProps} />
+        </AuthProvider>
+      );
+    }
+
+    export default MyApp;
+    ```
+
+3.  **Use Client Components**: Any component that uses `AuthForm` or `AuthStatus` must be a Client Component. Add `'use client';` to the top of the file if you are using the Next.js App Router.
+
+## Frontend: `AuthForm` Component
+
+The `AuthForm` component is the core of the Dimsee frontend. It is a highly configurable React component that handles user interaction for both signing in and signing up.
+
+### Props
+
+| Prop          | Type       | Default                      | Description                                                                                              |
+|---------------|------------|------------------------------|----------------------------------------------------------------------------------------------------------|
+| `mode`        | `string`   | `'signin'`                   | Determines if the form is in `'signin'` or `'signup'` mode.                                              |
+| `design`      | `string`   | `'modern'`                   | The visual theme of the form. Options: `'modern'`, `'minimal'`, `'colorful'`.                             |
+| `onSuccess`   | `function` | `undefined`                  | Callback function executed on successful authentication. Receives response data.                           |
+| `onError`     | `function` | `undefined`                  | Callback function executed on authentication failure. Receives the error object.                         |
+| `className`   | `string`   | `''`                         | Additional CSS classes to apply to the component's root element for custom styling.                      |
+| `oAuthConfig` | `object`   | `null`                       | An object to dynamically configure OAuth providers on the frontend.                                      |
+| `redirectUrl` | `string`   | `null`                       | Destination after successful OAuth login. Accepts relative paths or HTTP(S) URLs on the backend's configured `corsOrigin`; defaults to `corsOrigin`. External origins are rejected. |
+| `onModeChange`| `function` | `undefined`                  | A function to make the form a controlled component, managing the `mode` from a parent component.         |
+
+---
+
+## Frontend Components: `AuthStatus` vs. `AuthForm`
+
+Dimsee provides two key frontend components: `AuthStatus` and `AuthForm`. Understanding their differences is key to using the package effectively.
+
+-   **`AuthForm`** is a low-level component focused on one thing: displaying a sign-in or sign-up form.
+-   **`AuthStatus`** is a high-level component that acts as a "controller." It checks if a user is logged in and, based on that status, decides what to render: the `AuthForm`, a logout button, or your application's content.
+
+### Use Case Comparison
+
+| Scenario                                | Recommended Component | Why?                                                                                                              |
+|-----------------------------------------|-----------------------|-------------------------------------------------------------------------------------------------------------------|
+| A dedicated `/login` page               | `AuthForm`            | You just need to show the form, as the user is guaranteed to be unauthenticated on this page.                     |
+| A popup modal for login/signup          | `AuthForm`            | You control when the modal appears, so you just need the form itself inside the modal.                            |
+| A simple drop-in for an entire app      | `AuthStatus`          | It will handle everything automatically: show the login form if logged out, and your app content if logged in.      |
+| A header that shows "Login" or "Logout" | `AuthStatus`          | It can automatically switch between showing a login prompt (`AuthForm`) and a `LogoutButton` based on auth state. |
+
+### Using `AuthStatus`
+
+`AuthStatus` is the easiest way to get started. It wraps your authenticated application content and handles the entire authentication flow.
+
+#### Basic Example: Protecting App Content
+
+If a user is not logged in, `AuthStatus` will render the `AuthForm`. Once they log in, it will render the content passed to it as `children`.
+
+```jsx
+import { AuthStatus } from 'dimsee/frontend';
+
+function App() {
+  return (
+    <AuthProvider apiUrl="http://localhost:5000/api/auth">
+      <AuthStatus>
+        {/* This content will only be shown to authenticated users */}
+        <div>
+          <h1>Welcome to the App!</h1>
+          <p>This is a protected area.</p>
+        </div>
+      </AuthStatus>
+    </AuthProvider>
+  );
+}
+```
+
+#### Advanced Example: Showing User Info and Set Password Button
+
+`AuthStatus` also automatically includes the `LogoutButton` and can conditionally show the `SetPasswordButton` for users who signed up with an OAuth provider.
+
+```jsx
+import { AuthStatus } from 'dimsee/frontend';
+
+function App() {
+  return (
+    <AuthProvider apiUrl="http://localhost:5000/api/auth">
+      <AuthStatus
+        showUserInfo={true}          // Shows username next to logout button
+        showSetPassword={true}       // Shows a "Set Password" button if needed
+        logoutDesign="minimal"
+      >
+        {/* Your protected app content here */}
+      </AuthStatus>
+    </AuthProvider>
+  );
+}
+```
+
+### `AuthStatus` Props
+
+| Prop                       | Type      | Default     | Description                                                                              |
+|----------------------------|-----------|-------------|------------------------------------------------------------------------------------------|
+| `showForm`                 | `boolean` | `true`      | If `true`, renders `AuthForm` when the user is not authenticated.                          |
+| `formMode`                 | `string`  | `'signin'`  | The default mode for the nested `AuthForm`.                                              |
+| `formDesign`               | `string`  | `'modern'`  | The design theme for the nested `AuthForm`.                                              |
+| `logoutDesign`             | `string`  | `'modern'`  | The design theme for the `LogoutButton`.                                                 |
+| `showUserInfo`             | `boolean` | `true`      | If `true`, displays the user's name next to the logout button.                             |
+| `showSetPassword`          | `boolean` | `false`     | If `true`, displays a `SetPasswordButton` for authenticated users without a password.      |
+| `children`                 | `node`    | `undefined` | The content to display when the user is authenticated.                                   |
+| `unauthenticatedComponent` | `node`    | `undefined` | A custom component to show instead of `AuthForm` when the user is not authenticated.     |
+
+For more granular control over logout and set password button positioning and styling, refer to their individual component files.
+
+`SetPasswordButton` accepts `showPrompt` (default `true`): the button opens a password modal. Set `showPrompt={false}` to display the password form inline immediately. It renders only for authenticated users who do not already have a password.
+
+Signup requests must include `username`, `email`, `password`, and `confirmPassword`. Usernames must contain 3–20 letters, digits, or underscores. Passwords must contain at least six characters, including an uppercase letter, a lowercase letter, and a digit, and confirmation must match. These rules are now enforced by the backend; API clients that previously omitted confirmation or used weaker passwords must update. Signin requires nonempty email and password strings, without applying the new signup email-format or password-complexity checks to existing accounts.
+
+## Backend: `createAuthBackend`
+
+The `createAuthBackend` function sets up and returns a fully configured Express application with all the necessary middleware and routes for authentication.
+
+### Configuration Options
+
+| Option        | Type     | Default                           | Description                                                                 |
+|---------------|----------|-----------------------------------|-----------------------------------------------------------------------------|
+| `mongoUri`    | `string` | `'mongodb://localhost:27017/mern-auth'` | The connection string for your MongoDB database.                          |
+| `jwtSecret`   | `string` | `'your-secret-key-...'`           | A secret key for signing JWTs. **Change this in production.**               |
+| `corsOrigin`  | `string` | `'http://localhost:5173'`         | The origin to allow for CORS requests (your frontend URL).                  |
+| `cookieMaxAge`| `number` | `604800000` (7 days)              | The max age for the authentication cookie in milliseconds.                  |
+| `enableOAuth` | `boolean`| `false`                           | A flag to enable or disable OAuth functionality.                            |
+| `oauth`       | `object` | `{}`                              | An object containing credentials for OAuth providers (Google, GitHub).      |
+
+### Protecting Routes
+
+The package also exports an `authMiddleware` that you can use to protect your own API routes.
+
+```javascript
+const { createAuthBackend, authMiddleware } = require('dimsee/backend');
+const app = createAuthBackend(...);
+
+app.get('/api/my-protected-route', authMiddleware, (req, res) => {
+  // This will only be accessible to authenticated users
+  res.json({ message: 'You have accessed a protected route!' });
+});
+```
+
+## Backend API Reference
+
+The backend exposes the following API endpoints under the `/api/auth` prefix.
+
+| Method | Endpoint               | Description                                           |
+|--------|------------------------|-------------------------------------------------------|
+| `POST` | `/signup`              | Register a new user.                                  |
+| `POST` | `/signin`              | Log in an existing user.                              |
+| `POST` | `/signout`             | Log out the current user.                             |
+| `GET`  | `/me`                  | Get the profile of the currently authenticated user.  |
+| `GET`  | `/oauth-status`        | Check which OAuth providers are enabled.              |
+| `GET`  | `/google`              | Initiate Google OAuth login.                          |
+| `GET`  | `/google/callback`     | Callback URL for Google OAuth.                        |
+| `GET`  | `/github`              | Initiate GitHub OAuth login.                          |
+| `GET`  | `/github/callback`     | Callback URL for GitHub OAuth.                        |
+| `POST` | `/set-password`        | Allow an OAuth user to set a password.                |
+
+## Customization and Contributing
+
+We welcome contributions and custom implementations!
+
+### Customizing Styles
+
+You can override the component's default styles by targeting the CSS classes outlined in the `CUSTOMIZATION.md` file. For best results, make your CSS selectors more specific than the library's.
+
+**Example: Overriding input focus color**
+```css
+/* Make selector more specific to win */
+body .auth-container.modern .form-input:focus {
+  border-color: #ff8a00;
+  box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.3);
+}
+```
+
+### Contributing a New Theme
+
+Have you built a great-looking theme? We'd love to include it!
+
+1.  **Fork the repository** and create a new branch.
+2.  **Add your CSS** to `frontend/src/components/AuthForm.css`. Wrap all your styles in a unique theme class (e.g., `.auth-container.my-theme`).
+3.  **Test your theme** thoroughly in both `signin` and `signup` modes, including error states and different screen sizes.
+4.  **Submit a pull request** with a screenshot of your theme in action.
+
+### Reporting Issues
+
+If you encounter a bug or have a feature request, please [open an issue](https://github.com/sidd190/dimsee/issues) on our GitHub repository. Provide as much detail as possible, including:
+-   A clear description of the issue.
+-   Steps to reproduce it.
+-   Any relevant error messages or console logs.
+-   Your environment details (Node.js version, browser, etc.).
+
+## Deployment and Troubleshooting
+
+Moving your application to a production environment requires careful configuration to ensure security and functionality.
+
+### Deployment Checklist
+
+1.  **Set `NODE_ENV`**: Your hosting environment **must** have `NODE_ENV=production`. This is critical for security and performance.
+2.  **Configure Environment Variables**:
+    -   `MONGO_URI`: Your production database connection string.
+    -   `JWT_SECRET`: A long, random, unique string for signing tokens.
+    -   `CORS_ORIGIN`: Your exact frontend production URL (e.g., `https://www.your-app.com`).
+    -   (Optional) OAuth credentials (`GOOGLE_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, etc.)
+3.  **Update Backend Configuration**: Pass your environment variables to the `createAuthBackend` function.
+    ```javascript
+    const app = createAuthBackend({
+      mongoUri: process.env.MONGO_URI,
+      jwtSecret: process.env.JWT_SECRET,
+      corsOrigin: process.env.CORS_ORIGIN,
+      enableOAuth: true, // if using OAuth
+      oauth: {
+        google: {
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          callbackURL: '/api/auth/google/callback'
+        }
+      }
+    });
+    ```
+4.  **Update Frontend Configuration**: Set the `apiUrl` in your `AuthProvider` to point to your live backend.
+    ```jsx
+    <AuthProvider apiUrl="https://api.your-app.com/api/auth">
+      {/* ... */}
+    </AuthProvider>
+    ```
+5.  **Configure OAuth Redirect URIs**: In your Google/GitHub developer console, add your production callback URL (e.g., `https://api.your-app.com/api/auth/google/callback`) to the list of authorized redirect URIs.
+
+### Common Issues
+
+-   **"CORS Error"**: This means the `corsOrigin` in your backend config does not exactly match the URL of your frontend. Check for typos, and ensure it includes `https://`.
+-   **"Invalid Token" / "No Token Provided"**: This can happen if the frontend and backend are on different root domains (e.g., `app.com` and `api.herokuapp.com`), as browsers may block third-party cookies. To fix this, ensure both your frontend and backend are on subdomains of the same parent domain (e.g., `www.app.com` and `api.app.com`).
+-   **OAuth Login Fails with "Redirect URI Mismatch"**: The callback URL registered in your OAuth provider's settings does not exactly match the one your backend is configured with.
+-   **User is Logged Out on Refresh**: This could mean cookies are not being set correctly. Ensure `withCredentials: true` is set in your frontend requests (Axios does this by default in this package) and that your CORS/domain configuration is correct.
+
+## Use Cases
+
+Dimsee is ideal for:
+-   **Prototyping MERN applications:** Quickly add authentication to your projects.
+-   **SaaS products:** A solid foundation for user management.
+-   **Internal tools:** Secure your internal applications with minimal effort.
+-   **Learning:** A great way to see how full-stack authentication is implemented.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+================================================================================
+SECTION 2.2: CUSTOMIZATION (Source: CUSTOMIZATION.md)
+================================================================================
+
+# Customizing and Contributing to AuthForm
+
+This guide provides detailed instructions on how to customize the `AuthForm` component with your own CSS or contribute new design themes to the library.
+
+## 1. Customizing the Design
+
+You have complete control over the component's appearance. You can override existing styles, add new ones, or use a utility-first framework like Tailwind CSS.
+
+### CSS Class Structure
+
+To customize the component, you need to target the correct CSS classes. The component has a main container with a class that reflects the chosen `design` prop (e.g., `.modern`, `.minimal`, `.colorful`). All custom styles for a theme are scoped within this class.
+
+Here is a diagram of the component's HTML structure and the most important classes:
+
+```mermaid
+graph TD
+    A["div.auth-container.<design-name>"] --> B["form.auth-form"];
+    B --> C["div.form-header"];
+    C --> C1["h2.form-title"];
+    C --> C2["p.form-subtitle"];
+
+    B --> D["div.oauth-buttons"];
+    D --> D1["button.oauth-button.google"];
+    D --> D2["button.oauth-button.github"];
+    D1 --> D1a["span.oauth-icon"];
+    D2 --> D2a["span.oauth-icon"];
+
+    B --> E["div.separator"];
+
+    B --> F["div.form-body"];
+    F --> G["div.input-group"];
+    G --> H["div.input-wrapper"];
+    H --> H1["input.form-input"];
+    H --> H2["span.input-icon"];
+    F --> I["button.submit-button"];
+    I --> I1["div.button-content"];
+    I1 --> I2["span.button-icon / .loading-spinner"];
+
+    B --> J["div.form-footer"];
+    J --> J1["p.footer-text"];
+    J --> J2["button.mode-switch-button"];
+```
+
+### Key Classes for Customization
+
+-   `div.auth-container`: The root container. All theme styles are scoped under `.auth-container.<design-name>`.
+-   `form.auth-form`: The form element itself. This is a good place to control the form's background, padding, and shadows.
+-   `h2.form-title` & `p.form-subtitle`: For styling the main header text.
+-   `input.form-input`: The text fields for username, email, and password.
+-   `span.input-icon`: The icons inside the input fields.
+-   `button.submit-button`: The primary action button for submitting the form.
+-   `button.oauth-button`: The buttons for social logins (e.g., Google, GitHub).
+-   `div.separator`: The "or" separator between OAuth and email/password forms.
+-   `p.error-message`: The text that appears when there's a validation error.
+
+### How to Apply Custom Styles
+
+1.  **Create a new CSS file** in your project (e.g., `custom-auth.css`).
+2.  **Add your override styles.** Be specific with your selectors to ensure they take precedence. For example, to change the modern theme's button color:
+
+    ```css
+    /* custom-auth.css */
+    .auth-container.modern .submit-button {
+      background: linear-gradient(90deg, #00c9ff, #92fe9d);
+      box-shadow: 0 10px 30px rgba(0, 201, 255, 0.4);
+    }
+    ```
+
+3.  **Import the CSS file** in your main application file *after* the component's default CSS.
+
+### Using Tailwind CSS
+
+If you're using Tailwind, you can pass custom classes directly to the component via the `className` prop.
+
+```jsx
+import AuthForm from './components/AuthForm';
+
+function MyPage() {
+  return (
+    <AuthForm
+      design="modern"
+      className="!bg-gray-900 border-t-4 border-teal-500" // Overrides background and adds a border
+    />
+  );
+}
+```
+
+Note the use of `!` to mark the utilities as `!important`, which may be necessary to override the component's built-in styles.
+
+## 2. Contributing a New Theme
+
+We welcome contributions! If you've created a great new design, you can add it as a new theme to the library.
+
+### Contribution Guidelines
+
+1.  **Choose a Theme Name:** Pick a descriptive, one-word name for your theme (e.g., `vintage`, `corporate`, `neon`).
+
+2.  **Add Your CSS:**
+    *   Open `AuthForm.css`.
+    *   Create a new section for your theme at the end of the file.
+    *   Wrap all of your styles within the theme's root selector: `.auth-container.<your-theme-name>`. This is crucial to avoid conflicts with other themes.
+
+3.  **Structure Your CSS:** Follow the existing structure. Create distinct styles for inputs, buttons, titles, etc., within your theme's scope. Make sure to style all states: `hover`, `focus`, `active`, and `disabled`.
+
+    ```css
+    /* Example structure for a new "neon" theme */
+
+    /* ==========================================
+       NEON THEME (Community Contribution)
+       ========================================== */
+    .auth-container.neon {
+      /* Your base styles here */
+      background-color: #0c0c0c;
+      font-family: 'Your Chosen Font', sans-serif;
+    }
+
+    .auth-container.neon .auth-form {
+      /* Form container styles */
+    }
+
+    .auth-container.neon .submit-button {
+      /* Button styles */
+    }
+
+    /* ...and so on for all other elements ... */
+    ```
+
+4.  **Test Thoroughly:**
+    *   Test both "signin" and "signup" modes.
+    *   Check all input validation and error states.
+    *   Ensure OAuth buttons are styled correctly.
+    *   Verify that your design is responsive and looks good on mobile devices.
+
+5.  **Submit a Pull Request:**
+    *   Fork the repository.
+    *   Create a new branch for your theme (`feature/neon-theme`).
+    *   Commit your changes to `AuthForm.css`.
+    *   Push to your fork and submit a pull request to the main repository.
+    *   In your pull request description, include a screenshot of your new theme in action!
+
+Thank you for helping make this component better!
+
+================================================================================
+SECTION 2.3: CONTRIBUTING (Source: CONTRIBUTING.md)
+================================================================================
+
+# Contributing to Dimsee
+First off - thank you! Dimsee is a drop-in authentication package for the MERN
+stack (and Next.js), and it only gets better with community help. This guide
+gets you from zero to your first merged PR.
+
+> **New to open source?** Look for issues labelled
+> [`good first issue`](https://github.com/sidd190/dimsee/labels/good%20first%20issue).
+> They're self-contained, well-scoped, and a great way in.
+
+---
+
+## The contribution ladder
+
+Dimsee is part of a wider set of projects. Pick a rung that matches your comfort
+level - and climb:
+
+1. **`good first issue`** - docs, a new theme, a small UI/a11y tweak. One file,
+   clear acceptance criteria.
+2. **`intermediate`** - tests, validation wiring, build hygiene, small refactors.
+3. **`complex`** - architecture: unifying the server factory, token/secret
+   hardening, CI, TypeScript types.
+
+Shipped a theme? Try an intermediate issue next. The ladder is the point.
+
+---
+
+## Local setup
+
+**Prerequisites:** Node.js >= 14, npm, and (for running the backend) a local or
+hosted MongoDB instance.
+
+```bash
+# 1. Fork, then clone your fork
+git clone https://github.com/<your-username>/dimsee.git
+cd dimsee
+
+# 2. Install dependencies (this also runs the build via the prepare hook)
+npm install
+
+# 3. Run the test suite
+npm test
+
+# 4. Build backend + frontend bundles
+npm run build
+
+# 5. Lint & format before committing
+npm run lint
+npm run format
+```
+
+To try the backend end-to-end, copy `backend/.env.example` to `backend/.env`,
+fill in `MONGODB_URI` and a `JWT_SECRET`, and wire `createAuthBackend` into a
+small `server.js` (see the README "Getting Started" section).
+
+## Automated checks
+
+GitHub Actions runs [CI](.github/workflows/ci.yml) on pull requests targeting
+`main` and on pushes to `main`. It checks Node.js 22 and 24 with `npm ci`,
+`npm run lint`, `npm test -- --ci --runInBand`, `npm run build`, and
+`npm pack --dry-run --ignore-scripts`. It can also be started manually from
+the Actions tab. Tests use mocked authentication providers and user storage;
+they do not require MongoDB or OAuth credentials.
+
+Before merging, both `Checks (Node 22)` and `Checks (Node 24)` should pass.
+Maintainers can require these checks through the protection rule or ruleset
+for `main`. This workflow validates changes and package contents; publishing
+to npm remains a separate release step.
+
+---
+
+## Contributing a new theme (great first PR)
+
+Themes are the easiest high-impact contribution. Each theme is a self-contained
+block of CSS - no JavaScript changes required.
+
+1. Open `frontend/src/components/AuthForm.css`.
+2. Add your styles under a **unique theme class**, e.g. `.auth-container.sunset`.
+   Scope *every* rule to that class so themes never leak into each other.
+3. Test it in **both** `signin` and `signup` modes, including error states and on
+   mobile widths.
+4. Add the theme name to the `design` prop options table in `README.md`.
+5. Submit a PR **with a screenshot** (both modes).
+
+```css
+/* Example: a new "sunset" theme */
+.auth-container.sunset .auth-form {
+  background: linear-gradient(135deg, #ff8a00, #e52e71);
+}
+.auth-container.sunset .form-input:focus {
+  border-color: #ff8a00;
+  box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.3);
+}
+```
+
+---
+
+## Pull request process
+
+1. **Create a branch** off `main`: `git checkout -b fix/short-description` or
+   `feat/short-description`.
+2. **Keep PRs focused** - one issue per PR. Smaller is easier to review.
+3. **Reference the issue** you're closing: `Closes #123`.
+4. **Run `npm test` and `npm run lint`** locally; make sure both pass.
+5. **Describe your change** and, for any UI work, attach before/after screenshots.
+6. A maintainer will review. Expect a round or two of feedback - that's normal
+   and welcome.
+
+### Commit messages
+
+Use a short, conventional prefix:
+
+- `feat:` a new capability (e.g. a new theme, a new prop)
+- `fix:` a bug fix
+- `docs:` documentation only
+- `test:` adding or fixing tests
+- `chore:` build/tooling/housekeeping
+
+---
+
+## Definition of done
+
+A change is ready to merge when:
+
+- [ ] `npm test` passes
+- [ ] `npm run lint` is clean
+- [ ] New behaviour has a test (where practical)
+- [ ] Docs/README updated if the public API or props changed
+- [ ] UI changes include a screenshot
+
+---
+
+## Reporting bugs & requesting features
+
+[Open an issue](https://github.com/sidd190/dimsee/issues) and include:
+
+- A clear description and steps to reproduce
+- Expected vs. actual behaviour
+- Relevant error messages / console logs
+- Environment details (Node version, browser, OS)
+
+---
+
+## Code of conduct
+
+Be kind, be constructive, assume good intent. We want Dimsee to be a welcoming
+first open-source experience for everyone.
+
+By contributing, you agree that your contributions are licensed under the
+[MIT License](LICENSE).
+
+================================================================================
+SECTION 2.4: SECURITY (Source: SECURITY.md)
+================================================================================
+
+# Security Policy
+
+Dimsee handles authentication - credentials, sessions, and tokens - so security
+is a first-class concern, not an afterthought. This document covers how to
+report issues and what Dimsee does and does not protect against.
+
+## Supported versions
+
+| Version | Supported          |
+| ------- | ------------------ |
+| 0.6.x   | active           |
+| < 0.6   | please upgrade   |
+
+Security fixes land on the latest minor; please upgrade before reporting against
+an old release.
+
+## Reporting a vulnerability
+
+**Please do not open a public issue for security vulnerabilities.**
+
+Instead, use GitHub's private advisory flow:
+**[Report a vulnerability](https://github.com/sidd190/dimsee/security/advisories/new)**
+- or email the maintainer directly.
+
+When reporting, include:
+
+- A description of the issue and its impact
+- Steps to reproduce (a minimal repro is ideal)
+- Affected version(s) and environment
+- Any suggested remediation
+
+**Response targets:** acknowledgement within 72 hours, an initial assessment
+within 7 days, and a coordinated fix + disclosure timeline agreed with you. We'll
+credit reporters in the release notes unless you prefer to stay anonymous.
+
+## Security model - what Dimsee protects
+
+Dimsee aims to give a MERN app a secure-by-default auth baseline:
+
+- **Password storage:** hashed with bcrypt - plaintext passwords are never stored.
+- **Sessions:** cookie-based, `httpOnly`, server-side session store (`connect-mongo`),
+  `secure` + `sameSite` enforced in production.
+- **Tokens:** short-lived access JWTs with refresh-token rotation and reuse
+  detection.
+- **Brute force:** rate limiting on the auth endpoints.
+- **Transport:** designed to run behind HTTPS in production.
+
+## Known limitations & your responsibilities
+
+Dimsee is a building block, not a turnkey security guarantee. You are responsible
+for:
+
+- **Secrets:** set strong, unique `JWT_SECRET` and `JWT_REFRESH_SECRET` (distinct
+  values). Never ship the defaults to production.
+- **HTTPS:** terminate TLS in front of the backend; cookies are only `secure`
+  when `NODE_ENV=production`.
+- **CORS:** set `corsOrigin` to your exact frontend origin.
+- **Environment:** keep `.env` out of version control and rotate leaked secrets.
+- **Dependencies:** run `npm audit` and keep Dimsee and its deps current.
+
+Features such as email verification, MFA, and CSRF tokens are on the roadmap and
+tracked as hardening issues - see the security track in the contributor backlog.
+
+## Disclosure
+
+We follow coordinated disclosure: once a fix is released, we publish a security
+advisory describing the issue, affected versions, and remediation.
+
+================================================================================
+SECTION 2.5: VISION (Source: VISION.md)
+================================================================================
+
+# Dimsee Vision and Roadmap
+
+Status: draft for review. Not yet the public story until approved.
+
+## What Dimsee is
+
+Dimsee is the auth library that uses your database properly and is secure by
+default for every kind of app. It is an opinionated, self-hosted library (not a
+hosted service, not a boilerplate dump): a configurable Express backend plus a
+themeable React frontend, wired together so you add real authentication in
+minutes.
+
+## Why Dimsee exists
+
+The JavaScript auth field consolidated onto a single SQL-first stack in 2025-26
+(Auth.js folded into Better Auth, which Vercel acquired; Lucia became a tutorial;
+Passport went unmaintained). That left two lanes open, and both are Dimsee's home
+turf:
+
+1. Nobody treats MongoDB as a first-class citizen. The incumbents bolt Mongo on as
+   a shallow, lowest-common-denominator adapter that cannot even populate a
+   Mongoose ref. Dimsee uses the database the way it is actually meant to be used.
+2. "Secure by default" is talked about but rarely true. ~30% of AI-generated auth
+   code ships insecure, and the most common complaints in the field are
+   misconfiguration footguns. Dimsee makes the insecure path unreachable, not just
+   discouraged.
+
+## Principles
+
+- Deep integration, not lowest-common-denominator. We integrate a database the way
+  its own ecosystem expects (real Mongoose refs, transactions, migrations), rather
+  than a thin CRUD shim. Start with MongoDB; expand only to databases we can do
+  this well.
+- Secure by default, insecure by exception. The default configuration is safe; an
+  insecure configuration is either unreachable or loudly flagged.
+- Pick a tier, not twenty flags. Presets keyed to your deployment scale do the
+  correct wiring for you (see Presets).
+- Batteries included, still yours. One-call backend, drop-in UI, MIT, no lock-in.
+- Honest scope. We would rather do a few databases and methods excellently than
+  many of them badly.
+
+## Scope and non-goals
+
+In scope now:
+- MongoDB / Mongoose as the single, deep, first-class datastore.
+- A thin storage-adapter seam underneath, so additional databases can be added
+  later without rewrites. We ship one adapter (Mongoose) and do it right first.
+
+Non-goals (deliberate):
+- Not trying to be framework-agnostic across every stack on day one. That is the
+  incumbent's strength and a maintenance treadmill for a small project.
+- Not a code stamper or a learn-to-build-your-own reference. That is a separate
+  project (Sedim); Dimsee stays a library.
+- Not supporting many databases shallowly. Breadth-via-shallow-adapters is the
+  exact weakness we are exploiting in others.
+
+## Presets (keyed to deployment scale)
+
+A preset is a named, coherent bundle of correct settings, so a developer (or an AI
+assistant writing the integration) selects a scale tier instead of assembling
+options by hand. Draft set, to be refined:
+
+- prototype: fastest path, minimal setup, in-process defaults. Loud warnings that
+  it is not for production.
+- production: secure defaults, refresh-token rotation, rate limiting, a proper
+  persistent session store, breach-aware passwords, insecure-default refusal.
+- scale: everything in production, plus multi-instance safety, a distributed
+  session store and distributed rate limiting, and observability hooks.
+
+`auth.audit()` reports when a running configuration has drifted from the tier it
+claims, turning posture into something you can see.
+
+## Roadmap (milestones)
+
+- 0.7.0 Secure by default: the self-posture audit and presets, plus the security
+  hardening already tracked (rate limiting on the real API, distinct refresh
+  secret, insecure-default refusal, cookie hardening, account-enumeration fix).
+- 0.8.0 Deep Mongo and core methods: first-class Mongoose integration (refs,
+  transactions, migrations), refresh-rotation hardening, and the baseline modern
+  methods (passkeys, TOTP/MFA, magic link).
+- 0.9.0 Teams and types: organizations, roles, and the start of the TypeScript
+  move.
+- 1.0.0 Stable and typed: full TypeScript with inferred session types, OAuth moved
+  off the unmaintained Passport to a maintained primitive, CI and tests green, a
+  stable public API.
+- Later (post-1.0): agent-era support (MCP resource-server mode, token exchange,
+  step-up auth, device grant), a self-hosted auth observability dashboard, a
+  lazy-migration shim off managed providers, and additional deep database adapters.
+
+## How we work
+
+Direction is set in the open. Big bets get an RFC discussion before implementation.
+The contributor ladder (good first issue through complex) stays the on-ramp.
+
+================================================================================
+SECTION 2.6: CHANGELOG (Source: CHANGELOG.md)
+================================================================================
+
+(File empty or not found)
+
+================================================================================
+END OF DIMSEE DOCUMENTATION DUMP
+================================================================================
