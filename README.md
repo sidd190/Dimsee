@@ -3,6 +3,7 @@
 [![NPM Version](https://img.shields.io/npm/v/dimsee.svg)](https://www.npmjs.com/package/dimsee)
 [![NPM Downloads](https://img.shields.io/npm/dm/dimsee.svg)](https://www.npmjs.com/package/dimsee)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Secure Snippets](https://img.shields.io/badge/Secure%20Snippets-vetted-blue.svg)](SECURE_SNIPPETS.md)
 [![Pull Requests Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 **Dimsee** is a drop-in authentication package for MERN applications. It pairs a configurable Express backend with a themeable React frontend, so you can add signup, login, OAuth, sessions, and protected routes without wiring auth from scratch.
@@ -27,6 +28,8 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 -   **Customizable:** Easily extend and style with your own CSS.
 -   **Callbacks:** `onSuccess` and `onError` callbacks for handling auth events.
 
+> For copy-paste secure setup code, jump to [Secure Snippets](#secure-snippets) or see [SECURE_SNIPPETS.md](SECURE_SNIPPETS.md).
+
 ## Table of Contents
 - [Getting Started](#getting-started)
 - [Framework Guides](#framework-guides)
@@ -37,6 +40,7 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 - [Backend: `createAuthBackend`](#backend-createauthbackend)
 - [Backend API Reference](#backend-api-reference)
 - [Customization and Contributing](#customization-and-contributing)
+- [Secure Snippets](#secure-snippets) _(see also [SECURE_SNIPPETS.md](SECURE_SNIPPETS.md))_
 - [Deployment and Troubleshooting](#deployment-and-troubleshooting)
 - [Use Cases](#use-cases)
 - [License](#license)
@@ -53,6 +57,9 @@ npm install dimsee
 ### Basic Usage
 
 Here is a quick example of how to set up a basic authentication system with Dimsee by running a **standalone backend server**.
+
+> [!IMPORTANT]
+> Never hardcode secrets in source code. Always read `mongoUri`, `jwtSecret`, and `corsOrigin` from environment variables. See [Secure Snippets](#secure-snippets) for a production-ready version.
 
 **Backend (`server.js`) : **
 ```javascript
@@ -167,6 +174,9 @@ If you prefer an all-in-one setup, you can run the Dimsee backend inside a catch
 
 3.  **Use Client Components**: Any component that uses `AuthForm` or `AuthStatus` must be a Client Component. Add `'use client';` to the top of the file if you are using the Next.js App Router.
 
+> [!WARNING]
+> When using the Next.js App Router, do **not** use `NEXT_PUBLIC_` prefix for `MONGO_URI` or `JWT_SECRET`. Only values intended to be public (like your app's own URL) should use `NEXT_PUBLIC_`. Sensitive server-only vars must remain unprefixed.
+
 ## Frontend: `AuthForm` Component
 
 The `AuthForm` component is the core of the Dimsee frontend. It is a highly configurable React component that handles user interaction for both signing in and signing up.
@@ -185,6 +195,9 @@ The `AuthForm` component is the core of the Dimsee frontend. It is a highly conf
 | `onModeChange`| `function` | `undefined`                  | A function to make the form a controlled component, managing the `mode` from a parent component.         |
 
 ---
+
+> [!TIP]
+> Dimsee uses **HTTP-only cookies** for session tokens — you do not need to store tokens in `localStorage` (which is vulnerable to XSS). The `onSuccess` callback is for navigation/UI only, not token handling.
 
 ## Frontend Components: `AuthStatus` vs. `AuthForm`
 
@@ -284,6 +297,10 @@ The `createAuthBackend` function sets up and returns a fully configured Express 
 | `enableOAuth` | `boolean`| `false`                           | A flag to enable or disable OAuth functionality.                            |
 | `oauth`       | `object` | `{}`                              | An object containing credentials for OAuth providers (Google, GitHub).      |
 
+> [!CAUTION]
+> Change `jwtSecret` before deploying. Use at least 32 random characters.  
+> Generate one with: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"`
+
 ### Protecting Routes
 
 The package also exports an `authMiddleware` that you can use to protect your own API routes.
@@ -297,6 +314,9 @@ app.get('/api/my-protected-route', authMiddleware, (req, res) => {
   res.json({ message: 'You have accessed a protected route!' });
 });
 ```
+
+> [!NOTE]
+> `authMiddleware` must be added to **every** route you want to protect. There is no "protect all routes" default. See [Snippet 3](#3-backend--protecting-custom-routes) for the canonical pattern.
 
 ## Backend API Reference
 
@@ -349,6 +369,374 @@ If you encounter a bug or have a feature request, please [open an issue](https:/
 -   Any relevant error messages or console logs.
 -   Your environment details (Node.js version, browser, etc.).
 
+## Secure Snippets
+
+This section provides **vetted, copy-paste-ready code snippets** that follow security best practices by construction. Each snippet is safe to use as-is; anti-patterns are explicitly called out so AI assistants and developers always reproduce the secure path.
+
+> **Why this matters:** Authentication bugs are among the most common and dangerous security flaws. These snippets eliminate the guesswork.
+
+### Quick Reference
+
+| Snippet | What It Secures |
+|---------|----------------|
+| [Backend – Minimal Secure Setup](#1-backend--minimal-secure-setup) | Strong secrets, env vars, `NODE_ENV` |
+| [Backend – With OAuth (Google + GitHub)](#2-backend--with-oauth-google--github) | Callback URL pinning, scoped secrets |
+| [Backend – Protecting Custom Routes](#3-backend--protecting-custom-routes) | Middleware-based route guards |
+| [Frontend – AuthProvider with HTTPS API URL](#4-frontend--authprovider-with-https-api-url) | No hardcoded localhost in production |
+| [Frontend – AuthForm with Callbacks](#5-frontend--authform-with-callbacks) | Error boundaries, no silent failures |
+| [Frontend – AuthStatus: Gate Entire App](#6-frontend--authstatus-gate-entire-app) | Server-verified session, no client-only guards |
+| [Frontend – Controlled Mode Switch](#7-frontend--controlled-mode-switch) | Prevent race conditions on mode toggle |
+| [Next.js – Integrated API Route](#8-nextjs--integrated-api-route) | Body parser disabled, env-only config |
+| [Environment Variables – .env.example](#9-environment-variables--envexample) | Canonical list; no secrets in source |
+| [Rate Limiting – Hardening Endpoints](#10-rate-limiting--hardening-endpoints) | Brute-force protection on auth routes |
+
+---
+
+### 1. Backend – Minimal Secure Setup
+
+```javascript
+// server.js
+// ✅ SECURE: All sensitive values come from environment variables.
+// ❌ NEVER hardcode mongoUri, jwtSecret, or corsOrigin in source code.
+
+require('dotenv').config(); // npm install dotenv
+const { createAuthBackend } = require('dimsee/backend');
+
+if (!process.env.MONGO_URI)   throw new Error('MONGO_URI env var is required');
+if (!process.env.JWT_SECRET)  throw new Error('JWT_SECRET env var is required');
+if (!process.env.CORS_ORIGIN) throw new Error('CORS_ORIGIN env var is required');
+if (process.env.JWT_SECRET.length < 32) {
+  throw new Error('JWT_SECRET must be at least 32 characters for production use');
+}
+
+const app = createAuthBackend({
+  mongoUri:    process.env.MONGO_URI,
+  jwtSecret:   process.env.JWT_SECRET,
+  corsOrigin:  process.env.CORS_ORIGIN,     // e.g. 'https://www.your-app.com'
+  cookieMaxAge: 7 * 24 * 60 * 60 * 1000,   // 7 days in ms (explicit, not magic)
+});
+
+const PORT = Number(process.env.PORT) || 5000;
+app.listen(PORT, () => console.log(`Auth server running on port ${PORT}`));
+```
+
+> **Security notes:**
+> - Startup-time guard clauses (`throw new Error`) crash early if any secret is missing, preventing a misconfigured server from silently accepting requests.
+> - `corsOrigin` must be your **exact** production frontend URL — no wildcards, no trailing slashes.
+> - Generate a strong `JWT_SECRET`: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"`
+
+---
+
+### 2. Backend – With OAuth (Google + GitHub)
+
+```javascript
+// server.js
+require('dotenv').config();
+const { createAuthBackend } = require('dimsee/backend');
+
+const app = createAuthBackend({
+  mongoUri:   process.env.MONGO_URI,
+  jwtSecret:  process.env.JWT_SECRET,
+  corsOrigin: process.env.CORS_ORIGIN,
+  enableOAuth: true,
+  oauth: {
+    google: {
+      clientId:     process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      // ✅ Use an absolute URL that matches your OAuth console exactly.
+      callbackURL:  process.env.GOOGLE_CALLBACK_URL,
+      // e.g. 'https://api.your-app.com/api/auth/google/callback'
+    },
+    github: {
+      clientId:     process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      callbackURL:  process.env.GITHUB_CALLBACK_URL,
+      // e.g. 'https://api.your-app.com/api/auth/github/callback'
+    },
+  },
+});
+
+app.listen(Number(process.env.PORT) || 5000);
+```
+
+> **Security notes:**
+> - Store **callback URLs** in env vars too — this avoids a mismatch between your code and your OAuth provider console.
+> - Each OAuth provider's "Authorized redirect URIs" must list **exactly** the value of `callbackURL`. Even a trailing slash difference causes failures.
+> - Never commit `.env` — add it to `.gitignore`. Use `.env.example` (no real values) for onboarding.
+
+---
+
+### 3. Backend – Protecting Custom Routes
+
+```javascript
+// server.js
+const { createAuthBackend, authMiddleware } = require('dimsee/backend');
+
+const app = createAuthBackend({ /* ... */ });
+
+// ✅ SECURE: authMiddleware verifies the JWT on every request.
+// ❌ NEVER rely solely on frontend route guards — the server must verify.
+app.get('/api/profile', authMiddleware, (req, res) => {
+  // req.user is populated by authMiddleware after JWT verification.
+  res.json({ user: req.user });
+});
+
+app.get('/api/admin/data', authMiddleware, (req, res) => {
+  // Add role checks here if needed (e.g. req.user.role === 'admin').
+  res.json({ data: 'sensitive admin payload' });
+});
+
+// ✅ Public routes need no middleware:
+app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
+```
+
+> **Security notes:**
+> - **Every** protected endpoint must include `authMiddleware` — there is no "default protected" mode.
+> - Frontend route guards (e.g. React Router `<PrivateRoute>`) are UX helpers only; server-side checks are the real security boundary.
+
+---
+
+### 4. Frontend – AuthProvider with HTTPS API URL
+
+```jsx
+// App.jsx (or main.jsx / _app.js)
+import { AuthProvider } from 'dimsee/frontend';
+
+// ✅ SECURE: API URL comes from environment variables.
+// ❌ NEVER hardcode 'http://localhost:5000' in production builds.
+const API_URL = import.meta.env.VITE_API_URL           // Vite
+             || process.env.REACT_APP_API_URL           // Create React App
+             || process.env.NEXT_PUBLIC_API_URL;        // Next.js
+
+if (!API_URL) {
+  throw new Error('API URL env var is not set. Check your .env file.');
+}
+
+function App() {
+  return (
+    <AuthProvider apiUrl={API_URL}>
+      {/* rest of your app */}
+    </AuthProvider>
+  );
+}
+
+export default App;
+```
+
+> **Security notes:**
+> - In production, `API_URL` must start with `https://`. HTTP leaks tokens in transit.
+> - The backend's `corsOrigin` and the frontend's `API_URL` host must agree — a mismatch causes CORS errors.
+
+---
+
+### 5. Frontend – AuthForm with Callbacks
+
+```jsx
+// LoginPage.jsx
+import { AuthForm } from 'dimsee/frontend';
+import { useNavigate } from 'react-router-dom';
+
+function LoginPage() {
+  const navigate = useNavigate();
+
+  // ✅ SECURE: Always handle both onSuccess and onError.
+  // ❌ NEVER silently swallow errors — users won't know why login failed.
+  return (
+    <AuthForm
+      mode="signin"
+      design="modern"
+      onSuccess={(data) => {
+        // Redirect to protected area; do NOT store JWT in localStorage.
+        navigate('/dashboard');
+      }}
+      onError={(error) => {
+        // Log to your monitoring service (not to console in production).
+        console.error('[Auth Error]', error?.message ?? error);
+      }}
+    />
+  );
+}
+
+export default LoginPage;
+```
+
+> **Security notes:**
+> - Dimsee uses **HTTP-only cookies** for session tokens — you don't need to (and shouldn't) manually store tokens in `localStorage` or `sessionStorage`.
+> - `localStorage` is accessible to JavaScript and therefore vulnerable to XSS. HTTP-only cookies are not.
+
+---
+
+### 6. Frontend – AuthStatus: Gate Entire App
+
+```jsx
+// App.jsx
+import { AuthProvider, AuthStatus } from 'dimsee/frontend';
+
+function App() {
+  return (
+    // ✅ SECURE: AuthStatus hits /api/auth/me on mount to verify the session
+    //            server-side before rendering protected content.
+    <AuthProvider apiUrl={import.meta.env.VITE_API_URL}>
+      <AuthStatus
+        showUserInfo={true}       // display username in the logout bar
+        showSetPassword={true}    // let OAuth users set a password later
+        formDesign="modern"
+      >
+        {/* Only rendered after server confirms the user is authenticated */}
+        <Dashboard />
+      </AuthStatus>
+    </AuthProvider>
+  );
+}
+```
+
+> **Security notes:**
+> - `AuthStatus` calls the `/api/auth/me` endpoint on every page load, so a revoked or expired session is detected immediately — no stale client-side state.
+> - Wrap your entire app (not just individual pages) so there is no unguarded render path.
+
+---
+
+### 7. Frontend – Controlled Mode Switch
+
+```jsx
+// AuthModal.jsx  — sign-in / sign-up toggle
+import { useState } from 'react';
+import { AuthForm } from 'dimsee/frontend';
+
+function AuthModal({ onClose }) {
+  // ✅ SECURE: Use controlled state so only one mode is ever active.
+  // ❌ NEVER let two form submissions race (e.g., triggering both signin
+  //    and signup if the user clicks while a request is in-flight).
+  const [mode, setMode] = useState('signin');
+
+  return (
+    <div className="modal-overlay" role="dialog" aria-modal="true">
+      <AuthForm
+        mode={mode}
+        onModeChange={setMode}   // let the form toggle mode via its own link
+        design="minimal"
+        onSuccess={onClose}
+        onError={(err) => console.error('[Auth]', err)}
+      />
+    </div>
+  );
+}
+
+export default AuthModal;
+```
+
+---
+
+### 8. Next.js – Integrated API Route
+
+```javascript
+// pages/api/auth/[...slug].js  (Pages Router)
+// 'use server' — this file never runs in the browser.
+import { createAuthBackend } from 'dimsee/backend';
+
+// ✅ Initialize once at module load, not inside the handler.
+//    Re-creating the backend per request would leak DB connections.
+const authApp = createAuthBackend({
+  mongoUri:   process.env.MONGO_URI,
+  jwtSecret:  process.env.JWT_SECRET,
+  corsOrigin: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+});
+
+// ✅ REQUIRED: Disable Next.js body parsing; Dimsee's Express handles it.
+export const config = { api: { bodyParser: false } };
+
+export default function handler(req, res) {
+  // Strip the Next.js API prefix so Dimsee sees clean paths (/signup, /signin…)
+  req.url = req.url.replace('/api/auth', '');
+  return authApp(req, res);
+}
+```
+
+> **Security notes:**
+> - **Never** put real secrets in `next.config.js` — only in `.env.local` (not committed).
+> - `NEXT_PUBLIC_*` variables are **exposed to the browser**. Use them only for public values (like the app URL). Keep `MONGO_URI` and `JWT_SECRET` without the `NEXT_PUBLIC_` prefix.
+
+---
+
+### 9. Environment Variables – .env.example
+
+Copy this file to `.env` (never commit `.env`) and fill in your real values:
+
+```bash
+# .env.example  — commit this file; keep .env gitignored
+
+# ── Database ────────────────────────────────────────────
+MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/mydb?retryWrites=true&w=majority
+
+# ── Auth ────────────────────────────────────────────────
+# Generate with: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+JWT_SECRET=<at-least-64-hex-chars>
+
+# ── CORS / Frontend URL ──────────────────────────────────
+CORS_ORIGIN=https://www.your-app.com        # exact frontend origin, no trailing slash
+PORT=5000
+
+# ── OAuth – Google ───────────────────────────────────────
+GOOGLE_CLIENT_ID=<from-google-cloud-console>
+GOOGLE_CLIENT_SECRET=<from-google-cloud-console>
+GOOGLE_CALLBACK_URL=https://api.your-app.com/api/auth/google/callback
+
+# ── OAuth – GitHub ───────────────────────────────────────
+GITHUB_CLIENT_ID=<from-github-developer-settings>
+GITHUB_CLIENT_SECRET=<from-github-developer-settings>
+GITHUB_CALLBACK_URL=https://api.your-app.com/api/auth/github/callback
+
+# ── Frontend (Vite / CRA / Next.js) ─────────────────────
+VITE_API_URL=https://api.your-app.com/api/auth
+# REACT_APP_API_URL=https://api.your-app.com/api/auth
+# NEXT_PUBLIC_API_URL=https://api.your-app.com/api/auth
+```
+
+---
+
+### 10. Rate Limiting – Hardening Endpoints
+
+Dimsee's backend exposes an Express app, so you can layer standard Express middleware for extra hardening:
+
+```javascript
+// server.js
+require('dotenv').config();
+const rateLimit = require('express-rate-limit');   // npm install express-rate-limit
+const { createAuthBackend } = require('dimsee/backend');
+
+const app = createAuthBackend({
+  mongoUri:   process.env.MONGO_URI,
+  jwtSecret:  process.env.JWT_SECRET,
+  corsOrigin: process.env.CORS_ORIGIN,
+});
+
+// ✅ SECURE: Limit auth endpoints to prevent brute-force attacks.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,                   // max 20 attempts per window per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
+});
+
+// Apply only to mutation auth routes (not /me or /oauth-status).
+app.use('/api/auth/signin',  authLimiter);
+app.use('/api/auth/signup',  authLimiter);
+app.use('/api/auth/set-password', authLimiter);
+
+const PORT = Number(process.env.PORT) || 5000;
+app.listen(PORT);
+```
+
+> **Security notes:**
+> - Adjust `max` and `windowMs` for your expected traffic — a public app will need stricter limits than an internal tool.
+> - In production behind a proxy (e.g., Nginx, Cloudflare), set `app.set('trust proxy', 1)` so rate limiting uses the real client IP from `X-Forwarded-For`, not the proxy IP.
+
+---
+
+> [!TIP]
+> These snippets are designed to be AI-assistant-friendly: copy any block into your project and it will work securely without modification. The `❌ NEVER` callouts explicitly mark the insecure alternatives so code-generation tools learn the correct path.
+
 ## Deployment and Troubleshooting
 
 Moving your application to a production environment requires careful configuration to ensure security and functionality.
@@ -384,6 +772,8 @@ Moving your application to a production environment requires careful configurati
     </AuthProvider>
     ```
 5.  **Configure OAuth Redirect URIs**: In your Google/GitHub developer console, add your production callback URL (e.g., `https://api.your-app.com/api/auth/google/callback`) to the list of authorized redirect URIs.
+
+6.  **Enable Rate Limiting** on auth endpoints to prevent brute-force attacks. See [Snippet 10 – Rate Limiting](#10-rate-limiting--hardening-endpoints) for a drop-in `express-rate-limit` setup. If running behind a proxy (Nginx, Cloudflare), also add `app.set('trust proxy', 1)` so limits use the real client IP.
 
 ### Common Issues
 
