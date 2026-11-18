@@ -14,6 +14,11 @@ report issues and what Dimsee does and does not protect against.
 Security fixes land on the latest minor; please upgrade before reporting against
 an old release.
 
+## Secure Setup
+
+When setting up Dimsee, follow the vetted patterns in [SECURE_SNIPPETS.md](SECURE_SNIPPETS.md).  
+These snippets are designed so that copy-pasting them into a new project produces a secure configuration by default.
+
 ## Reporting a vulnerability
 
 **Please do not open a public issue for security vulnerabilities.**
