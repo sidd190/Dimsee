@@ -14,6 +14,10 @@ report issues and what Dimsee does and does not protect against.
 Security fixes land on the latest minor; please upgrade before reporting against
 an old release.
 
+## Machine-Readable Security Guidance & MCP
+
+AI assistants can directly query vetted security snippets and guidelines via [llms.txt](llms.txt), [SECURE_SNIPPETS.md](SECURE_SNIPPETS.md), or through the documentation MCP server (`npm run mcp:docs`).
+
 ## Reporting a vulnerability
 
 **Please do not open a public issue for security vulnerabilities.**
