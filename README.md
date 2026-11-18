@@ -27,6 +27,10 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 -   **Customizable:** Easily extend and style with your own CSS.
 -   **Callbacks:** `onSuccess` and `onError` callbacks for handling auth events.
 
+[![llms.txt](https://img.shields.io/badge/llms.txt-available-blue.svg)](llms.txt)
+[![MCP Server](https://img.shields.io/badge/MCP-dimsee--docs--mcp-purple.svg)](scripts/mcp-server.js)
+[![Secure Snippets](https://img.shields.io/badge/Secure%20Snippets-vetted-green.svg)](SECURE_SNIPPETS.md)
+
 ## Table of Contents
 - [Getting Started](#getting-started)
 - [Framework Guides](#framework-guides)
