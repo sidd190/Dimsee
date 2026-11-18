@@ -277,6 +277,7 @@ The `createAuthBackend` function sets up and returns a fully configured Express 
 
 | Option        | Type     | Default                           | Description                                                                 |
 |---------------|----------|-----------------------------------|-----------------------------------------------------------------------------|
+| `preset`      | `string` | `undefined`                       | Deployment preset tier: set to `"prototype"` for fastest zero-config setup with in-process defaults and loud dev warnings. |
 | `mongoUri`    | `string` | `'mongodb://localhost:27017/mern-auth'` | The connection string for your MongoDB database.                          |
 | `jwtSecret`   | `string` | `'your-secret-key-...'`           | A secret key for signing JWTs. **Change this in production.**               |
 | `corsOrigin`  | `string` | `'http://localhost:5173'`         | The origin to allow for CORS requests (your frontend URL).                  |
