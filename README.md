@@ -312,6 +312,9 @@ app.get('/api/my-protected-route', authMiddleware, (req, res) => {
 });
 ```
 
+> [!NOTE]
+> `authMiddleware` must be added to **every** route you want to protect. There is no "protect all routes" default. See [Snippet 3](#3-backend--protecting-custom-routes) for the canonical pattern.
+
 ## Backend API Reference
 
 The backend exposes the following API endpoints under the `/api/auth` prefix.
