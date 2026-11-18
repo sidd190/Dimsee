@@ -1,6 +1,7 @@
 // backend/models/User.js - User Model
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -22,13 +23,25 @@ const userSchema = new mongoose.Schema({
     required: function() {
       return !this.googleId && !this.githubId; // Only required if not using OAuth
     },
-    minlength: 6
+    minlength: 8
   },
   refreshToken: {
+    type: String,
+    index: true
+  }, // SHA-256 hash of active refresh token
+  previousRefreshToken: {
     type: String
-  }, // For refreshtokens to generate new accesstokens
-  googleId: String,
-  githubId: String,
+  }, // SHA-256 hash of immediately preceding refresh token for replay detection
+  googleId: {
+    type: String,
+    sparse: true,
+    index: true
+  },
+  githubId: {
+    type: String,
+    sparse: true,
+    index: true
+  },
   authMethod: {
     type: String,
     enum: ['local', 'google', 'github'],
@@ -37,10 +50,6 @@ const userSchema = new mongoose.Schema({
   hasPassword: {
     type: Boolean,
     default: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
 }, {
   timestamps: true
@@ -69,6 +78,7 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 userSchema.methods.setPassword = async function(password) {
   this.password = password;
   this.hasPassword = true;
+  this.refreshToken = null; // Revoke existing refresh token on credential change
   await this.save();
 };
 
@@ -77,10 +87,88 @@ userSchema.methods.canUsePasswordLogin = function() {
   return this.hasPassword;
 };
 
-// Remove password from JSON output
+// Hash a raw refresh token using SHA-256 for secure at-rest storage
+userSchema.statics.hashToken = function(token) {
+  if (!token) return null;
+  return crypto.createHash('sha256').update(token).digest('hex');
+};
+
+// Set and hash the refresh token, rotating existing token into previousRefreshToken
+userSchema.methods.setRefreshToken = async function(rawToken) {
+  if (!rawToken) {
+    this.previousRefreshToken = null;
+    this.refreshToken = null;
+  } else {
+    const hash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    if (this.refreshToken && this.refreshToken !== hash) {
+      this.previousRefreshToken = this.refreshToken;
+    }
+    this.refreshToken = hash;
+  }
+  if (typeof this.save === 'function' && (!this.db || this.db.readyState === 1)) {
+    await this.save({ validateBeforeSave: false });
+  }
+};
+
+// Constant-time verification of active refresh token
+userSchema.methods.verifyRefreshToken = function(rawToken) {
+  if (!this.refreshToken || !rawToken) return false;
+  const incomingHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+  if (this.refreshToken.length === 64) {
+    const storedBuf = Buffer.from(this.refreshToken, 'utf8');
+    const incomingBuf = Buffer.from(incomingHash, 'utf8');
+    if (storedBuf.length === incomingBuf.length && crypto.timingSafeEqual(storedBuf, incomingBuf)) {
+      return true;
+    }
+  }
+
+  // Fallback for legacy unhashed tokens
+  const legacyStored = Buffer.from(this.refreshToken, 'utf8');
+  const incoming = Buffer.from(rawToken, 'utf8');
+  if (legacyStored.length === incoming.length && crypto.timingSafeEqual(legacyStored, incoming)) {
+    return true;
+  }
+  return false;
+};
+
+// Constant-time verification of previously rotated refresh token for replay detection
+userSchema.methods.verifyPreviousRefreshToken = function(rawToken) {
+  if (!this.previousRefreshToken || !rawToken) return false;
+  const incomingHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+  if (this.previousRefreshToken.length === 64) {
+    const storedBuf = Buffer.from(this.previousRefreshToken, 'utf8');
+    const incomingBuf = Buffer.from(incomingHash, 'utf8');
+    if (storedBuf.length === incomingBuf.length && crypto.timingSafeEqual(storedBuf, incomingBuf)) {
+      return true;
+    }
+  }
+
+  // Fallback for legacy unhashed
+  const legacyStored = Buffer.from(this.previousRefreshToken, 'utf8');
+  const incoming = Buffer.from(rawToken, 'utf8');
+  if (legacyStored.length === incoming.length && crypto.timingSafeEqual(legacyStored, incoming)) {
+    return true;
+  }
+  return false;
+};
+
+// Invalidate all tokens for user across devices
+userSchema.methods.revokeAllRefreshTokens = async function() {
+  this.refreshToken = null;
+  this.previousRefreshToken = null;
+  if (typeof this.save === 'function' && (!this.db || this.db.readyState === 1)) {
+    await this.save({ validateBeforeSave: false });
+  }
+};
+
+// Remove password and token hashes from JSON output
 userSchema.methods.toJSON = function() {
   const user = this.toObject();
   delete user.password;
+  delete user.refreshToken;
+  delete user.previousRefreshToken;
   return user;
 };
 
