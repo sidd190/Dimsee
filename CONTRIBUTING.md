@@ -126,6 +126,7 @@ A change is ready to merge when:
 - [ ] New behaviour has a test (where practical)
 - [ ] Docs/README updated if the public API or props changed
 - [ ] UI changes include a screenshot
+- [ ] Security-sensitive changes (auth flow, cookie handling, secrets) must update [SECURE_SNIPPETS.md](SECURE_SNIPPETS.md) if any snippet is affected
 
 ---
 
