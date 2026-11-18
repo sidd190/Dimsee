@@ -88,6 +88,25 @@ function App() {
 }
 ```
 
+### Rapid Prototyping with the `prototype` Preset
+
+Need to spin up authentication immediately for local development or demoing without setting up a live MongoDB instance or generating secrets? Use the `prototype` preset:
+
+```javascript
+const { createAuthBackend } = require("dimsee/backend");
+
+// Zero-config fast setup with in-process session defaults
+const app = createAuthBackend({
+  preset: "prototype",
+});
+
+app.listen(5000, () => console.log("Prototype auth server running on port 5000"));
+```
+
+> [!WARNING]
+> The `prototype` preset emits loud console warnings and uses ephemeral in-memory defaults. **Never use `preset: "prototype"` in production.**
+
+
 ## Framework Guides
 
 Learn how to integrate Dimsee with popular React frameworks.
