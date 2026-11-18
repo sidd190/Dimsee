@@ -332,6 +332,93 @@ The backend exposes the following API endpoints under the `/api/auth` prefix.
 | `GET`  | `/github`              | Initiate GitHub OAuth login.                          |
 | `GET`  | `/github/callback`     | Callback URL for GitHub OAuth.                        |
 | `POST` | `/set-password`        | Allow an OAuth user to set a password.                |
+| `POST` | `/magic-link/send`     | Send a magic sign-in link to the given email.         |
+| `GET`  | `/magic-link/verify`   | Verify a magic-link token and issue auth cookies.     |
+
+---
+
+## Magic Link Authentication
+
+Dimsee ships a **passwordless magic-link** flow backed by a fully pluggable
+email transport.  In development the built-in `ConsoleTransport` prints the
+link to stdout — no SMTP setup needed.  In production you can drop in
+`SmtpTransport` or write your own transport in a few lines.
+
+### Quick Start (dev — console output)
+
+```js
+const { createAuthBackend } = require('dimsee');
+
+// No emailTransport option → ConsoleTransport is used automatically.
+const app = createAuthBackend({ mongoUri: process.env.MONGO_URI });
+```
+
+Your terminal will show the magic-link URL whenever `/api/auth/magic-link/send`
+is called.  Click it to complete sign-in.
+
+### Production — SMTP transport
+
+```js
+const { createAuthBackend, SmtpTransport } = require('dimsee');
+
+const app = createAuthBackend({
+  mongoUri: process.env.MONGO_URI,
+  emailTransport: new SmtpTransport({
+    host: 'smtp.example.com',
+    port: 587,
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    from: '"My App" <no-reply@example.com>',
+  }),
+  magicLinkTtl: 600,          // 10-minute tokens (default: 900 / 15 min)
+  magicLinkSuccessPath: '/dashboard', // redirect path after verify
+  appName: 'My App',
+});
+```
+
+> **Requires** `nodemailer` to be installed: `npm install nodemailer`
+
+### Custom transport
+
+Extend `EmailTransport` and implement one method:
+
+```js
+const { EmailTransport, EmailService, createAuthBackend } = require('dimsee');
+
+class SendGridTransport extends EmailTransport {
+  constructor(apiKey) {
+    super();
+    this.client = require('@sendgrid/mail');
+    this.client.setApiKey(apiKey);
+  }
+  async send({ to, subject, html, text }) {
+    await this.client.send({ to, from: 'no-reply@app.com', subject, html, text });
+  }
+}
+
+const app = createAuthBackend({
+  mongoUri: process.env.MONGO_URI,
+  emailTransport: new SendGridTransport(process.env.SENDGRID_API_KEY),
+});
+```
+
+### Magic-link API
+
+#### `POST /api/auth/magic-link/send`
+
+| Field   | Type     | Required | Description            |
+|---------|----------|----------|------------------------|
+| `email` | `string` | ✅       | Recipient email address |
+
+Returns `200` regardless of whether the email exists (anti-enumeration).
+
+```json
+{ "success": true, "message": "If that address is registered you will receive a sign-in link shortly." }
+```
+
+#### `GET /api/auth/magic-link/verify?token=<raw>`
+
+Verifies the token (one-time use, TTL-enforced), sets JWT auth cookies, and
+redirects the browser to `corsOrigin + magicLinkSuccessPath`.
 
 ## Customization and Contributing
 
