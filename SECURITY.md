@@ -45,6 +45,11 @@ Dimsee aims to give a MERN app a secure-by-default auth baseline:
 - **Brute force:** rate limiting on the auth endpoints.
 - **Transport:** designed to run behind HTTPS in production.
 
+## Automated Security Posture Checks
+
+Use `audit()` to automatically detect configuration drift or weak secrets:
+- Access and refresh token secrets must be distinct and non-default.
+
 ## Known limitations & your responsibilities
 
 Dimsee is a building block, not a turnkey security guarantee. You are responsible
