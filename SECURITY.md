@@ -45,6 +45,11 @@ Dimsee aims to give a MERN app a secure-by-default auth baseline:
 - **Brute force:** rate limiting on the auth endpoints.
 - **Transport:** designed to run behind HTTPS in production.
 
+## Deployment Presets and Production Safety
+
+- The `prototype` preset is explicitly restricted to local testing and rapid prototyping. It activates in-memory session handling and logs prominent warnings.
+- Production environments must supply custom high-entropy secrets and persistent database connections rather than prototype defaults.
+
 ## Known limitations & your responsibilities
 
 Dimsee is a building block, not a turnkey security guarantee. You are responsible

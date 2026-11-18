@@ -1,7 +1,7 @@
 {
   "name": "dimsee",
   "version": "0.6.9",
-  "description": "Modern, flexible authentication solution for MERN applications with OAuth support",
+  "description": "Modern, flexible authentication solution for MERN applications with presets and OAuth support",
   "main": "./dist/backend/index.js",
   "module": "./dist/frontend/index.js",
   "exports": {
@@ -38,9 +38,22 @@
   },
   "jest": {
     "transform": {
-      "^.+\\.jsx?$": ["babel-jest", {
-        "presets": [["@babel/preset-env", { "targets": { "node": "current" } }], "@babel/preset-react"]
-      }]
+      "^.+\\.jsx?$": [
+        "babel-jest",
+        {
+          "presets": [
+            [
+              "@babel/preset-env",
+              {
+                "targets": {
+                  "node": "current"
+                }
+              }
+            ],
+            "@babel/preset-react"
+          ]
+        }
+      ]
     },
     "testPathIgnorePatterns": [
       "/node_modules/",
