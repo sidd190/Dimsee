@@ -4,7 +4,7 @@
 const backend = require('./backend');
 
 // Backend exports
-const { createAuthBackend, authMiddleware, User } = backend;
+const { createAuthBackend, authMiddleware, User, audit } = backend;
 
 // Frontend exports
 const AuthStatus = require('./frontend/src/components/AuthStatus');
@@ -16,6 +16,7 @@ module.exports = {
   createAuthBackend,
   authMiddleware,
   User,
+  audit,
   // Frontend
   AuthStatus,
   useAuth,
