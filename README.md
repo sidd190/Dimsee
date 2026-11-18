@@ -27,6 +27,8 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 -   **Customizable:** Easily extend and style with your own CSS.
 -   **Callbacks:** `onSuccess` and `onError` callbacks for handling auth events.
 
+[![LLM Context](https://img.shields.io/badge/llms--full.txt-available-purple.svg)](llms-full.txt)
+
 ## Table of Contents
 - [Getting Started](#getting-started)
 - [Framework Guides](#framework-guides)
