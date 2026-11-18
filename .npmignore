@@ -35,3 +35,5 @@ tsconfig.json
 babel.config.js
 rollup.config.js
 webpack.config.js 
+# LLM index
+llms.txt
