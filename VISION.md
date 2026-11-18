@@ -60,7 +60,7 @@ A preset is a named, coherent bundle of correct settings, so a developer (or an 
 assistant writing the integration) selects a scale tier instead of assembling
 options by hand. Draft set, to be refined:
 
-- prototype: fastest path, minimal setup, in-process defaults. Loud warnings that
+- prototype (implemented in 0.7.0): fastest path, minimal setup, in-process defaults. Loud warnings that
   it is not for production.
 - production: secure defaults, refresh-token rotation, rate limiting, a proper
   persistent session store, breach-aware passwords, insecure-default refusal.
