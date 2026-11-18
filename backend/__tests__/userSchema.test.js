@@ -12,8 +12,12 @@ describe('User Schema Verification (Issue #15 & Issue #92)', () => {
   it('declares unique indexes on email and username without duplicate specifications (Issue #92)', () => {
     const indexes = User.schema.indexes();
 
-    const emailIndex = indexes.find(([fields]) => fields.email !== undefined);
-    const usernameIndex = indexes.find(([fields]) => fields.username !== undefined);
+    const emailIndex = indexes.find(
+      ([fields]) => Object.keys(fields).length === 1 && fields.email === 1
+    );
+    const usernameIndex = indexes.find(
+      ([fields]) => Object.keys(fields).length === 1 && fields.username === 1
+    );
 
     expect(emailIndex).toBeDefined();
     expect(emailIndex[1].unique).toBe(true);
@@ -24,7 +28,9 @@ describe('User Schema Verification (Issue #15 & Issue #92)', () => {
 
   it('declares hot-path index on refreshToken for fast session lookups (Issue #92)', () => {
     const indexes = User.schema.indexes();
-    const refreshTokenIndex = indexes.find(([fields]) => fields.refreshToken !== undefined);
+    const refreshTokenIndex = indexes.find(
+      ([fields]) => Object.keys(fields).length === 1 && fields.refreshToken === 1
+    );
 
     expect(refreshTokenIndex).toBeDefined();
     expect(refreshTokenIndex[0].refreshToken).toBe(1);
@@ -32,8 +38,12 @@ describe('User Schema Verification (Issue #15 & Issue #92)', () => {
 
   it('declares sparse indexes on OAuth identifiers for external logins', () => {
     const indexes = User.schema.indexes();
-    const googleIndex = indexes.find(([fields]) => fields.googleId !== undefined);
-    const githubIndex = indexes.find(([fields]) => fields.githubId !== undefined);
+    const googleIndex = indexes.find(
+      ([fields]) => Object.keys(fields).length === 1 && fields.googleId === 1
+    );
+    const githubIndex = indexes.find(
+      ([fields]) => Object.keys(fields).length === 1 && fields.githubId === 1
+    );
 
     expect(googleIndex).toBeDefined();
     expect(googleIndex[1].sparse).toBe(true);
