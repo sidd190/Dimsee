@@ -14,6 +14,10 @@ report issues and what Dimsee does and does not protect against.
 Security fixes land on the latest minor; please upgrade before reporting against
 an old release.
 
+## Machine-Readable Security Guidance
+
+For AI code generation tools and agents, security best practices and constraints are documented in [llms.txt](llms.txt) to prevent insecure defaults.
+
 ## Reporting a vulnerability
 
 **Please do not open a public issue for security vulnerabilities.**
