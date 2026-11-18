@@ -12,26 +12,43 @@ const authRoutes = require(path.join(__dirname, 'routes', 'auth'));
 const authMiddleware = require(path.join(__dirname, 'middleware', 'auth'));
 const { passport: passportInstance, configureOAuthStrategies } = require(path.join(__dirname, 'config', 'passport'));
 const User = require(path.join(__dirname, 'models', 'User'));
+const { applyPreset, PROTOTYPE_WARNING_BANNER } = require(path.join(__dirname, 'presets'));
 
 require('dotenv').config();
 
-const createAuthBackend = (config = {}) => {
+const createAuthBackend = (rawConfig = {}) => {
+  const { config, preset, warnings } = applyPreset(rawConfig);
+
   const { 
     mongoUri = 'mongodb://localhost:27017/mern-auth',
     jwtSecret = 'your-secret-key-change-in-production',
-    jwtExpiry = '15m', //your-expiry-for-access-token-ideal-set-it-to-15m',
+    jwtExpiry = '15m',
     jwtRefreshSecret = 'your-secret-key-change-in-production',
-    jwtRefreshExpiry = '7d', //'your-expiry-for-refresh-token-ideal-set-it-to-7d',
+    jwtRefreshExpiry = '7d',
     corsOrigin = 'http://localhost:5173',
     cookieMaxAge = 7 * 24 * 60 * 60 * 1000, // 7 days
     enableOAuth = false, // OAuth disabled by default
-    oauth = {}
+    oauth = {},
+    useMemorySession = false,
+    connectMongo = true
   } = config;
 
   // Connect to MongoDB using mongoUri from props
-  mongoose.connect(mongoUri)
-    .then(() => console.log('MongoDB connected successfully'))
-    .catch(err => console.error('MongoDB connection error:', err));
+  if (connectMongo !== false) {
+    mongoose.connect(mongoUri)
+      .then(() => {
+        if (preset !== 'prototype') {
+          console.log('MongoDB connected successfully');
+        }
+      })
+      .catch(err => {
+        if (preset === 'prototype') {
+          console.warn('[DIMSEE PROTOTYPE] MongoDB connection failed or offline; prototype running with local fallback.');
+        } else {
+          console.error('MongoDB connection error:', err);
+        }
+      });
+  }
 
   const app = express();
 
@@ -42,17 +59,21 @@ const createAuthBackend = (config = {}) => {
   }));
   app.use(express.json());
   app.use(cookieParser());
-  app.use(session({
-    secret: jwtSecret,
-    expiry: jwtExpiry,
-    refreshSecret: jwtRefreshSecret,
-    refreshExpiry: jwtRefreshExpiry,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
+
+  // Session storage: in prototype preset, useMemorySession defaults to true (in-process)
+  let sessionStore;
+  if (!useMemorySession) {
+    sessionStore = MongoStore.create({
       mongoUrl: mongoUri,
       collectionName: 'sessions'
-    }),
+    });
+  }
+
+  app.use(session({
+    secret: jwtSecret,
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore, // In-memory MemoryStore if sessionStore is undefined
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       maxAge: cookieMaxAge
@@ -83,8 +104,9 @@ const createAuthBackend = (config = {}) => {
     configureOAuthStrategies({});
   }
 
-  // Make config available to routes
+  // Make config available to routes and callers
   app.locals.authConfig = {
+    preset,
     jwtSecret,
     jwtExpiry,
     jwtRefreshSecret,
@@ -92,7 +114,8 @@ const createAuthBackend = (config = {}) => {
     cookieMaxAge,
     corsOrigin,
     enableOAuth,
-    mongoUri
+    mongoUri,
+    warnings
   };
 
   // Auth routes
@@ -110,4 +133,4 @@ const createAuthBackend = (config = {}) => {
   return app;
 };
 
-module.exports = { createAuthBackend, authMiddleware, User };
+module.exports = { createAuthBackend, authMiddleware, User, applyPreset, PROTOTYPE_WARNING_BANNER };
