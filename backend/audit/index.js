@@ -2,12 +2,14 @@
 'use strict';
 
 const { checkJwtSecrets } = require('./checks/jwtSecrets');
+const { checkCorsOrigin } = require('./checks/corsOrigin');
 
 /**
  * Registry of available audit checks.
  */
 const CHECKS = [
-  checkJwtSecrets
+  checkJwtSecrets,
+  checkCorsOrigin
 ];
 
 /**
@@ -17,7 +19,6 @@ const CHECKS = [
  * @returns {Object} Audit report containing findings and summary
  */
 function audit(input = {}, options = {}) {
-  // Support passing app instance or raw config
   let config = input;
   if (input && input.locals && input.locals.authConfig) {
     config = input.locals.authConfig;
@@ -55,5 +56,6 @@ function audit(input = {}, options = {}) {
 module.exports = {
   audit,
   CHECKS,
-  checkJwtSecrets
+  checkJwtSecrets,
+  checkCorsOrigin
 };
