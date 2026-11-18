@@ -58,6 +58,9 @@ npm install dimsee
 
 Here is a quick example of how to set up a basic authentication system with Dimsee by running a **standalone backend server**.
 
+> [!IMPORTANT]
+> Never hardcode secrets in source code. Always read `mongoUri`, `jwtSecret`, and `corsOrigin` from environment variables. See [Secure Snippets](#secure-snippets) for a production-ready version.
+
 **Backend (`server.js`) : **
 ```javascript
 const { createAuthBackend } = require('dimsee/backend');
