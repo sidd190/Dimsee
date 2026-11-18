@@ -47,6 +47,19 @@ Stand up a secure backend with a single `createAuthBackend()` call, drop an `<Au
 - [License](#license)
 
 
+## AI Assistant & LLM Integration
+
+Dimsee includes first-class support for AI coding tools, agents, and IDE assistants to ensure safe, idiomatic authentication setups:
+
+- **[llms.txt](llms.txt)**: Standardized overview and index linking core docs adhering to the [llmstxt.org](https://llmstxt.org) convention.
+- **[llms-full.txt](llms-full.txt)**: Complete machine-readable documentation dump suitable for LLM context windows.
+- **[SECURE_SNIPPETS.md](SECURE_SNIPPETS.md)**: Curated, copy-paste-ready integration snippets designed to be secure by construction.
+- **Documentation MCP Server**: Run an in-process or stdio Model Context Protocol server exposing Dimsee documentation, tools, and vetted code snippets to MCP-compliant assistants:
+  ```bash
+  # Launch the Docs MCP Server
+  npm run mcp:docs
+  ```
+
 ## Getting Started
 
 ### Installation
