@@ -25,10 +25,19 @@ const userSchema = new mongoose.Schema({
     minlength: 6
   },
   refreshToken: {
-    type: String
-  }, // For refreshtokens to generate new accesstokens
-  googleId: String,
-  githubId: String,
+    type: String,
+    index: true
+  }, // For refreshtokens to generate new accesstokens (hot-path index)
+  googleId: {
+    type: String,
+    sparse: true,
+    index: true
+  },
+  githubId: {
+    type: String,
+    sparse: true,
+    index: true
+  },
   authMethod: {
     type: String,
     enum: ['local', 'google', 'github'],
@@ -37,10 +46,6 @@ const userSchema = new mongoose.Schema({
   hasPassword: {
     type: Boolean,
     default: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
 }, {
   timestamps: true
