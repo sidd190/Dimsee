@@ -52,7 +52,8 @@ describe('audit check: distinct access and refresh JWT secrets (Issue #73)', () 
   test('passes cleanly when distinct, non-default secrets are provided', () => {
     const config = {
       jwtSecret: 'random-access-secret-32-chars-long-abc',
-      jwtRefreshSecret: 'random-refresh-secret-32-chars-long-xyz'
+      jwtRefreshSecret: 'random-refresh-secret-32-chars-long-xyz',
+      corsOrigin: 'https://app.example.com'
     };
 
     const findings = checkJwtSecrets(config, { env: 'production' });
