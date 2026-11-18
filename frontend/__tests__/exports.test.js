@@ -1,6 +1,7 @@
 jest.mock('../src/components/AuthForm.css', () => ({}));
 jest.mock('../src/components/AuthStatus.css', () => ({}));
 jest.mock('../src/components/SetPasswordButton.css', () => ({}));
+jest.mock('../src/components/LogoutButton.css', () => ({}));
 
 const frontend = require('../index');
 const source = require('../src/index');

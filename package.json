@@ -18,7 +18,9 @@
       "require": "./dist/frontend/index.js"
     }
   },
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "files": [
     "dist/",
     "frontend/index.js",

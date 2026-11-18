@@ -1,0 +1,94 @@
+.logout-button {
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+/* Size Variants */
+.logout-button.size-small {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.logout-button.size-medium {
+  padding: 8px 16px;
+  font-size: 16px;
+}
+
+.logout-button.size-large {
+  padding: 12px 24px;
+  font-size: 18px;
+}
+
+/* Design */
+.logout-button.design-modern {
+  background-color: #dc2626;
+  color: white;
+}
+
+.logout-button.design-minimal {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.logout-button.design-outline {
+  background-color: transparent;
+  color: #dc2626;
+  border: 2px solid #dc2626;
+}
+
+.logout-button.design-rounded {
+  background-color: #dc2626;
+  color: white;
+  border-radius: 50px;
+}
+
+/* Hover Effects */
+.logout-button.design-modern:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+.logout-button.design-minimal:hover:not(:disabled) {
+  background-color: #d1d5db;
+}
+
+.logout-button.design-outline:hover:not(:disabled) {
+  background-color: #dc2626;
+  color: white;
+}
+
+.logout-button.design-rounded:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+/* Disabled State */
+.logout-button.design-modern:disabled {
+  background-color: #fca5a5;
+  cursor: not-allowed;
+}
+
+.logout-button.design-minimal:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.logout-button.design-outline:disabled {
+  border-color: #fca5a5;
+  color: #fca5a5;
+  cursor: not-allowed;
+}
+
+.logout-button.design-rounded:disabled {
+  background-color: #fca5a5;
+  cursor: not-allowed;
+}
+
+/* Focus State */
+.logout-button:focus-visible {
+  outline: 2px solid #dc2626;
+  outline-offset: 2px;
+}
