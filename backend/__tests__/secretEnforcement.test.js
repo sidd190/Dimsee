@@ -1,4 +1,12 @@
 const mongoose = require('mongoose');
+
+jest.mock('connect-mongo', () => {
+  const session = require('express-session');
+  return {
+    create: jest.fn().mockImplementation(() => new session.MemoryStore())
+  };
+});
+
 const { createAuthBackend } = require('../index');
 
 describe('Production Secrets Enforcement (Issue #33 & Issue #32)', () => {
@@ -9,8 +17,9 @@ describe('Production Secrets Enforcement (Issue #33 & Issue #32)', () => {
     connectSpy = jest.spyOn(mongoose, 'connect').mockResolvedValue(undefined);
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     connectSpy.mockRestore();
+    await mongoose.disconnect();
   });
 
   afterEach(() => {
