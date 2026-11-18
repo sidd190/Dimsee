@@ -88,6 +88,25 @@ function App() {
 }
 ```
 
+### Security Posture Auditing (`audit`)
+
+Dimsee provides an automated configuration auditing function (`audit`) to evaluate your authentication setup:
+
+```javascript
+const { audit, createAuthBackend } = require("dimsee/backend");
+
+const app = createAuthBackend({ /* ... */ });
+const report = audit(app);
+
+if (!report.passed) {
+  console.error("Security posture findings:", report.findings);
+}
+```
+
+- **CORS Origin Audit**: Flags wildcard (`"*"`), missing, or insecure HTTP origins when in production.
+- **JWT Secrets Audit**: Checks that `jwtSecret` (for access tokens) and `jwtRefreshSecret` (for refresh tokens) are distinct, configured, and not left at default placeholders.
+
+
 ## Framework Guides
 
 Learn how to integrate Dimsee with popular React frameworks.
